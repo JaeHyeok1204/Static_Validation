@@ -38,8 +38,8 @@ export default function TimeEvalPage() {
                         </thead>
                         <tbody>
                             {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar, idx) => {
-                                const comp = data.timeEvaluationComponent.find((c: any) => c.subsystem === subsystemChar);
-                                const runn = data.timeEvaluationRunnable.find((r: any) => r.subsystem === subsystemChar);
+                                const comp = data.timeEvaluationComponent?.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
+                                const runn = data.timeEvaluationRunnable?.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
 
                                 return (
                                     <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">

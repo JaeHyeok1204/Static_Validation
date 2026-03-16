@@ -20,7 +20,7 @@ export default function RisksPage() {
 
             <div className="flex-1 overflow-y-auto pr-2 pb-6">
                 <div className="grid grid-cols-1 gap-6">
-                    {data.risksList.map((risk: any, idx: number) => (
+                    {data.risksList.map((risk: import('../../store/useStore').RiskData, idx: number) => (
                         <div key={idx} className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                             {/* Status bar on left edge mapped to accent logic */}
                             <div className={`absolute left-0 top-0 bottom-0 w-2 ${risk.level === 'High' ? 'bg-red-500' : risk.level === 'Medium' ? 'bg-orange-500' : 'bg-[var(--accent-color)]'}`} />

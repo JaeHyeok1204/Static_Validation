@@ -21,7 +21,7 @@ export default function RulesPage() {
             <div className="flex-1 overflow-y-auto pr-2 pb-6">
                 <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full min-w-[600px] text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm whitespace-nowrap">
                                     <th className="p-4 font-semibold">규칙 ID</th>
@@ -33,7 +33,7 @@ export default function RulesPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.rulesList.map((rule: any, idx: number) => (
+                                {data.rulesList.map((rule: import('../../store/useStore').RuleData, idx: number) => (
                                     <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                         <td className="p-4 font-bold text-[var(--accent-color)]">{rule.id}</td>
                                         <td className="p-4">

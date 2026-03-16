@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
 
@@ -54,10 +53,6 @@ export default function SettingPage() {
                             기본 시스템 설정
                         </h2>
                         <div className="space-y-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-[var(--text-main)] mb-2">프로젝트 명칭</label>
-                                <input type="text" className="w-full border border-[var(--border-color)] bg-[var(--bg-color)] rounded-lg p-2.5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]" defaultValue="모델 정적검증 운영 포털" />
-                            </div>
                             <div>
                                 <label className="block text-sm font-semibold text-[var(--text-main)] mb-2">테마 변경</label>
                                 <div className="flex flex-wrap gap-3">

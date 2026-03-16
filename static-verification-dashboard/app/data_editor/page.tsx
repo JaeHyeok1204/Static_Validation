@@ -24,13 +24,13 @@ export default function DataEditorPage() {
     if (!data) return null;
 
     // Helpers to write to Zustand
-    const calculateAutomatedMetrics = (updatedData: any) => {
+    const calculateAutomatedMetrics = (updatedData: import('../../store/useStore').VersionData) => {
         const { dashboardData, subsystemsList } = updatedData;
         const newDashboard = { ...dashboardData };
 
         // 1. Calculate overall progress
         if (subsystemsList && subsystemsList.length > 0) {
-            const totalProgress = subsystemsList.reduce((acc: number, s: any) => acc + (s.progress || 0), 0);
+            const totalProgress = subsystemsList.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.progress || 0), 0);
             newDashboard.overallProgress = Math.round(totalProgress / subsystemsList.length) + "%";
         }
 
@@ -69,7 +69,7 @@ export default function DataEditorPage() {
                 }
             }
         } else {
-            newDashboard.expectedSchedule = "일정 미입력 / 분석 대기";
+            newDashboard.expectedSchedule = "측정불가";
         }
 
         return newDashboard;
@@ -156,132 +156,183 @@ export default function DataEditorPage() {
                     </div>
                 </section>
 
-                {/* 2. 서브시스템 현황 편집 (Array Mapping) */}
-                <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm overflow-x-auto">
-                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
-                        📋 서브시스템 상세 데이터 (A~M)
-                        <span className="text-xs font-normal text-[var(--accent-color)]">* 데이터 수정 즉시 부분 반영 (진척도는 자동계산됨)</span>
-                    </h2>
-                    <table className="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-xs text-center">
-                                <th className="p-2 font-semibold">서브시스템</th>
-                                <th className="p-2 font-semibold">분류 (C/R)</th>
-                                <th className="p-2 font-semibold">담당자</th>
-                                <th className="p-2 font-semibold">검출 위배</th>
-                                <th className="p-2 font-semibold">신규 위배</th>
-                                <th className="p-2 font-semibold">분석 완료</th>
-                                <th className="p-2 font-semibold">진척도 (%) - 자동</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
-                                const currentItem = data.subsystemsList.find((s: any) => s.version === subsystemChar) || {
-                                    version: subsystemChar, category: "Component", owner: "", detectedViolations: 0, newViolations: 0, analyzedViolations: 0, progress: 0
-                                };
+                {/* 2. 서브시스템 현황 편집 (Component / Runnable 분리) */}
+                <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
+                    {/* Component 박스 */}
+                    <section className="bg-[var(--bg-color)] border border-blue-200 dark:border-blue-900/50 rounded-2xl p-6 shadow-sm overflow-x-auto relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
+                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                                Component 상세 데이터
+                            </div>
+                        </h2>
+                        <table className="w-full text-left border-collapse min-w-[500px]">
+                            <thead>
+                                <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-xs text-center">
+                                    <th className="p-2 font-semibold">서브시스템</th>
+                                    <th className="p-2 font-semibold">담당자</th>
+                                    <th className="p-2 font-semibold">검출 위배</th>
+                                    <th className="p-2 font-semibold">신규 위배</th>
+                                    <th className="p-2 font-semibold">분석 완료</th>
+                                    <th className="p-2 font-semibold">진척도 (%) - 자동</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
+                                    const categoryType = 'Component';
+                                    const itemId = `${subsystemChar}-${categoryType}`;
+                                    const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType) || {
+                                        version: subsystemChar, category: categoryType, owner: "", detectedViolations: 0, newViolations: 0, analyzedViolations: 0, progress: 0
+                                    };
 
-                                const updateSubsystem = (key: string, val: string | number) => {
-                                    const newList = [...data.subsystemsList];
-                                    const existingIdx = newList.findIndex((s: any) => s.version === subsystemChar);
-                                    
-                                    // Automatic calculation hook for analyzed / detected violations
-                                    let mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
-                                    
-                                    if (key === 'detectedViolations' || key === 'analyzedViolations') {
-                                        const detected = mergedItem.detectedViolations > 0 ? mergedItem.detectedViolations : 1;
-                                        mergedItem.progress = Number(Math.min(100, Math.round((mergedItem.analyzedViolations / detected) * 100)).toFixed(1));
-                                        if (mergedItem.detectedViolations === 0 && mergedItem.analyzedViolations === 0) {
-                                            mergedItem.progress = 0;
+                                    const updateSubsystem = (key: string, val: string | number) => {
+                                        const newList = [...data.subsystemsList];
+                                        const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType);
+                                        
+                                        const mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
+                                        
+                                        if (key === 'detectedViolations' || key === 'analyzedViolations') {
+                                            const dv = mergedItem.detectedViolations || 0;
+                                            const av = mergedItem.analyzedViolations || 0;
+                                            const detected = dv > 0 ? dv : 1;
+                                            mergedItem.progress = Number(Math.min(100, Math.round((av / detected) * 100)).toFixed(1));
+                                            if (dv === 0 && av === 0) {
+                                                mergedItem.progress = 0;
+                                            }
                                         }
-                                    }
 
-                                    if (existingIdx >= 0) {
-                                        newList[existingIdx] = mergedItem;
-                                    } else {
-                                        newList.push(mergedItem);
-                                    }
+                                        if (existingIdx >= 0) {
+                                            newList[existingIdx] = mergedItem;
+                                        } else {
+                                            newList.push(mergedItem);
+                                        }
 
-                                    // Refresh dashboard metrics based on new subsystem data
-                                    const updatedDashboard = calculateAutomatedMetrics({
-                                        ...data,
-                                        subsystemsList: newList
-                                    });
+                                        const updatedDashboard = calculateAutomatedMetrics({
+                                            ...data,
+                                            subsystemsList: newList
+                                        });
 
-                                    updateVersionData(currentVersionIndex, { 
-                                        subsystemsList: newList,
-                                        dashboardData: updatedDashboard
-                                    });
-                                };
+                                        updateVersionData(currentVersionIndex, { 
+                                            subsystemsList: newList,
+                                            dashboardData: updatedDashboard
+                                        });
+                                    };
 
-                                return (
-                                    <tr key={subsystemChar} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
-                                        <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
-                                        <td className="p-2 w-32">
-                                            <select 
-                                                value={currentItem.category} 
-                                                onChange={(e) => updateSubsystem('category', e.target.value)}
-                                                className="w-full border border-[var(--border-color)] rounded p-1 text-xs bg-[var(--bg-color)] text-[var(--text-main)]"
-                                            >
-                                                <option value="Component">Component</option>
-                                                <option value="Runnable">Runnable</option>
-                                            </select>
-                                        </td>
-                                        <td className="p-2 w-24">
-                                            <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                        </td>
-                                        <td className="p-2 w-20">
-                                            <input type="number" value={currentItem.detectedViolations} onChange={(e) => updateSubsystem('detectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                        </td>
-                                        <td className="p-2 w-20">
-                                            <input type="number" value={currentItem.newViolations} onChange={(e) => updateSubsystem('newViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                        </td>
-                                        <td className="p-2 w-20">
-                                            <input type="number" value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                        </td>
-                                        <td className="p-2 w-20">
-                                            <input readOnly type="number" value={currentItem.progress} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold" />
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </section>
+                                    return (
+                                        <tr key={itemId} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
+                                            <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
+                                            <td className="p-2 w-24">
+                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input type="number" value={currentItem.detectedViolations} onChange={(e) => updateSubsystem('detectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input type="number" value={currentItem.newViolations} onChange={(e) => updateSubsystem('newViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input type="number" value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input readOnly type="number" value={currentItem.progress} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold" />
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </section>
+
+                    {/* Runnable 박스 */}
+                    <section className="bg-[var(--bg-color)] border border-emerald-200 dark:border-emerald-900/50 rounded-2xl p-6 shadow-sm overflow-x-auto relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
+                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                                Runnable 상세 데이터
+                            </div>
+                        </h2>
+                        <table className="w-full text-left border-collapse min-w-[500px]">
+                            <thead>
+                                <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-xs text-center">
+                                    <th className="p-2 font-semibold">서브시스템</th>
+                                    <th className="p-2 font-semibold">담당자</th>
+                                    <th className="p-2 font-semibold">검출 위배</th>
+                                    <th className="p-2 font-semibold">신규 위배</th>
+                                    <th className="p-2 font-semibold">분석 완료</th>
+                                    <th className="p-2 font-semibold">진척도 (%) - 자동</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
+                                    const categoryType = 'Runnable';
+                                    const itemId = `${subsystemChar}-${categoryType}`;
+                                    const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType) || {
+                                        version: subsystemChar, category: categoryType, owner: "", detectedViolations: 0, newViolations: 0, analyzedViolations: 0, progress: 0
+                                    };
+
+                                    const updateSubsystem = (key: string, val: string | number) => {
+                                        const newList = [...data.subsystemsList];
+                                        const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType);
+                                        
+                                        const mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
+                                        
+                                        if (key === 'detectedViolations' || key === 'analyzedViolations') {
+                                            const dv = mergedItem.detectedViolations || 0;
+                                            const av = mergedItem.analyzedViolations || 0;
+                                            const detected = dv > 0 ? dv : 1;
+                                            mergedItem.progress = Number(Math.min(100, Math.round((av / detected) * 100)).toFixed(1));
+                                            if (dv === 0 && av === 0) {
+                                                mergedItem.progress = 0;
+                                            }
+                                        }
+
+                                        if (existingIdx >= 0) {
+                                            newList[existingIdx] = mergedItem;
+                                        } else {
+                                            newList.push(mergedItem);
+                                        }
+
+                                        const updatedDashboard = calculateAutomatedMetrics({
+                                            ...data,
+                                            subsystemsList: newList
+                                        });
+
+                                        updateVersionData(currentVersionIndex, { 
+                                            subsystemsList: newList,
+                                            dashboardData: updatedDashboard
+                                        });
+                                    };
+
+                                    return (
+                                        <tr key={itemId} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
+                                            <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
+                                            <td className="p-2 w-24">
+                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input type="number" value={currentItem.detectedViolations} onChange={(e) => updateSubsystem('detectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input type="number" value={currentItem.newViolations} onChange={(e) => updateSubsystem('newViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input type="number" value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            </td>
+                                            <td className="p-2 w-20">
+                                                <input readOnly type="number" value={currentItem.progress} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold" />
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
 
                 <div className="grid grid-cols-1 gap-6">
-                    {/* 3. 이슈 관리 */}
-                    <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
-                        <div className="flex justify-between items-center mb-4 border-b border-[var(--border-color)] pb-2">
-                            <h2 className="text-lg font-bold text-[var(--text-main)]">🔥 발생 이슈</h2>
-                            <button 
-                                onClick={() => updateVersionData(currentVersionIndex, { issuesList: [...data.issuesList, { id: Date.now(), title: "", type: "System", content: "", resolved: false }] })}
-                                className="bg-[var(--badge-bg)] text-[var(--accent-color)] border border-[var(--border-color)] px-3 py-1 rounded text-xs font-bold transition-all hover:bg-[var(--hover-bg)]"
-                            >
-                                + 이슈 추가
-                            </button>
-                        </div>
-                        <div className="flex gap-2 items-center px-4 mb-2 text-xs font-semibold text-[var(--text-muted)] text-center">
-                            <div className="w-16">해결 여부</div>
-                            <div className="w-1/3 text-left pl-2">이슈 제목</div>
-                            <div className="w-1/4 text-left pl-2">종류</div>
-                            <div className="flex-1 text-left pl-2">세부 내용</div>
-                            <div className="w-8"></div>
-                        </div>
-                        <div className="space-y-3">
-                            {data.issuesList.map((issue: any, idx: number) => (
-                                <div key={idx} className="flex gap-2 items-center bg-[var(--hover-bg)] p-3 rounded-xl border border-[var(--border-color)]">
-                                    <div className="w-16 flex justify-center">
-                                        <input type="checkbox" checked={issue.resolved} onChange={(e) => { const n = [...data.issuesList]; n[idx].resolved = e.target.checked; updateVersionData(currentVersionIndex, { issuesList: n }); }} className="w-4 h-4 cursor-pointer accent-[var(--accent-color)]" />
-                                    </div>
-                                    <input value={issue.title} onChange={(e) => { const n = [...data.issuesList]; n[idx].title = e.target.value; updateVersionData(currentVersionIndex, { issuesList: n }); }} placeholder="이슈 제목" className="w-1/3 border p-1.5 rounded text-xs bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                    <input value={issue.type} onChange={(e) => { const n = [...data.issuesList]; n[idx].type = e.target.value; updateVersionData(currentVersionIndex, { issuesList: n }); }} placeholder="종류" className="w-1/4 border p-1.5 rounded text-xs bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                    <input value={issue.content} onChange={(e) => { const n = [...data.issuesList]; n[idx].content = e.target.value; updateVersionData(currentVersionIndex, { issuesList: n }); }} placeholder="세부 내용" className="flex-1 border p-1.5 rounded text-xs bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                    <button onClick={() => { const n = [...data.issuesList]; n.splice(idx, 1); updateVersionData(currentVersionIndex, { issuesList: n }); }} className="text-red-500 font-bold px-2 py-1 w-8 hover:bg-red-50 rounded">X</button>
-                                </div>
-                            ))}
-                            {data.issuesList.length === 0 && <p className="text-xs text-[var(--text-muted)] text-center py-2">등록된 이슈가 없습니다.</p>}
-                        </div>
-                    </section>
+
                 </div>
 
                 {/* 4. 정적검증 소요시간 평가 */}
@@ -307,15 +358,15 @@ export default function DataEditorPage() {
                                 <tbody>
                                     {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
                                         const prevVersionData = currentVersionIndex > 0 ? versionedData[currentVersionIndex - 1] : null;
-                                        const prevCompItem = prevVersionData?.timeEvaluationComponent?.find((c: any) => c.subsystem === subsystemChar);
+                                        const prevCompItem = prevVersionData?.timeEvaluationComponent?.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
                                         const autoPrevTime = prevCompItem ? prevCompItem.currentTime : "0h";
 
-                                        const compItem = data.timeEvaluationComponent.find((c: any) => c.subsystem === subsystemChar) || {
+                                        const compItem = data.timeEvaluationComponent.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar) || {
                                             subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateComp = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationComponent];
-                                            const idx = newList.findIndex((c: any) => c.subsystem === subsystemChar);
+                                            const idx = newList.findIndex((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
                                             if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val };
                                             else newList.push({ ...compItem, [key]: val, prevTime: autoPrevTime });
                                             updateVersionData(currentVersionIndex, { timeEvaluationComponent: newList });
@@ -348,15 +399,15 @@ export default function DataEditorPage() {
                                 <tbody>
                                     {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
                                         const prevVersionData = currentVersionIndex > 0 ? versionedData[currentVersionIndex - 1] : null;
-                                        const prevRunnItem = prevVersionData?.timeEvaluationRunnable?.find((r: any) => r.subsystem === subsystemChar);
+                                        const prevRunnItem = prevVersionData?.timeEvaluationRunnable?.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
                                         const autoPrevTime = prevRunnItem ? prevRunnItem.currentTime : "0h";
 
-                                        const runnItem = data.timeEvaluationRunnable.find((r: any) => r.subsystem === subsystemChar) || {
+                                        const runnItem = data.timeEvaluationRunnable.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar) || {
                                             subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateRunn = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationRunnable];
-                                            const idx = newList.findIndex((r: any) => r.subsystem === subsystemChar);
+                                            const idx = newList.findIndex((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
                                             if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val };
                                             else newList.push({ ...runnItem, [key]: val, prevTime: autoPrevTime });
                                             updateVersionData(currentVersionIndex, { timeEvaluationRunnable: newList });

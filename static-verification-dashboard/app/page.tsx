@@ -58,7 +58,7 @@ export default function HomePage() {
           <section className="lg:col-span-2 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col">
             <h2 className="text-lg font-bold text-[var(--text-main)] mb-4">최근 주요 서브시스템 검증 현황</h2>
             <div className="overflow-x-auto flex-1">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[500px] text-left border-collapse">
                 <thead>
                   <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm">
                     <th className="p-3 font-semibold">서브시스템</th>
@@ -67,7 +67,7 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.subsystemsList.slice(0, 3).map((item: any, idx: number) => (
+                  {data.subsystemsList.slice(0, 3).map((item: import('@/store/useStore').SubsystemData, idx: number) => (
                     <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                       <td className="p-3 font-medium">{item.version}</td>
                       <td className="p-3"><span className="px-2 py-1 rounded text-xs bg-[var(--badge-bg)]">{item.category}</span></td>
@@ -102,7 +102,7 @@ export default function HomePage() {
         <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm min-h-[350px] flex flex-col">
           <h2 className="text-lg font-bold text-[var(--text-main)] mb-4">검증 추이 그래프</h2>
           <div className="flex-grow w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minHeight={1}>
               <LineChart
                 data={data.chartData}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
