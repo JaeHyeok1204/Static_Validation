@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
 
@@ -7,6 +8,15 @@ export default function SettingPage() {
     const theme = useStore((state) => state.theme);
     const setTheme = useStore((state) => state.setTheme);
     const exportData = useStore((state) => state.exportData);
+    const geminiApiKey = useStore((state) => state.geminiApiKey);
+    const setGeminiApiKey = useStore((state) => state.setGeminiApiKey);
+    const currentUser = useStore((state) => state.currentUser);
+
+    const [localApiKey, setLocalApiKey] = useState(geminiApiKey);
+
+    useEffect(() => {
+        setLocalApiKey(geminiApiKey);
+    }, [geminiApiKey]);
 
     const handleResetValidation = () => {
         if (confirm("정말로 모든 [검증 데이터]를 초기화하시겠습니까? 이 작업은 복구할 수 없습니다.")) {
@@ -22,9 +32,15 @@ export default function SettingPage() {
 
     const handleSave = async () => {
         try {
-            // Force sync general settings to DB if needed
+            // 1. Sync API Key to store (and Supabase if logged in)
+            await setGeminiApiKey(localApiKey);
+
+            // 2. Sync general app state
             await useStore.getState().syncToDB();
-            alert("설정이 안전하게 저장되었습니다. (API 키는 브라우저에 보관됩니다)");
+            
+            alert(currentUser 
+                ? "설정이 계정에 동기화되어 저장되었습니다." 
+                : "설정이 저장되었습니다. (로그인하시면 계정에 자동 백업됩니다)");
         } catch (err) {
             alert("설정 저장 중 오류가 발생했습니다.");
         }
@@ -96,14 +112,14 @@ export default function SettingPage() {
                                 <div className="flex flex-col gap-2">
                                     <input 
                                         type="password"
-                                        value={useStore(s => s.geminiApiKey)}
-                                        onChange={(e) => useStore.getState().setGeminiApiKey(e.target.value)}
+                                        value={localApiKey}
+                                        onChange={(e) => setLocalApiKey(e.target.value)}
                                         placeholder="AIzaSy..."
                                         className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent-color)] outline-none transition-all"
                                     />
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
-                                        * 이 키는 브라우저 로컬 저장소에만 안전하게 저장되며, 소스 코드나 외부 서버로 전송되지 않습니다. <br/>
-                                        * 키가 없으면 대시보드 요약 및 AI 채팅 기능이 작동하지 않습니다.
+                                        * 현재 로그인된 계정: <strong>{currentUser?.name || "로그인 필요"}</strong> <br/>
+                                        * 로그인 상태에서 저장 시, API 키가 계정에 자동 동기화되어 다른 기기에서도 유지됩니다.
                                     </p>
                                     <button 
                                         onClick={async () => {

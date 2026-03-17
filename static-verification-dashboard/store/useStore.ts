@@ -13,6 +13,7 @@ export interface User {
     birthDate: string;
     teamName: string;
     position: string;
+    geminiApiKey?: string;
 }
 
 export interface DashboardData {
@@ -146,9 +147,13 @@ export const useStore = create<AppState>()(
     syncVersionIndex: (index: number) => set({ currentVersionIndex: index }),
 
     login: async (user: User) => {
-        set({ currentUser: user });
+        set({ 
+            currentUser: user,
+            // Automatically set the global Gemini key from the user's stored key if available
+            geminiApiKey: user.geminiApiKey || get().geminiApiKey 
+        });
     },
-    logout: () => set({ currentUser: null }),
+    logout: () => set({ currentUser: null, geminiApiKey: '' }),
     register: async (user: User) => {
         // 1. Update local state
         set((state) => ({ usersList: [...state.usersList, user] }));
@@ -161,7 +166,8 @@ export const useStore = create<AppState>()(
                 name: user.name,
                 birth_date: user.birthDate,
                 team_name: user.teamName,
-                position: user.position
+                position: user.position,
+                gemini_api_key: user.geminiApiKey || ""
             }]);
             if (error) throw error;
         } catch (err) {
@@ -187,7 +193,8 @@ export const useStore = create<AppState>()(
                 password: u.password,
                 birthDate: u.birth_date,
                 teamName: u.team_name,
-                position: u.position
+                position: u.position,
+                geminiApiKey: u.gemini_api_key || ""
             }));
 
             if (appStates && appStates.data && Object.keys(appStates.data).length > 0) {
@@ -326,7 +333,30 @@ export const useStore = create<AppState>()(
     },
 
     geminiApiKey: '',
-    setGeminiApiKey: (key: string) => set({ geminiApiKey: key }),
+    setGeminiApiKey: async (key: string) => {
+        const state = get();
+        set({ geminiApiKey: key });
+
+        // If a user is logged in, sync the key to their Supabase profile
+        if (state.currentUser) {
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .update({ gemini_api_key: key })
+                    .eq('id', state.currentUser.id);
+                
+                if (error) throw error;
+                
+                // Update local current user state as well
+                set({ 
+                    currentUser: { ...state.currentUser, geminiApiKey: key } 
+                });
+                console.log("Gemini API Key synced to user account.");
+            } catch (err) {
+                console.error("Failed to sync API Key to Supabase:", err);
+            }
+        }
+    },
 
     runAIAnalysis: async () => {
         const state = get();
