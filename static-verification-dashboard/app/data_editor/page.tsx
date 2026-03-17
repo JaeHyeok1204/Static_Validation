@@ -280,21 +280,31 @@ export default function DataEditorPage() {
                                     const categoryType = 'Component';
                                     const itemId = `${subsystemChar}-${categoryType}`;
                                     const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType) || {
-                                        id: subsystemChar, category: categoryType, owner: currentUser?.name || "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
+                                        id: subsystemChar, category: categoryType, owner: "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
                                     };
 
                                     const updateSubsystem = (key: string, val: string | number) => {
                                         const newList = [...data.subsystemsList];
                                         const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType);
                                         
-                                        const mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
+                                        let updatedOwner = currentItem.owner;
+                                        const nv = key === 'newDetectedViolations' ? Number(val) : (currentItem.newDetectedViolations || 0);
+                                        const av = key === 'analyzedViolations' ? Number(val) : (currentItem.analyzedViolations || 0);
+
+                                        if (nv > 0 || av > 0) {
+                                            updatedOwner = currentUser?.name || "";
+                                        } else {
+                                            updatedOwner = "";
+                                        }
+
+                                        const mergedItem = existingIdx >= 0 
+                                            ? { ...newList[existingIdx], [key]: val, owner: updatedOwner } 
+                                            : { ...currentItem, [key]: val, owner: updatedOwner };
                                         
                                         if (key === 'newDetectedViolations' || key === 'analyzedViolations') {
-                                            const nv = mergedItem.newDetectedViolations || 0;
-                                            const av = mergedItem.analyzedViolations || 0;
-                                            const total = nv > 0 ? nv : (av > 0 ? av : 1);
-                                            mergedItem.progress = Number(Math.min(100, Math.round((av / total) * 100)).toFixed(1));
-                                            if (nv === 0 && av === 0) mergedItem.progress = 0;
+                                            const total = (mergedItem.newDetectedViolations || 0) > 0 ? (mergedItem.newDetectedViolations || 0) : ((mergedItem.analyzedViolations || 0) > 0 ? (mergedItem.analyzedViolations || 0) : 1);
+                                            mergedItem.progress = Number(Math.min(100, Math.round(((mergedItem.analyzedViolations || 0) / total) * 100)).toFixed(1));
+                                            if ((mergedItem.newDetectedViolations || 0) === 0 && (mergedItem.analyzedViolations || 0) === 0) mergedItem.progress = 0;
                                         }
 
                                         if (existingIdx >= 0) newList[existingIdx] = mergedItem;
@@ -308,7 +318,12 @@ export default function DataEditorPage() {
                                         <tr key={itemId} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
                                             <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
                                             <td className="p-2 w-24">
-                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
+                                                <input 
+                                                    readOnly 
+                                                    value={currentItem.owner} 
+                                                    placeholder="자동입력" 
+                                                    className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-50 text-[var(--accent-color)] font-bold" 
+                                                />
                                             </td>
                                             <td className="p-2 w-28">
                                                 <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
@@ -350,7 +365,7 @@ export default function DataEditorPage() {
                                     const categoryType = 'Runnable';
                                     const itemId = `${subsystemChar}-${categoryType}`;
                                     const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType) || {
-                                        id: subsystemChar, category: categoryType, owner: currentUser?.name || "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
+                                        id: subsystemChar, category: categoryType, owner: "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
                                     };
 
                                     const updateSubsystem = (key: string, val: string | number) => {
@@ -566,19 +581,34 @@ export default function DataEditorPage() {
                                         const autoPrevTime = prevCompItem ? prevCompItem.currentTime : "0h";
 
                                         const compItem = data.timeEvaluationComponent.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar) || {
-                                            subsystem: subsystemChar, owner: currentUser?.name || "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
+                                            subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateComp = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationComponent];
                                             const idx = newList.findIndex((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
-                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val };
-                                            else newList.push({ ...compItem, [key]: val, prevTime: autoPrevTime });
+                                            
+                                            let updatedOwner = compItem.owner;
+                                            if (key === 'currentTime' && val !== "" && val !== "0h") {
+                                                updatedOwner = currentUser?.name || "";
+                                            } else if (key === 'currentTime' && (val === "" || val === "0h")) {
+                                                updatedOwner = "";
+                                            }
+
+                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner };
+                                            else newList.push({ ...compItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime });
                                             updateVersionData(currentVersionIndex, { timeEvaluationComponent: newList });
                                         };
                                         return (
                                             <tr key={subsystemChar} className="border-b border-[var(--border-color)]">
                                                 <td className="p-1 text-center font-bold text-[var(--accent-color)]">{subsystemChar}</td>
-                                                <td className="p-1"><input value={compItem.owner} onChange={(e) => updateComp('owner', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="담당자" /></td>
+                                                <td className="p-1">
+                                                    <input 
+                                                        readOnly 
+                                                        value={compItem.owner} 
+                                                        placeholder="자동입력" 
+                                                        className="w-full border p-1 rounded bg-gray-50 text-blue-600 border-slate-300 text-center font-bold" 
+                                                    />
+                                                </td>
                                                 <td className="p-1"><input value={compItem.currentTime} onChange={(e) => updateComp('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
                                                 <td className="p-1"><input readOnly value={autoPrevTime} className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold" /></td>
                                             </tr>
@@ -607,19 +637,34 @@ export default function DataEditorPage() {
                                         const autoPrevTime = prevRunnItem ? prevRunnItem.currentTime : "0h";
 
                                         const runnItem = data.timeEvaluationRunnable.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar) || {
-                                            subsystem: subsystemChar, owner: currentUser?.name || "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
+                                            subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateRunn = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationRunnable];
                                             const idx = newList.findIndex((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
-                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val };
-                                            else newList.push({ ...runnItem, [key]: val, prevTime: autoPrevTime });
+                                            
+                                            let updatedOwner = runnItem.owner;
+                                            if (key === 'currentTime' && val !== "" && val !== "0h") {
+                                                updatedOwner = currentUser?.name || "";
+                                            } else if (key === 'currentTime' && (val === "" || val === "0h")) {
+                                                updatedOwner = "";
+                                            }
+
+                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner };
+                                            else newList.push({ ...runnItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime });
                                             updateVersionData(currentVersionIndex, { timeEvaluationRunnable: newList });
                                         };
                                         return (
                                             <tr key={subsystemChar} className="border-b border-[var(--border-color)]">
                                                 <td className="p-1 text-center font-bold text-[var(--accent-color)]">{subsystemChar}</td>
-                                                <td className="p-1"><input value={runnItem.owner} onChange={(e) => updateRunn('owner', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="담당자" /></td>
+                                                <td className="p-1">
+                                                    <input 
+                                                        readOnly 
+                                                        value={runnItem.owner} 
+                                                        placeholder="자동입력" 
+                                                        className="w-full border p-1 rounded bg-gray-50 text-[var(--accent-color)] border-slate-300 text-center font-bold" 
+                                                    />
+                                                </td>
                                                 <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
                                                 <td className="p-1"><div className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold text-center">{autoPrevTime}</div></td>
                                             </tr>
