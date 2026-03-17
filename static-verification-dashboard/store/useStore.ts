@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { initialVersionedData, initialVersions } from '@/app/data/mockData';
+import { supabase } from '@/lib/supabase';
 
 type ThemeType = 'light' | 'dark' | 'blue' | 'red';
 
@@ -116,6 +117,10 @@ interface AppState {
     login: (user: User) => void;
     logout: () => void;
     register: (user: User) => void;
+    
+    // Remote Sync Actions
+    syncFromDB: () => Promise<void>;
+    syncToDB: (stateToSync?: Partial<AppState>) => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -131,9 +136,87 @@ export const useStore = create<AppState>()(
 
     setVersionIndex: (index) => set({ currentVersionIndex: index }),
 
-    login: (user: import('./useStore').User) => set({ currentUser: user }),
+    syncVersionIndex: (index: number) => set({ currentVersionIndex: index }),
+
+    login: async (user: User) => {
+        set({ currentUser: user });
+    },
     logout: () => set({ currentUser: null }),
-    register: (user: import('./useStore').User) => set((state) => ({ usersList: [...state.usersList, user] })),
+    register: async (user: User) => {
+        // 1. Update local state
+        set((state) => ({ usersList: [...state.usersList, user] }));
+        
+        // 2. Sync to Supabase
+        try {
+            const { error } = await supabase.from('users').insert([{
+                id: user.id,
+                password: user.password,
+                name: user.name,
+                birth_date: user.birthDate,
+                team_name: user.teamName,
+                position: user.position
+            }]);
+            if (error) throw error;
+        } catch (err) {
+            console.error("Failed to register user to Supabase:", err);
+        }
+    },
+
+    syncFromDB: async () => {
+        try {
+            // Load Users
+            const { data: users, error: userError } = await supabase.from('users').select('*');
+            if (userError) throw userError;
+            
+            // Load App State (Versioned Data)
+            const { data: appStates, error: stateError } = await supabase.from('app_state').select('data').limit(1).single();
+            if (stateError) {
+                if (stateError.code !== 'PGRST116') throw stateError; // Ignore if empty
+            }
+
+            const mappedUsers: User[] = (users || []).map(u => ({
+                id: u.id,
+                name: u.name,
+                password: u.password,
+                birthDate: u.birth_date,
+                teamName: u.team_name,
+                position: u.position
+            }));
+
+            if (appStates && appStates.data && Object.keys(appStates.data).length > 0) {
+                const remoteData = appStates.data as any;
+                set({
+                    usersList: mappedUsers,
+                    versions: remoteData.versions || initialVersions,
+                    versionedData: remoteData.versionedData || initialVersionedData,
+                });
+            } else {
+                set({ usersList: mappedUsers });
+            }
+        } catch (err) {
+            console.error("Critical: Failed to sync from Supabase:", err);
+        }
+    },
+
+    syncToDB: async (stateToSync?: Partial<AppState>) => {
+        const state = stateToSync || get();
+        try {
+            const payload = {
+                versions: state.versions,
+                versionedData: state.versionedData
+            };
+            
+            // Upsert based on first row
+            const { error } = await supabase.from('app_state').update({
+                data: payload,
+                updated_at: new Date().toISOString()
+            }).eq('id', 1); // We assume the initial row has ID 1
+
+            if (error) throw error;
+        } catch (err) {
+            console.error("Failed to sync app state to Supabase:", err);
+        }
+    },
     
     setTheme: (theme) => {
         if (typeof document !== 'undefined') {
@@ -174,7 +257,7 @@ export const useStore = create<AppState>()(
             const currentData = state.versionedData[versionIndex];
             if (!currentData) return state;
 
-            return {
+            const newState = {
                 versionedData: {
                     ...state.versionedData,
                     [versionIndex]: {
@@ -183,6 +266,9 @@ export const useStore = create<AppState>()(
                     }
                 }
             };
+            
+            get().syncToDB({ ...state, ...newState });
+            return newState;
         });
     },
 
@@ -216,7 +302,7 @@ export const useStore = create<AppState>()(
                 reportsDraft: { team: "", customer: "" }
             };
 
-            return {
+            const newState = {
                 versions: newVersions,
                 versionedData: {
                     ...state.versionedData,
@@ -224,6 +310,9 @@ export const useStore = create<AppState>()(
                 },
                 currentVersionIndex: newIndex // Auto-switch to newly created version
             };
+            
+            get().syncToDB({ ...state, ...newState });
+            return newState;
         });
     }
   }),
