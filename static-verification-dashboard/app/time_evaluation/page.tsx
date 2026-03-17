@@ -35,7 +35,7 @@ export default function TimeEvalPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar, idx) => {
+                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'].map((subsystemChar, idx) => {
                                 const comp = data.timeEvaluationComponent?.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
                                 const runn = data.timeEvaluationRunnable?.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
 
@@ -46,14 +46,14 @@ export default function TimeEvalPage() {
                                         {/* Component Stats */}
                                         <td className="p-3 text-center border-r border-[var(--border-color)] font-semibold">{comp ? comp.currentTime : "-"}</td>
                                         <td className="p-3 text-center border-r border-[var(--border-color)] text-[var(--text-muted)]">{comp ? comp.prevTime : "-"}</td>
-                                        <td className={`p-3 text-center border-r border-[var(--border-color)] font-bold ${comp?.diffColor === 'text-red-500' ? 'text-red-500' : comp?.diffColor === 'text-green-600' ? 'text-green-500' : 'text-[var(--text-muted)]'}`}>
+                                        <td className={`p-3 text-center border-r border-[var(--border-color)] font-bold ${comp?.diffColor || 'text-[var(--text-muted)]'}`}>
                                             {comp ? comp.diff : "-"}
                                         </td>
 
                                         {/* Runnable Stats */}
                                         <td className="p-3 text-center border-r border-[var(--border-color)] font-semibold">{runn ? runn.currentTime : "-"}</td>
                                         <td className="p-3 text-center border-r border-[var(--border-color)] text-[var(--text-muted)]">{runn ? runn.prevTime : "-"}</td>
-                                        <td className={`p-3 text-center font-bold ${runn?.diffColor === 'text-red-500' ? 'text-red-500' : runn?.diffColor === 'text-green-600' ? 'text-green-500' : 'text-[var(--text-muted)]'}`}>
+                                        <td className={`p-3 text-center font-bold ${runn?.diffColor || 'text-[var(--text-muted)]'}`}>
                                             {runn ? runn.diff : "-"}
                                         </td>
                                     </tr>

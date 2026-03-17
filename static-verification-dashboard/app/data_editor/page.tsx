@@ -609,8 +609,18 @@ export default function DataEditorPage() {
                                                 updatedOwner = "";
                                             }
 
-                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner };
-                                            else newList.push({ ...compItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime });
+                                            const currentVal = key === 'currentTime' ? val : (compItem.currentTime || "0h");
+                                            const prevVal = key === 'prevTime' ? val : (autoPrevTime || "0h");
+                                            
+                                            // Calculate Diff
+                                            const curNum = parseFloat(currentVal);
+                                            const prevNum = parseFloat(prevVal);
+                                            const diffNum = curNum - prevNum;
+                                            const formattedDiff = (diffNum > 0 ? "+" : "") + diffNum.toFixed(1) + "h";
+                                            const color = diffNum > 0 ? "text-red-500" : (diffNum < 0 ? "text-green-600" : "text-gray-400");
+
+                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner, diff: formattedDiff, diffColor: color };
+                                            else newList.push({ ...compItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime, diff: formattedDiff, diffColor: color });
                                             updateVersionData(currentVersionIndex, { timeEvaluationComponent: newList });
                                         };
                                         return (
@@ -675,8 +685,18 @@ export default function DataEditorPage() {
                                                 updatedOwner = "";
                                             }
 
-                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner };
-                                            else newList.push({ ...runnItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime });
+                                            const currentVal = key === 'currentTime' ? val : (runnItem.currentTime || "0h");
+                                            const prevVal = key === 'prevTime' ? val : (autoPrevTime || "0h");
+                                            
+                                            // Calculate Diff
+                                            const curNum = parseFloat(currentVal);
+                                            const prevNum = parseFloat(prevVal);
+                                            const diffNum = curNum - prevNum;
+                                            const formattedDiff = (diffNum > 0 ? "+" : "") + diffNum.toFixed(1) + "h";
+                                            const color = diffNum > 0 ? "text-red-500" : (diffNum < 0 ? "text-green-600" : "text-gray-400");
+
+                                            if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner, diff: formattedDiff, diffColor: color };
+                                            else newList.push({ ...runnItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime, diff: formattedDiff, diffColor: color });
                                             updateVersionData(currentVersionIndex, { timeEvaluationRunnable: newList });
                                         };
                                         return (
