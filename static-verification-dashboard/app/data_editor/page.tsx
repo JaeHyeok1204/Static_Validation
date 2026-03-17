@@ -21,8 +21,6 @@ export default function DataEditorPage() {
         alert("신규 버전이 생성되었습니다.");
     };
 
-    if (!data) return null;
-
     // Helpers to write to Zustand
     const calculateAutomatedMetrics = (updatedData: import('../../store/useStore').VersionData) => {
         const { dashboardData, subsystemsList } = updatedData;
@@ -123,9 +121,11 @@ export default function DataEditorPage() {
                     <p className="text-xs text-[var(--text-muted)] mt-2">* 새로운 버전을 생성하면 빈 템플릿(0%) 상태로 초기화되며 상단 버전 선택기에서 바로 작업 탭으로 전환됩니다.</p>
                 </section>
 
-                <div className="text-sm font-bold text-[var(--accent-color)] mb-2 mt-4">
-                    현재 편집 중인 버전: [{versions[currentVersionIndex]}]
-                </div>
+                {data ? (
+                    <>
+                        <div className="text-sm font-bold text-[var(--accent-color)] mb-2 mt-4">
+                            현재 편집 중인 버전: [{versions[currentVersionIndex]}]
+                        </div>
 
                 {/* 일정 관리 */}
                 <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
@@ -430,6 +430,17 @@ export default function DataEditorPage() {
                 <div className="flex justify-end pt-4">
                     <p className="text-xs text-[var(--text-muted)]">* 수정하시는 모든 데이터는 글로벌 메모리 저장소에 즉시 100% 동기화(자동저장) 되어 모든 탭에 반영됩니다.</p>
                 </div>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-color)] border-2 border-dashed border-[var(--border-color)] rounded-2xl">
+                        <div className="text-4xl mb-4">✍️</div>
+                        <h3 className="text-xl font-bold text-[var(--text-main)] mb-2">데이터 입력 준비</h3>
+                        <p className="text-[var(--text-muted)] text-sm mb-6 text-center">
+                            상단의 [신규 버전 데이터 생성] 영역에서 프로젝트의 새로운 버전을 생성해 주세요.<br/>
+                            버전 생성 후에는 각 항목별 데이터를 직접 입력하고 관리할 수 있습니다.
+                        </p>
+                    </div>
+                )}
 
             </div>
         </div>
