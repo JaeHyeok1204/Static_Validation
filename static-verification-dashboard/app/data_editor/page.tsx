@@ -624,7 +624,17 @@ export default function DataEditorPage() {
                                                         className="w-full border p-1 rounded bg-gray-50 text-blue-600 border-slate-300 text-center font-bold placeholder:text-gray-500" 
                                                     />
                                                 </td>
-                                                <td className="p-1"><input value={compItem.currentTime} onChange={(e) => updateComp('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
+                                                <td className="p-1">
+                                                    <input 
+                                                        type="number"
+                                                        step="0.1"
+                                                        value={parseFloat(compItem.currentTime || "0")} 
+                                                        onChange={(e) => updateComp('currentTime', (e.target.value || "0") + "h")} 
+                                                        onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
+                                                        className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                                                        placeholder="0" 
+                                                    />
+                                                </td>
                                                 <td className="p-1"><input readOnly value={autoPrevTime} className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold" /></td>
                                             </tr>
                                         );
@@ -680,7 +690,17 @@ export default function DataEditorPage() {
                                                         className="w-full border p-1 rounded bg-gray-50 text-emerald-600 border-slate-300 text-center font-bold placeholder:text-gray-500" 
                                                     />
                                                 </td>
-                                                <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
+                                                <td className="p-1">
+                                                    <input 
+                                                        type="number"
+                                                        step="0.1"
+                                                        value={parseFloat(runnItem.currentTime || "0")} 
+                                                        onChange={(e) => updateRunn('currentTime', (e.target.value || "0") + "h")} 
+                                                        onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
+                                                        className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                                                        placeholder="0" 
+                                                    />
+                                                </td>
                                                 <td className="p-1"><div className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold text-center">{autoPrevTime}</div></td>
                                             </tr>
                                         );
