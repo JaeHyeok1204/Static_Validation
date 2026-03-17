@@ -322,7 +322,7 @@ export default function DataEditorPage() {
                                                     readOnly 
                                                     value={currentItem.owner} 
                                                     placeholder="자동입력" 
-                                                    className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-50 text-[var(--accent-color)] font-bold" 
+                                                    className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-50 text-blue-600 font-bold placeholder:text-gray-500" 
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
@@ -372,14 +372,24 @@ export default function DataEditorPage() {
                                         const newList = [...data.subsystemsList];
                                         const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType);
                                         
-                                        const mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
+                                        let updatedOwner = currentItem.owner;
+                                        const nv = key === 'newDetectedViolations' ? Number(val) : (currentItem.newDetectedViolations || 0);
+                                        const av = key === 'analyzedViolations' ? Number(val) : (currentItem.analyzedViolations || 0);
+
+                                        if (nv > 0 || av > 0) {
+                                            updatedOwner = currentUser?.name || "";
+                                        } else {
+                                            updatedOwner = "";
+                                        }
+
+                                        const mergedItem = existingIdx >= 0 
+                                            ? { ...newList[existingIdx], [key]: val, owner: updatedOwner } 
+                                            : { ...currentItem, [key]: val, owner: updatedOwner };
                                         
                                         if (key === 'newDetectedViolations' || key === 'analyzedViolations') {
-                                            const nv = mergedItem.newDetectedViolations || 0;
-                                            const av = mergedItem.analyzedViolations || 0;
-                                            const total = nv > 0 ? nv : (av > 0 ? av : 1);
-                                            mergedItem.progress = Number(Math.min(100, Math.round((av / total) * 100)).toFixed(1));
-                                            if (nv === 0 && av === 0) mergedItem.progress = 0;
+                                            const total = (mergedItem.newDetectedViolations || 0) > 0 ? (mergedItem.newDetectedViolations || 0) : ((mergedItem.analyzedViolations || 0) > 0 ? (mergedItem.analyzedViolations || 0) : 1);
+                                            mergedItem.progress = Number(Math.min(100, Math.round(((mergedItem.analyzedViolations || 0) / total) * 100)).toFixed(1));
+                                            if ((mergedItem.newDetectedViolations || 0) === 0 && (mergedItem.analyzedViolations || 0) === 0) mergedItem.progress = 0;
                                         }
 
                                         if (existingIdx >= 0) newList[existingIdx] = mergedItem;
@@ -393,7 +403,12 @@ export default function DataEditorPage() {
                                         <tr key={itemId} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
                                             <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
                                             <td className="p-2 w-24">
-                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
+                                                <input 
+                                                    readOnly 
+                                                    value={currentItem.owner} 
+                                                    placeholder="자동입력" 
+                                                    className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-50 text-emerald-600 font-bold placeholder:text-gray-500" 
+                                                />
                                             </td>
                                             <td className="p-2 w-28">
                                                 <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
@@ -606,7 +621,7 @@ export default function DataEditorPage() {
                                                         readOnly 
                                                         value={compItem.owner} 
                                                         placeholder="자동입력" 
-                                                        className="w-full border p-1 rounded bg-gray-50 text-blue-600 border-slate-300 text-center font-bold" 
+                                                        className="w-full border p-1 rounded bg-gray-50 text-blue-600 border-slate-300 text-center font-bold placeholder:text-gray-500" 
                                                     />
                                                 </td>
                                                 <td className="p-1"><input value={compItem.currentTime} onChange={(e) => updateComp('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
@@ -662,7 +677,7 @@ export default function DataEditorPage() {
                                                         readOnly 
                                                         value={runnItem.owner} 
                                                         placeholder="자동입력" 
-                                                        className="w-full border p-1 rounded bg-gray-50 text-[var(--accent-color)] border-slate-300 text-center font-bold" 
+                                                        className="w-full border p-1 rounded bg-gray-50 text-emerald-600 border-slate-300 text-center font-bold placeholder:text-gray-500" 
                                                     />
                                                 </td>
                                                 <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
