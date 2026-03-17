@@ -99,12 +99,12 @@ export interface VersionData {
     [key: string]: unknown;
 }
 
-const INITIAL_MAB_RULE_IDS = [
+export const INITIAL_MAB_RULE_IDS = [
     "MAB_AR_0001", "MAB_AR_0002", "MAB_DB_0042", "MAB_DB_0112", "MAB_DB_0126", "MAB_DB_0127", "MAB_DB_0129", "MAB_DB_0137", "MAB_DB_0141", "MAB_DB_0143", "MAB_HD_0001", "MAB_JC_0011", "MAB_JC_0081", "MAB_JC_0110", "MAB_JC_0121", "MAB_JC_0161", "MAB_JC_0171", "MAB_JC_0201", "MAB_JC_0211", "MAB_JC_0222", "MAB_JC_0231", "MAB_JC_0232", "MAB_JC_0241", "MAB_JC_0242", "MAB_JC_0243", "MAB_JC_0244", "MAB_JC_0245", "MAB_JC_0246", "MAB_JC_0247", "MAB_JC_0451", "MAB_JC_0481", "MAB_JC_0501", "MAB_JC_0511", "MAB_JC_0531", "MAB_JC_0602", "MAB_JC_0603", "MAB_JC_0604", "MAB_JC_0610", "MAB_JC_0611", "MAB_JC_0621", "MAB_JC_0622", "MAB_JC_0623", "MAB_JC_0624", "MAB_JC_0626", "MAB_JC_0627", "MAB_JC_0628", "MAB_JC_0630", "MAB_JC_0640", "MAB_JC_0641", "MAB_JC_0642", "MAB_JC_0643", "MAB_JC_0644", "MAB_JC_0650", "MAB_JC_0653", "MAB_JC_0655", "MAB_JC_0656", "MAB_JC_0659", "MAB_JC_0700", "MAB_JC_0701", "MAB_JC_0702", "MAB_JC_0711", "MAB_JC_0712", "MAB_JC_0721", "MAB_JC_0723", "MAB_JC_0731", "MAB_JC_0732", "MAB_JC_0733", "MAB_JC_0734", "MAB_JC_0736", "MAB_JC_0738", "MAB_JC_0739", "MAB_JC_0740", "MAB_JC_0741", "MAB_JC_0751", "MAB_JC_0752", "MAB_JC_0753", "MAB_JC_0760", "MAB_JC_0762", "MAB_JC_0763", "MAB_JC_0770", "MAB_JC_0771", "MAB_JC_0772", "MAB_JC_0773", "MAB_JC_0774", "MAB_JC_0775", "MAB_JC_0790", "MAB_JC_0791", "MAB_JC_0792", "MAB_JC_0794", "MAB_JC_0795", "MAB_JC_0796", "MAB_JC_0797", "MAB_JC_0800", "MAB_JC_0801", "MAB_JC_0802", "MAB_JC_0803", "MAB_JC_0804", "MAB_JC_0805", "MAB_JC_0806", "MAB_JM_0011", "MAB_NA_0001", "MAB_NA_0002", "MAB_NA_0003", "MAB_NA_0009", "MAB_NA_0011", "MAB_NA_0016", "MAB_NA_0017", "MAB_NA_0018", "MAB_NA_0019", "MAB_NA_0020", "MAB_NA_0021", "MAB_NA_0022", "MAB_NA_0024", "MAB_NA_0025", "MAB_NA_0031", "MAB_NA_0034", "MAB_NA_0036", "MAB_NA_0037", "MAB_NA_0042"
 ];
 
-const INITIAL_MISRA_RULE_IDS = [
-    "MISRA_AC_SLSF_003_A", "MISRA_AC_SLSF_004_A", "MISRA_AC_SLSF_005_A", "MISRA_AC_SLSF_005_B", "MISRA_AC_SLSF_005_C", "MISRA_AC_SLSF_006_A", "MISRA_AC_SLSF_006_B", "MISRA_AC_SLSF_006_C", "MISRA_AC_SLSF_006_E", "MISRA_AC_SLSF_007_A", "MISRA_AC_SLSF_008_A", "MISRA_AC_SLSF_008_B", "MISRA_AC_SLSF_009_B", "MISRA_AC_SLSF_009_D", "MISRA_AC_SLSF_010_A", "MISRA_AC_SLSF_010_B", "MISRA_AC_SLSF_010_C", "MISRA_AC_SLSF_011_A", "MISRA_AC_SLSF_011_B", "MISRA_AC_SLSF_012_A", "MISRA_AC_SLSF_013_A", "MISRA_AC_SLSF_013_B", "MISRA_AC_SLSF_016_A", "MISRA_AC_SLSF_016_B", "MISRA_AC_SLSF_016_C", "MISRA_AC_SLSF_016_D", "MISRA_AC_SLSF_016_E", "MISRA_AC_SLSF_017_A", "MISRA_AC_SLSF_017_B", "MISRA_AC_SLSF_018_A", "MISRA_AC_SLSF_018_B", "MISRA_AC_SLSF_018_C", "MISRA_AC_SLSF_018_D", "MISRA_AC_SLSF_018_E", "MISRA_AC_SLSF_019_A", "MISRA_AC_SLSF_019_B", "MISRA_AC_SLSF_020_A", "MISRA_AC_SLSF_020_B", "MISRA_AC_SLSF_020_C", "MISRA_AC_SLSF_020_D", "MISRA_AC_SLSF_021_A", "MISRA_AC_SLSF_022_A", "MISRA_AC_SLSF_022_B", "MISRA_AC_SLSF_023_A", "MISRA_AC_SLSF_024_A", "MISRA_AC_SLSF_025_A", "MISRA_AC_SLSF_025_B", "MISRA_AC_SLSF_026_A", "MISRA_AC_SLSF_026_B", "MISRA_AC_SLSF_026_C", "MISRA_AC_SLSF_026_E", "MISRA_AC_SLSF_027_A", "MISRA_AC_SLSF_027_B", "MISRA_AC_SLSF_027_C", "MISRA_AC_SLSF_027_D", "MISRA_AC_SLSF_027_E", "MISRA_AC_SLSF_027_F", "MISRA_AC_SLSF_027_G", "MISRA_AC_SLSF_027_H", "MISRA_AC_SLSF_027_I", "MISRA_AC_SLSF_027_J", "MISRA_AC_SLSF_029_A", "MISRA_AC_SLSF_029_B", "MISRA_AC_SLSF_029_C", "MISRA_AC_SLSF_029_D", "MISRA_AC_SLSF_029_E", "MISRA_AC_SLSF_029_F", "MISRA_AC_SLSF_030_A", "MISRA_AC_SLSF_030_B", "MISRA_AC_SLSF_030_C", "MISRA_AC_SLSF_032_A", "MISRA_AC_SLSF_032_B", "MISRA_AC_SLSF_034_A", "MISRA_AC_SLSF_034_B", "MISRA_AC_SLSF_034_C", "MISRA_AC_SLSF_034_D", "MISRA_AC_SLSF_035_B", "MISRA_AC_SLSF_036_A", "MISRA_AC_SLSF_036_B", "MISRA_AC_SLSF_036_C", "MISRA_AC_SLSF_037_A", "MISRA_AC_SLSF_037_B", "MISRA_AC_SLSF_037_C", "MISRA_AC_SLSF_037_G", "MISRA_AC_SLSF_037_H", "MISRA_AC_SLSF_038_A", "MISRA_AC_SLSF_038_B", "MISRA_AC_SLSF_038_C", "MISRA_AC_SLSF_039_A", "MISRA_AC_SLSF_039_B", "MISRA_AC_SLSF_039_C", "MISRA_AC_SLSF_040_A", "MISRA_AC_SLSF_040_B", "MISRA_AC_SLSF_041_A", "MISRA_AC_SLSF_042_A", "MISRA_AC_SLSF_042_B", "MISRA_AC_SLSF_042_C", "MISRA_AC_SLSF_042_D", "MISRA_AC_SLSF_042_E", "MISRA_AC_SLSF_043_A", "MISRA_AC_SLSF_043_B", "MISRA_AC_SLSF_043_C", "MISRA_AC_SLSF_043_D", "MISRA_AC_SLSF_043_F", "MISRA_AC_SLSF_043_G", "MISRA_AC_SLSF_043_H", "MISRA_AC_SLSF_043_I", "MISRA_AC_SLSF_043_J", "MISRA_AC_SLSF_044_A", "MISRA_AC_SLSF_044_B", "MISRA_AC_SLSF_044_C", "MISRA_AC_SLSF_045_A", "MISRA_AC_SLSF_045_B", "MISRA_AC_SLSF_045_C", "MISRA_AC_SLSF_045_D", "MISRA_AC_SLSF_045_E", "MISRA_AC_SLSF_045_F", "MISRA_AC_SLSF_045_G", "MISRA_AC_SLSF_046_A", "MISRA_AC_SLSF_047_A", "MISRA_AC_SLSF_047_B", "MISRA_AC_SLSF_048_A", "MISRA_AC_SLSF_048_B", "MISRA_AC_SLSF_048_C", "MISRA_AC_SLSF_048_G", "MISRA_AC_SLSF_049_A", "MISRA_AC_SLSF_050_A", "MISRA_AC_SLSF_050_B", "MISRA_AC_SLSF_050_D", "MISRA_AC_SLSF_050_E", "MISRA_AC_SLSF_050_F", "MISRA_AC_SLSF_051_A", "MISRA_AC_SLSF_051_C", "MISRA_AC_SLSF_051_D", "MISRA_AC_SLSF_052_A", "MISRA_AC_SLSF_052_B", "MISRA_AC_SLSF_053_A", "MISRA_AC_SLSF_053_B", "MISRA_AC_SLSF_053_C", "MISRA_AC_SLSF_053_D", "MISRA_AC_SLSF_053_E", "MISRA_AC_SLSF_053_F", "MISRA_AC_SLSF_053_H", "MISRA_AC_SLSF_053_I", "MISRA_AC_SLSF_053_J", "MISRA_AC_SLSF_053_K", "MISRA_AC_SLSF_054_A", "MISRA_AC_SLSF_054_B", "MISRA_AC_SLSF_054_C", "MISRA_AC_SLSF_054_D", "MISRA_AC_SLSF_054_E", "MISRA_AC_SLSF_054_F", "MISRA_AC_SLSF_054_G", "MISRA_AC_SLSF_054_H", "MISRA_AC_SLSF_055_A", "MISRA_AC_SLSF_055_B", "MISRA_AC_SLSF_055_C", "MISRA_AC_SLSF_055_D"
+export const INITIAL_MISRA_RULE_IDS = [
+    "MISRA_AC_SLSF_003_A", "MISRA_AC_SLSF_004_A", "MISRA_AC_SLSF_005_A", "MISRA_AC_SLSF_005_B", "MISRA_AC_SLSF_005_C", "MISRA_AC_SLSF_006_A", "MISRA_AC_SLSF_006_B", "MISRA_AC_SLSF_006_C", "MISRA_AC_SLSF_006_E", "MISRA_AC_SLSF_007_A", "MISRA_AC_SLSF_008_A", "MISRA_AC_SLSF_008_B", "MISRA_AC_SLSF_009_B", "MISRA_AC_SLSF_009_D", "MISRA_AC_SLSF_010_A", "MISRA_AC_SLSF_010_B", "MISRA_AC_SLSF_010_C", "MISRA_AC_SLSF_011_A", "MISRA_AC_SLSF_011_B", "MISRA_AC_SLSF_012_A", "MISRA_AC_SLSF_013_A", "MISRA_AC_SLSF_013_B", "MISRA_AC_SLSF_016_A", "MISRA_AC_SLSF_016_B", "MISRA_AC_SLSF_016_C", "MISRA_AC_SLSF_016_D", "MISRA_AC_SLSF_016_E", "MISRA_AC_SLSF_017_A", "MISRA_AC_SLSF_017_B", "MISRA_AC_SLSF_018_A", "MISRA_AC_SLSF_018_B", "MISRA_AC_SLSF_018_C", "MISRA_AC_SLSF_018_D", "MISRA_AC_SLSF_018_E", "MISRA_AC_SLSF_019_A", "MISRA_AC_SLSF_019_B", "MISRA_AC_SLSF_020_A", "MISRA_AC_SLSF_020_B", "MISRA_AC_SLSF_020_C", "MISRA_AC_SLSF_020_D", "MISRA_AC_SLSF_021_A", "MISRA_AC_SLSF_022_A", "MISRA_AC_SLSF_022_B", "MISRA_AC_SLSF_023_A", "MISRA_AC_SLSF_024_A", "MISRA_AC_SLSF_025_A", "MISRA_AC_SLSF_025_B", "MISRA_AC_SLSF_026_A", "MISRA_AC_SLSF_026_B", "MISRA_AC_SLSF_026_C", "MISRA_AC_SLSF_026_E", "MISRA_AC_SLSF_027_B", "MISRA_AC_SLSF_027_C", "MISRA_AC_SLSF_027_D", "MISRA_AC_SLSF_027_E", "MISRA_AC_SLSF_027_F", "MISRA_AC_SLSF_027_G", "MISRA_AC_SLSF_027_H", "MISRA_AC_SLSF_027_I", "MISRA_AC_SLSF_027_J", "MISRA_AC_SLSF_029_A", "MISRA_AC_SLSF_029_B", "MISRA_AC_SLSF_029_C", "MISRA_AC_SLSF_029_D", "MISRA_AC_SLSF_029_E", "MISRA_AC_SLSF_029_F", "MISRA_AC_SLSF_030_A", "MISRA_AC_SLSF_030_B", "MISRA_AC_SLSF_030_C", "MISRA_AC_SLSF_032_A", "MISRA_AC_SLSF_032_B", "MISRA_AC_SLSF_034_A", "MISRA_AC_SLSF_034_B", "MISRA_AC_SLSF_034_C", "MISRA_AC_SLSF_034_D", "MISRA_AC_SLSF_035_B", "MISRA_AC_SLSF_036_A", "MISRA_AC_SLSF_036_B", "MISRA_AC_SLSF_036_C", "MISRA_AC_SLSF_037_A", "MISRA_AC_SLSF_037_B", "MISRA_AC_SLSF_037_C", "MISRA_AC_SLSF_037_G", "MISRA_AC_SLSF_037_H", "MISRA_AC_SLSF_038_A", "MISRA_AC_SLSF_038_B", "MISRA_AC_SLSF_038_C", "MISRA_AC_SLSF_039_A", "MISRA_AC_SLSF_039_B", "MISRA_AC_SLSF_039_C", "MISRA_AC_SLSF_040_A", "MISRA_AC_SLSF_040_B", "MISRA_AC_SLSF_041_A", "MISRA_AC_SLSF_042_A", "MISRA_AC_SLSF_042_B", "MISRA_AC_SLSF_042_C", "MISRA_AC_SLSF_042_D", "MISRA_AC_SLSF_042_E", "MISRA_AC_SLSF_043_A", "MISRA_AC_SLSF_043_B", "MISRA_AC_SLSF_043_C", "MISRA_AC_SLSF_043_D", "MISRA_AC_SLSF_043_F", "MISRA_AC_SLSF_043_G", "MISRA_AC_SLSF_043_H", "MISRA_AC_SLSF_043_I", "MISRA_AC_SLSF_043_J", "MISRA_AC_SLSF_044_A", "MISRA_AC_SLSF_044_B", "MISRA_AC_SLSF_044_C", "MISRA_AC_SLSF_045_A", "MISRA_AC_SLSF_045_B", "MISRA_AC_SLSF_045_C", "MISRA_AC_SLSF_045_D", "MISRA_AC_SLSF_045_E", "MISRA_AC_SLSF_045_F", "MISRA_AC_SLSF_045_G", "MISRA_AC_SLSF_046_A", "MISRA_AC_SLSF_047_A", "MISRA_AC_SLSF_047_B", "MISRA_AC_SLSF_048_A", "MISRA_AC_SLSF_048_B", "MISRA_AC_SLSF_048_C", "MISRA_AC_SLSF_048_G", "MISRA_AC_SLSF_049_A", "MISRA_AC_SLSF_050_A", "MISRA_AC_SLSF_050_B", "MISRA_AC_SLSF_050_D", "MISRA_AC_SLSF_050_E", "MISRA_AC_SLSF_050_F", "MISRA_AC_SLSF_051_A", "MISRA_AC_SLSF_051_C", "MISRA_AC_SLSF_051_D", "MISRA_AC_SLSF_052_A", "MISRA_AC_SLSF_052_B", "MISRA_AC_SLSF_053_A", "MISRA_AC_SLSF_053_B", "MISRA_AC_SLSF_053_C", "MISRA_AC_SLSF_053_D", "MISRA_AC_SLSF_053_E", "MISRA_AC_SLSF_053_F", "MISRA_AC_SLSF_053_H", "MISRA_AC_SLSF_053_I", "MISRA_AC_SLSF_053_J", "MISRA_AC_SLSF_053_K", "MISRA_AC_SLSF_054_A", "MISRA_AC_SLSF_054_B", "MISRA_AC_SLSF_054_C", "MISRA_AC_SLSF_054_D", "MISRA_AC_SLSF_054_E", "MISRA_AC_SLSF_054_F", "MISRA_AC_SLSF_054_G", "MISRA_AC_SLSF_054_H", "MISRA_AC_SLSF_055_A", "MISRA_AC_SLSF_055_B", "MISRA_AC_SLSF_055_C", "MISRA_AC_SLSF_055_D"
 ];
 
 const SUBSYSTEM_IDS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
@@ -165,6 +165,9 @@ interface AppState {
     // V7 Data Editor Actions
     updateVersionData: (versionIndex: number, partialData: Partial<VersionData>) => void;
     createNewVersion: (versionName: string) => void;
+    addRuleRow: (versionIndex: number) => void;
+    deleteRuleRow: (versionIndex: number, ruleIndex: number) => void;
+    updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => void;
     login: (user: User) => void;
     logout: () => void;
     register: (user: User) => void;
@@ -181,6 +184,9 @@ interface AppState {
     runIssueAIAnalysis: (issueId: string | number) => Promise<void>;
     resetValidationData: () => Promise<void>;
     resetAiData: () => Promise<void>;
+    
+    INITIAL_MAB_RULE_IDS: string[];
+    INITIAL_MISRA_RULE_IDS: string[];
 }
 
 export const useStore = create<AppState>()(
@@ -193,6 +199,8 @@ export const useStore = create<AppState>()(
     versionedData: initialVersionedData,
     currentUser: null,
     usersList: [],
+    INITIAL_MAB_RULE_IDS,
+    INITIAL_MISRA_RULE_IDS,
 
     setVersionIndex: (index) => set({ currentVersionIndex: index }),
 
@@ -374,6 +382,40 @@ export const useStore = create<AppState>()(
         });
     },
 
+    addRuleRow: (versionIndex: number) => {
+        const state = get();
+        const currentData = state.versionedData[versionIndex];
+        if (!currentData) return;
+
+        const newRule: RuleData = {
+            id: '',
+            category: 'MAB',
+            subsystemViolations: {}
+        };
+        const newList = [...(currentData.rulesList || []), newRule];
+        get().updateVersionData(versionIndex, { rulesList: newList });
+    },
+
+    deleteRuleRow: (versionIndex: number, ruleIndex: number) => {
+        const state = get();
+        const currentData = state.versionedData[versionIndex];
+        if (!currentData) return;
+
+        const newList = [...(currentData.rulesList || [])];
+        newList.splice(ruleIndex, 1);
+        get().updateVersionData(versionIndex, { rulesList: newList });
+    },
+
+    updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => {
+        const state = get();
+        const currentData = state.versionedData[versionIndex];
+        if (!currentData || !currentData.rulesList) return;
+
+        const newList = [...currentData.rulesList];
+        newList[ruleIndex] = { ...newList[ruleIndex], ...ruleData };
+        get().updateVersionData(versionIndex, { rulesList: newList });
+    },
+
     createNewVersion: (versionName: string) => {
         if (!versionName.trim()) return;
         set((state) => {
@@ -387,10 +429,10 @@ export const useStore = create<AppState>()(
                     [newIndex]: { 
                         ...emptyVersionData,
                         subsystemsList: getInitialSubsystems(),
-                        rulesList: getInitialRules()
+                        rulesList: [] // Start with empty for dynamic management
                     }
                 },
-                currentVersionIndex: newIndex // Auto-switch to newly created version
+                currentVersionIndex: newIndex
             };
             
             get().syncToDB({ ...state, ...newState });

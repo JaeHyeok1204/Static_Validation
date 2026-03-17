@@ -10,6 +10,11 @@ export default function DataEditorPage() {
     const versionedData = useStore((state) => state.versionedData);
     const updateVersionData = useStore((state) => state.updateVersionData);
     const createNewVersion = useStore((state) => state.createNewVersion);
+    const addRuleRow = useStore((state) => state.addRuleRow);
+    const deleteRuleRow = useStore((state) => state.deleteRuleRow);
+    const updateRuleRow = useStore((state) => state.updateRuleRow);
+    const INITIAL_MAB_RULE_IDS = useStore((state) => state.INITIAL_MAB_RULE_IDS);
+    const INITIAL_MISRA_RULE_IDS = useStore((state) => state.INITIAL_MISRA_RULE_IDS);
 
     const data = versionedData[currentVersionIndex];
     const [newVersionStr, setNewVersionStr] = useState("");
@@ -126,7 +131,7 @@ export default function DataEditorPage() {
                     <div className="flex gap-3">
                         <input 
                             type="text" 
-                            className="flex-1 border border-[var(--border-color)] bg-[var(--bg-color)] rounded-lg p-2.5 text-sm text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]" 
+                            className="flex-1 border border-[var(--border-color)] bg-white rounded-lg p-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]" 
                             placeholder="예: T0050, T0060..."
                             value={newVersionStr}
                             onChange={(e) => setNewVersionStr(e.target.value)}
@@ -160,7 +165,7 @@ export default function DataEditorPage() {
                                 type="date" 
                                 value={data.dashboardData?.startDate || ""} 
                                 onChange={(e) => handleChangeDashboard('startDate', e.target.value)}
-                                className="w-full border p-2 rounded-lg text-sm bg-[var(--bg-color)] text-[var(--text-main)] border-[var(--border-color)]" 
+                                className="w-full border p-2 rounded-lg text-sm bg-white text-black border-[var(--border-color)]" 
                             />
                         </div>
                         <span className="text-[var(--text-muted)] font-bold mt-4">~</span>
@@ -170,7 +175,7 @@ export default function DataEditorPage() {
                                 type="date" 
                                 value={data.dashboardData?.endDate || ""} 
                                 onChange={(e) => handleChangeDashboard('endDate', e.target.value)}
-                                className="w-full border p-2 rounded-lg text-sm bg-[var(--bg-color)] text-[var(--text-main)] border-[var(--border-color)]" 
+                                className="w-full border p-2 rounded-lg text-sm bg-white text-black border-[var(--border-color)]" 
                             />
                         </div>
                     </div>
@@ -230,13 +235,13 @@ export default function DataEditorPage() {
                                         <tr key={itemId} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
                                             <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
                                             <td className="p-2 w-24">
-                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -300,13 +305,13 @@ export default function DataEditorPage() {
                                         <tr key={itemId} className="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)]">
                                             <td className="p-2 text-center font-bold text-[var(--text-main)] w-16">{subsystemChar}</td>
                                             <td className="p-2 w-24">
-                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                                <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -327,7 +332,7 @@ export default function DataEditorPage() {
                             <label className="flex items-center gap-2 text-xs font-normal">
                                 <span>카테고리:</span>
                                 <select 
-                                    className="border rounded p-1 bg-[var(--bg-color)] text-[var(--text-main)]"
+                                    className="border rounded p-1 bg-white text-black"
                                     value={ruleCategoryFilter}
                                     onChange={(e) => { setRuleCategoryFilter(e.target.value as any); setRulePage(1); }}
                                 >
@@ -340,12 +345,18 @@ export default function DataEditorPage() {
                                 <input 
                                     type="text" 
                                     placeholder="규칙 ID 검색..." 
-                                    className="border rounded p-1 pl-7 text-xs bg-[var(--bg-color)] text-[var(--text-main)] w-48"
+                                    className="border rounded p-1 pl-7 text-xs bg-white text-black w-48"
                                     value={ruleSearch}
                                     onChange={(e) => { setRuleSearch(e.target.value); setRulePage(1); }}
                                 />
-                                <span className="absolute left-2 top-1.5 opacity-50">🔍</span>
+                                <span className="absolute left-2 top-1.5 opacity-50 text-gray-400">🔍</span>
                             </div>
+                            <button 
+                                onClick={() => addRuleRow(currentVersionIndex)}
+                                className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-blue-700 transition-colors"
+                            >
+                                + 규칙 추가
+                            </button>
                         </div>
                     </h2>
 
@@ -353,43 +364,61 @@ export default function DataEditorPage() {
                         <table className="w-full text-left border-collapse border border-[var(--border-color)] text-[10px]">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-32">규칙 ID</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-40">규칙 ID</th>
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">MAB Sub ID</th>
                                     {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                         <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-blue-600">{ss}</th>
                                     ))}
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-16 bg-blue-50">합계</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12 bg-blue-50">합계</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-10">삭제</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginatedRules.map((rule) => {
+                                {paginatedRules.map((rule, displayedIdx) => {
+                                    const realIdx = (rulePage - 1) * rulesPerPage + displayedIdx;
                                     const updateViolation = (ssId: string, val: number) => {
                                         const newViolations = { ...rule.subsystemViolations, [ssId]: val };
-                                        const ruleIdx = data.rulesList.findIndex(r => r.id === rule.id);
-                                        const newList = [...data.rulesList];
-                                        newList[ruleIdx] = { ...rule, subsystemViolations: newViolations };
-                                        updateVersionData(currentVersionIndex, { rulesList: newList });
+                                        updateRuleRow(currentVersionIndex, realIdx, { subsystemViolations: newViolations });
                                     };
-                                    const updateSubId = (val: string) => {
-                                        const ruleIdx = data.rulesList.findIndex(r => r.id === rule.id);
-                                        const newList = [...data.rulesList];
-                                        newList[ruleIdx] = { ...rule, mabSubId: val };
-                                        updateVersionData(currentVersionIndex, { rulesList: newList });
+                                    const updateField = (key: string, val: any) => {
+                                        updateRuleRow(currentVersionIndex, realIdx, { [key]: val });
                                     };
                                     
                                     const total = Object.values(rule.subsystemViolations || {}).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
 
                                     return (
-                                        <tr key={rule.id} className="hover:bg-[var(--hover-bg)] transition-colors">
-                                            <td className="p-2 border border-[var(--border-color)] font-medium sticky left-0 bg-[var(--bg-color)] z-10 truncate max-w-[128px]" title={rule.id}>
-                                                {rule.id}
+                                        <tr key={displayedIdx} className="hover:bg-[var(--hover-bg)] transition-colors">
+                                            <td className="p-1 border border-[var(--border-color)] font-medium sticky left-0 bg-white z-10">
+                                                <div className="flex gap-1 flex-col">
+                                                    <select 
+                                                        value={rule.category}
+                                                        onChange={(e) => updateField('category', e.target.value as any)}
+                                                        className="w-full text-[9px] border rounded bg-slate-50 text-black border-slate-300"
+                                                    >
+                                                        <option value="MAB">MAB</option>
+                                                        <option value="MISRA">MISRA</option>
+                                                    </select>
+                                                    <input 
+                                                        list={rule.category === 'MAB' ? "mab-ids" : "misra-ids"}
+                                                        value={rule.id}
+                                                        onChange={(e) => updateField('id', e.target.value)}
+                                                        className="w-full p-1 border rounded text-black bg-white border-slate-300 text-[10px]"
+                                                        placeholder="ID 입력"
+                                                    />
+                                                    <datalist id="mab-ids">
+                                                        {INITIAL_MAB_RULE_IDS.map(id => <option key={id} value={id} />)}
+                                                    </datalist>
+                                                    <datalist id="misra-ids">
+                                                        {INITIAL_MISRA_RULE_IDS.map(id => <option key={id} value={id} />)}
+                                                    </datalist>
+                                                </div>
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)]">
                                                 {rule.category === 'MAB' ? (
                                                     <input 
                                                         value={rule.mabSubId || ""} 
-                                                        onChange={(e) => updateSubId(e.target.value)}
-                                                        className="w-full p-1 border rounded text-center bg-white dark:bg-gray-800 text-[var(--accent-color)] font-bold text-[10px]"
+                                                        onChange={(e) => updateField('mabSubId', e.target.value)}
+                                                        className="w-full p-1 border rounded text-center bg-white text-blue-600 border-slate-300 font-bold text-[10px]"
                                                         placeholder="Sub ID"
                                                     />
                                                 ) : <div className="text-center text-gray-300">-</div>}
@@ -401,13 +430,22 @@ export default function DataEditorPage() {
                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
                                                         value={rule.subsystemViolations?.[ss] || 0}
                                                         onChange={(e) => updateViolation(ss, Math.max(0, Number(e.target.value)))}
-                                                        className="w-full p-2 text-center bg-white dark:bg-gray-800 border-0 focus:ring-1 focus:ring-blue-400 focus:bg-blue-50 dark:focus:bg-blue-900/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none text-[10px]"
+                                                        className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-blue-400 focus:bg-blue-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none text-[10px]"
                                                         title={`${rule.id} - Subsystem ${ss}`}
                                                     />
                                                 </td>
                                             ))}
-                                            <td className="p-2 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700">
+                                            <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700 text-[10px]">
                                                 {total}
+                                            </td>
+                                            <td className="p-1 border border-[var(--border-color)] text-center">
+                                                <button 
+                                                    onClick={() => deleteRuleRow(currentVersionIndex, realIdx)}
+                                                    className="w-6 h-6 flex items-center justify-center text-red-500 hover:bg-red-50 rounded"
+                                                    title="행 삭제"
+                                                >
+                                                    🗑️
+                                                </button>
                                             </td>
                                         </tr>
                                     );
@@ -476,8 +514,8 @@ export default function DataEditorPage() {
                                         return (
                                             <tr key={subsystemChar} className="border-b border-[var(--border-color)]">
                                                 <td className="p-1 text-center font-bold text-[var(--accent-color)]">{subsystemChar}</td>
-                                                <td className="p-1"><input value={compItem.owner} onChange={(e) => updateComp('owner', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)]" placeholder="담당자" /></td>
-                                                <td className="p-1"><input value={compItem.currentTime} onChange={(e) => updateComp('currentTime', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)]" placeholder="예: 4.2h" /></td>
+                                                <td className="p-1"><input value={compItem.owner} onChange={(e) => updateComp('owner', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="담당자" /></td>
+                                                <td className="p-1"><input value={compItem.currentTime} onChange={(e) => updateComp('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
                                                 <td className="p-1"><input readOnly value={autoPrevTime} className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold" /></td>
                                             </tr>
                                         );
@@ -517,8 +555,8 @@ export default function DataEditorPage() {
                                         return (
                                             <tr key={subsystemChar} className="border-b border-[var(--border-color)]">
                                                 <td className="p-1 text-center font-bold text-[var(--accent-color)]">{subsystemChar}</td>
-                                                <td className="p-1"><input value={runnItem.owner} onChange={(e) => updateRunn('owner', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)] text-[var(--text-main)]" placeholder="담당자" /></td>
-                                                <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)] text-[var(--text-main)]" placeholder="예: 4.2h" /></td>
+                                                <td className="p-1"><input value={runnItem.owner} onChange={(e) => updateRunn('owner', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="담당자" /></td>
+                                                <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-white text-black border-slate-300" placeholder="예: 4.2h" /></td>
                                                 <td className="p-1"><div className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold text-center">{autoPrevTime}</div></td>
                                             </tr>
                                         );
