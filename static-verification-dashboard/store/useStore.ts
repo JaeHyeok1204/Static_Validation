@@ -211,8 +211,9 @@ export const useStore = create<AppState>()(
                     const refreshedUser = mappedUsers.find(u => u.id === state.currentUser?.id);
                     if (refreshedUser) {
                         stateUpdates.currentUser = refreshedUser;
-                        // Synchronize the global API key if the user has one stored in DB
-                        if (refreshedUser.geminiApiKey) {
+                        // ONLY synchronize if the DB actually has a non-empty key.
+                        // This prevents missing columns or empty DB fields from wiping out local persistence.
+                        if (refreshedUser.geminiApiKey && refreshedUser.geminiApiKey.trim() !== "") {
                             stateUpdates.geminiApiKey = refreshedUser.geminiApiKey;
                         }
                     }
