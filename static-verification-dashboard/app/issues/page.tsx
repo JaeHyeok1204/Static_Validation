@@ -4,19 +4,6 @@ import PageHeader from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
 
 // Mock AI recommendation generataion
-const generateAIRecommendation = (title: string, type: string) => {
-    if (!title) return "이슈 제목을 입력하시면 AI가 해결 방안을 추천해 드립니다.";
-    if (type.includes("System") || type.includes("시스템")) {
-        return "Gemini ✨: 시스템 연동 혹은 리소스 할당량이 초과되었을 가능성이 있습니다. 타임아웃 설정을 20% 늘리거나 서버 로그를 먼저 확인하세요.";
-    }
-    if (type.includes("Logic") || type.includes("로직")) {
-        return "Gemini ✨: 조건문 처리 누락 혹은 분기 결함일 가능성이 높습니다. Coverage 테스트 리포트를 확인하고 Edge Case(경계값) 검증 로직을 추가하세요.";
-    }
-    if (type.includes("Performance") || type.includes("성능")) {
-        return "Gemini ✨: 메모리 누수 혹은 비효율적인 루프가 원인일 수 있습니다. Profiler를 통해 병목 구간을 탐색하고 캐싱 레이어 도입을 고려하세요.";
-    }
-    return `Gemini ✨: '${title}' 이슈 수정을 위해 최신 코드베이스의 변경 이력을 살펴보고 관련 담당자와 리뷰를 진행하는 것을 권장합니다.`;
-};
 
 export default function IssuesPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
@@ -55,8 +42,8 @@ export default function IssuesPage() {
                     <div className="grid grid-cols-1 gap-4">
                         {issues.map((issue: import('../../store/useStore').IssueData, idx: number) => (
                             <div key={issue.id} className="bg-[var(--hover-bg)] p-4 rounded-xl border border-[var(--border-color)] flex flex-col gap-3 transition-colors hover:border-[var(--accent-color)]">
-                                <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-                                    <div className="flex items-center gap-2">
+                                <div className="flex flex-wrap lg:flex-nowrap gap-3 items-start lg:items-center">
+                                    <div className="flex items-center gap-2 shrink-0">
                                         <input 
                                             type="checkbox" 
                                             checked={issue.resolved} 
@@ -98,17 +85,17 @@ export default function IssuesPage() {
                                         className="container flex-1 border border-[var(--border-color)] p-2 rounded-lg text-sm bg-[var(--bg-color)] text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] min-h-[60px] resize-y" 
                                     />
                                 </div>
-                                <div className="bg-[#1e293b] border border-[#334155] p-4 rounded-xl text-sm mt-1 flex flex-col md:flex-row gap-3 items-start shadow-md">
+                                <div className="bg-[#1e293b] border border-[#334155] p-4 rounded-xl text-sm mt-1 flex flex-col sm:flex-row gap-3 items-start shadow-md transition-all">
                                     <div className="flex gap-2 items-start flex-1 text-white">
-                                        <span className="text-xl">🤖</span>
-                                        <div className="pt-0.5">
+                                        <span className="text-xl shrink-0">🤖</span>
+                                        <div className="pt-0.5 break-words w-full">
                                             <span className="font-bold text-[#38bdf8]">AI 해결 제안: </span>
-                                            {issue.aiRecommendation || generateAIRecommendation(issue.title, issue.type)}
+                                            {issue.aiRecommendation || "이슈 정보를 입력하고 우측의 분석 버튼을 눌러주세요."}
                                         </div>
                                     </div>
                                     <button 
                                         onClick={() => runIssueAIAnalysis(issue.id)}
-                                        className="shrink-0 bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm"
+                                        className="shrink-0 w-full sm:w-auto bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm active:scale-95"
                                     >
                                         ✨ AI 분석/갱신
                                     </button>
