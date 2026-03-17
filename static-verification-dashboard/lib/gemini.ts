@@ -29,31 +29,42 @@ export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string)
     
     if (!finalApiKey) return "ERROR_MISSING_KEY";
 
-    // 1. Dynamic Discovery: Ask the API what models this key can actually use
+    // 1. Dynamic Discovery
     const discovered = await listAvailableModels(finalApiKey);
     let modelsToTry: string[] = [];
+    let discoveryStatus = "성공";
 
-    if (Array.isArray(discovered) && discovered.length > 0) {
-        // Filter for models likely to support generateContent
-        modelsToTry = discovered.filter(name => 
-            name.includes("flash") || name.includes("pro") || name.includes("gemini")
-        );
-    } 
+    if (Array.isArray(discovered)) {
+        if (discovered.length > 0) {
+            modelsToTry = discovered.filter(name => 
+                name.includes("flash") || name.includes("pro") || name.includes("gemini")
+            );
+        } else {
+            discoveryStatus = "성공(빈 목록)";
+        }
+    } else {
+        discoveryStatus = `실패 (${discovered})`;
+    }
     
-    // Fallback list if discovery fails or returns nothing
+    // Comprehensive Fallback list if discovery doesn't give us anything useful
     if (modelsToTry.length === 0) {
-        modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"];
+        modelsToTry = [
+            "gemini-1.5-flash", 
+            "gemini-1.5-pro", 
+            "gemini-2.0-flash",
+            "gemini-pro", // Legacy name used in some regions/projects
+            "gemini-1.0-pro"
+        ];
     }
 
     const apiVersions = ["v1beta", "v1"];
     let lastError = "";
     let hadQuotaError = false;
 
-    // 2. Attempt connection with discovered/fallback models
+    // 2. Attempt connection
     for (const modelName of modelsToTry) {
         for (const apiVer of apiVersions) {
             try {
-                console.log(`Gemini Attempt: ${modelName} (${apiVer})`);
                 const client = new GoogleGenerativeAI(finalApiKey);
                 const model = client.getGenerativeModel({ model: modelName }, { apiVersion: apiVer } as any);
                 
@@ -67,7 +78,6 @@ export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string)
                 }
             } catch (error: any) {
                 lastError = error?.message || "알 수 없는 오류";
-                // If quota error, we stop and report it (trying other models usually doesn't help if it's a global quota)
                 if (lastError.includes("429") || lastError.toLowerCase().includes("quota")) {
                     hadQuotaError = true;
                     continue; 
@@ -75,24 +85,28 @@ export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string)
                 if (lastError.includes("404") || lastError.toLowerCase().includes("not found")) {
                     continue;
                 }
-                if (lastError.includes("401") || lastError.includes("leaked") || lastError.includes("API key not valid")) {
-                    return `API 키가 유효하지 않습니다. (${lastError})`;
+                // Stop for auth/permission errors
+                if (lastError.includes("401") || lastError.includes("API key not valid") || lastError.includes("403")) {
+                    return `API 보안/권한 이슈: ${lastError}`;
                 }
             }
         }
     }
     
     if (hadQuotaError) {
-        return `AI 할당량 초과 (429). 잠시 후 다시 시도하거나 다른 키를 사용해 주세요.`;
+        return `AI 할당량 초과 (429). 다른 키를 사용하거나 나중에 다시 시도해 주세요.`;
     }
 
-    // Detailed 404 error
+    // Detailed 404 report
     if (lastError.includes("404")) {
-        return `AI 모델을 찾을 수 없습니다 (404). 
-        \n[검색된 모델]: ${modelsToTry.join(", ") || "없음"}
-        \nAPI 서버가 해당 모델들을 인식하지 못하고 있습니다. 
-        \n계정의 '지역 제한' 또는 '결제 계정 연결' 상태를 확인해 주세요.`;
+        return `AI 모델 접속 실패 (404). 
+        \n- 진단 상태: ${discoveryStatus}
+        \n- 시도 모델: ${modelsToTry.join(", ")}
+        \n
+        \n[해결 방법]:
+        \n1. Google AI Studio(aistudio.google.com)에서 'Get API Key'를 통해 생성한 키인지 확인해 주세요.
+        \n2. 클라우드 콘솔의 API 활성화 후 실제 반영까지 5~10분 정도 소요될 수 있습니다.`;
     }
     
-    return `AI 분석 중 오류가 발생했습니다. (${lastError})`;
+    return `AI 분석 중 오류 발생: ${lastError}`;
 };
