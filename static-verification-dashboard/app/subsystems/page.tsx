@@ -7,9 +7,7 @@ import { useStore } from "@/store/useStore";
 export default function SubsystemsPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
     const versionedData = useStore((state) => state.versionedData);
-    const data = versionedData[currentVersionIndex];
-
-    if (!data) return null;
+    const data = versionedData[currentVersionIndex] || { subsystemsList: [] };
 
     return (
         <div className="h-full flex flex-col">

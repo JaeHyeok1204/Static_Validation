@@ -11,9 +11,7 @@ export default function IssuesPage() {
     const updateVersionData = useStore((state) => state.updateVersionData);
     const runIssueAIAnalysis = useStore((state) => state.runIssueAIAnalysis);
     
-    const data = versionedData[currentVersionIndex];
-    if (!data) return null;
-
+    const data = versionedData[currentVersionIndex] || { issuesList: [] };
     const issues = data.issuesList || [];
 
     const updateIssuesList = (newList: import('../../store/useStore').IssueData[]) => {

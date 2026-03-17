@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 export default function ReportsPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
     const versionedData = useStore((state) => state.versionedData);
-    const data = versionedData[currentVersionIndex];
+    const data = versionedData[currentVersionIndex] || { reportsDraft: { team: "내용 없음", customer: "내용 없음" } };
     
     const [isGenerating, setIsGenerating] = useState(false);
     const [draftTeam, setDraftTeam] = useState("");
@@ -42,8 +42,6 @@ export default function ReportsPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
-
-    if (!data) return null;
 
     return (
         <div className="h-full flex flex-col">

@@ -98,6 +98,27 @@ export interface VersionData {
     [key: string]: unknown;
 }
 
+export const emptyVersionData: VersionData = {
+    dashboardData: {
+        overallProgress: "0%",
+        violationInspectionComponent: "0",
+        violationInspectionRunnable: "0",
+        violationAnalysisComponent: "0",
+        violationAnalysisRunnable: "0",
+        newRuleViolationsCount: 0,
+        expectedSchedule: "데이터 없음",
+        aiSummary: "분석할 데이터가 없습니다.",
+    },
+    chartData: [],
+    subsystemsList: [],
+    rulesList: [],
+    issuesList: [],
+    risksList: [],
+    timeEvaluationComponent: [],
+    timeEvaluationRunnable: [],
+    reportsDraft: { team: "내용 없음", customer: "내용 없음" }
+};
+
 interface AppState {
     theme: ThemeType;
     projectName: string;
@@ -116,7 +137,7 @@ interface AppState {
 
     // V7 Data Editor Actions
     updateVersionData: (versionIndex: number, partialData: Partial<VersionData>) => void;
-    createNewVersion: (versionStr: string) => void;
+    createNewVersion: (versionName: string) => void;
     login: (user: User) => void;
     logout: () => void;
     register: (user: User) => void;
@@ -308,41 +329,17 @@ export const useStore = create<AppState>()(
         });
     },
 
-    createNewVersion: (versionStr: string) => {
-        if (!versionStr.trim()) return;
+    createNewVersion: (versionName: string) => {
+        if (!versionName.trim()) return;
         set((state) => {
             const newIndex = state.versions.length;
-            const newVersions = [...state.versions, versionStr];
+            const newVersions = [...state.versions, versionName];
             
-            // Blanket default template based on T0040 shape but reset
-            const defaultEmptyData = {
-                dashboardData: {
-                    startDate: "",
-                    endDate: "",
-                    overallProgress: "0%",
-                    violationInspectionComponent: "0%",
-                    violationInspectionRunnable: "0%",
-                    violationAnalysisComponent: "0%",
-                    violationAnalysisRunnable: "0%",
-                    newRuleViolationsCount: 0,
-                    expectedSchedule: "분석 전",
-                    aiSummary: "신규 발급된 버전입니다. 데이터 입력을 진행해주세요.",
-                },
-                chartData: [],
-                subsystemsList: [],
-                rulesList: [],
-                issuesList: [],
-                risksList: [],
-                timeEvaluationComponent: [],
-                timeEvaluationRunnable: [],
-                reportsDraft: { team: "", customer: "" }
-            };
-
             const newState = {
                 versions: newVersions,
                 versionedData: {
                     ...state.versionedData,
-                    [newIndex]: defaultEmptyData
+                    [newIndex]: { ...emptyVersionData }
                 },
                 currentVersionIndex: newIndex // Auto-switch to newly created version
             };

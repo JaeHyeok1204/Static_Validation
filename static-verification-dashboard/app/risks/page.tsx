@@ -8,17 +8,15 @@ import { AlertTriangle, Zap } from "lucide-react"; // Added icon imports
 export default function RisksPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
     const versions = useStore((state) => state.versions); // Added versions
-    const data = useStore((state) => state.versionedData[currentVersionIndex]);
-    const runAIRiskAnalysis = useStore((state) => state.runAIRiskAnalysis); // Added runAIRiskAnalysis
-    const [isAnalyzing, setIsAnalyzing] = useState(false); // Added isAnalyzing state
+    const runAIRiskAnalysis = useStore((state) => state.runAIRiskAnalysis);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const data = useStore((state) => state.versionedData[currentVersionIndex]) || { risksList: [] };
 
     const handleRunAI = async () => {
         setIsAnalyzing(true);
         await runAIRiskAnalysis();
         setIsAnalyzing(false);
     };
-
-    if (!data) return null;
 
     return (
         <div className="h-full flex flex-col">
