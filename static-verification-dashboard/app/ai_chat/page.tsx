@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Send, Bot, User, Database, Lightbulb, FileText, Cpu, ChevronRight } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { analyzeDataWithAI } from "@/lib/gemini";
 
 interface Message {
     id: string;
@@ -36,31 +37,41 @@ export default function AiChatPage() {
         scrollToBottom();
     }, [messages, isTyping]);
 
-    const handleSend = () => {
-        if (!input.trim()) return;
+    const handleSend = async (manualInput?: string) => {
+        const textToSend = manualInput || input;
+        if (!textToSend.trim()) return;
 
+        const userQuery = textToSend.trim();
         const newUserMsg: Message = {
             id: Date.now().toString(),
             role: "user",
-            content: input.trim(),
+            content: userQuery,
             timestamp: new Date()
         };
 
         setMessages(prev => [...prev, newUserMsg]);
-        setInput("");
+        if (!manualInput) setInput("");
         setIsTyping(true);
 
-        // Simulate AI thinking
-        setTimeout(() => {
-            let aiResponse = "기본적인 답변입니다. 질문하신 사항을 분석 중입니다.";
+        try {
+            // Get current project context for better AI answers
+            const state = useStore.getState();
+            const currentData = state.versionedData[state.currentVersionIndex];
             
-            if (newUserMsg.content.includes("학습") || newUserMsg.content.includes("데이터")) {
-                aiResponse = "데이터 로그를 수집 및 학습했습니다. 앞으로 유사한 위배 사항이 발견될 시 사전에 제안해드릴 수 있도록 모델을 개선했습니다.";
-            } else if (newUserMsg.content.includes("피드백") || newUserMsg.content.includes("리뷰")) {
-                aiResponse = "현재까지 입력된 서브시스템들의 결과를 종합해보면, 특정 Component에서 병목이 발생하고 있습니다. 다음 검증 배포 시 최적화 코드를 추가하는 것을 권장합니다.";
-            } else if (newUserMsg.content.includes("보고서") || !!newUserMsg.content.includes("요약")) {
-                aiResponse = "현재 데이터 모음을 기반으로 요약 보고서를 추출했습니다. AI 보고서 초안 관리 탭을 참고해 주세요.";
-            }
+            const contextPrompt = `
+                너는 '정적검증 업무 관리 시스템'의 전문 AI 어시스턴트야.
+                사용자가 질문을 하거나 업무 지시를 내리면, 아래의 현재 프로젝트 데이터를 참고해서 전문적이고 친절하게 답변해줘.
+                
+                [현재 프로젝트 정보]
+                - 현재 버전: ${state.versions[state.currentVersionIndex]}
+                - 전체 진척도: ${currentData?.dashboardData.overallProgress}
+                - 일정 상태: ${currentData?.dashboardData.expectedSchedule}
+                - 검출된 이슈: ${currentData?.issuesList.length}개
+                
+                사용자 질문: "${userQuery}"
+            `;
+
+            const aiResponse = await analyzeDataWithAI(contextPrompt);
 
             const newAiMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -70,8 +81,11 @@ export default function AiChatPage() {
             };
 
             setMessages(prev => [...prev, newAiMsg]);
+        } catch (error) {
+            console.error("Chat AI Error:", error);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     const handleActionClick = (actionName: string) => {
@@ -106,7 +120,10 @@ export default function AiChatPage() {
                                 {quickActions.map((action, idx) => (
                                     <button 
                                         key={idx}
-                                        onClick={() => { setInput(action.query); }}
+                                        onClick={() => { 
+                                            setInput(action.query);
+                                            handleSend(action.query);
+                                        }}
                                         className="text-left bg-[var(--bg-color)] hover:bg-[var(--hover-bg)] border border-[var(--border-color)] rounded-xl p-5 shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
                                     >
                                         <div className="mb-3 bg-[var(--badge-bg)] w-10 h-10 rounded-lg flex items-center justify-center">
@@ -189,7 +206,7 @@ export default function AiChatPage() {
                             rows={1}
                         />
                         <button
-                            onClick={handleSend}
+                            onClick={() => handleSend()}
                             disabled={!input.trim() || isTyping}
                             className={`absolute right-2 p-2.5 rounded-xl flex items-center justify-center transition-all ${
                                 input.trim() && !isTyping 
