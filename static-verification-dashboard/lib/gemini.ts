@@ -38,12 +38,18 @@ export const analyzeDataWithAI = async (prompt: string) => {
             lastError = error?.message || "알 수 없는 오류";
             console.error(`Gemini Error with ${modelName}:`, lastError);
             
-            // If it's a 404, we continue to the next model
-            if (lastError.includes("404") || lastError.toLowerCase().includes("not found")) {
+            // If it's a 404 (Not Found) or 429 (Quota Exceeded), we continue to the next model
+            if (
+                lastError.includes("404") || 
+                lastError.toLowerCase().includes("not found") || 
+                lastError.includes("429") || 
+                lastError.toLowerCase().includes("quota")
+            ) {
+                console.log(`Skipping ${modelName} due to availability/quota and trying next...`);
                 continue;
             }
             
-            // If it's a 403 (Location/Permission), 429 (Quota), or 401 (Auth), stop and tell the user
+            // If it's a 403 (Location/Permission) or 401 (Auth), stop and tell the user
             break;
         }
     }
