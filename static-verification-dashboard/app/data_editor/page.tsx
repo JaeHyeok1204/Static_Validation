@@ -15,6 +15,7 @@ export default function DataEditorPage() {
     const updateRuleRow = useStore((state) => state.updateRuleRow);
     const INITIAL_MAB_RULE_IDS = useStore((state) => state.INITIAL_MAB_RULE_IDS);
     const INITIAL_MISRA_RULE_IDS = useStore((state) => state.INITIAL_MISRA_RULE_IDS);
+    const currentUser = useStore((state) => state.currentUser);
 
     const data = versionedData[currentVersionIndex];
     const [newVersionStr, setNewVersionStr] = useState("");
@@ -159,6 +160,65 @@ export default function DataEditorPage() {
                     <p className="text-xs text-[var(--text-muted)] mt-2">* 새로운 버전을 생성하면 빈 템플릿(0%) 상태로 초기화되며 상단 버전 선택기에서 바로 작업 탭으로 전환됩니다.</p>
                 </section>
 
+                {/* 데이터 정합성 검사 (Violation Sync Check) - Moved to top per user request */}
+                {data && (
+                    <section className="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-md my-0">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center gap-2">
+                            🔍 데이터 정합성 검사 (상세 데이터 vs 규칙 매트릭스)
+                            <span className="text-xs font-normal text-slate-500">* 서브시스템별 위배 개수 일치 여부를 실시간으로 대조합니다.</span>
+                        </h2>
+
+                        <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
+                            {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => {
+                                const comp = data.subsystemsList.find(s => s.id === ss && s.category === 'Component')?.newDetectedViolations || 0;
+                                const runn = data.subsystemsList.find(s => s.id === ss && s.category === 'Runnable')?.newDetectedViolations || 0;
+                                const totalDetail = comp + runn;
+
+                                const totalMatrix = (data.rulesList || [])
+                                    .filter(r => r.id.trim() !== '')
+                                    .reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.[ss]) || 0), 0);
+
+                                const isMatch = totalDetail === totalMatrix;
+                                const diff = totalMatrix - totalDetail;
+
+                                return (
+                                    <div key={ss} className={`p-3 rounded-xl border-2 transition-all ${isMatch ? 'border-emerald-100 bg-emerald-50/50' : 'border-red-100 bg-red-50/50 shadow-inner'}`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className={`text-sm font-black w-6 h-6 flex items-center justify-center rounded-lg ${isMatch ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+                                                {ss}
+                                            </span>
+                                            {isMatch ? (
+                                                <span className="text-emerald-600 text-[10px] font-bold">✅ 일치</span>
+                                            ) : (
+                                                <span className="text-red-600 text-[10px] font-bold animate-pulse">❌ 불일치</span>
+                                            )}
+                                        </div>
+                                        <div className="space-y-1 text-center">
+                                            <div className="text-[10px] text-slate-500 leading-tight">상세: <span className="font-bold text-slate-700">{totalDetail}</span></div>
+                                            <div className="text-[10px] text-slate-500 leading-tight">규칙: <span className="font-bold text-slate-700">{totalMatrix}</span></div>
+                                            {!isMatch && (
+                                                <div className="text-[10px] font-black text-red-600 border-t border-red-200 mt-1 pt-1">
+                                                    {diff > 0 ? `+${diff}` : diff}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {!['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].every(ss => {
+                            const comp = data.subsystemsList.find(s => s.id === ss && s.category === 'Component')?.newDetectedViolations || 0;
+                            const runn = data.subsystemsList.find(s => s.id === ss && s.category === 'Runnable')?.newDetectedViolations || 0;
+                            const totalMatrix = (data.rulesList || []).filter(r => r.id.trim() !== '').reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.[ss]) || 0), 0);
+                            return (comp + runn) === totalMatrix;
+                        }) && (
+                            <p className="text-[10px] text-red-500 mt-4 font-bold text-center">
+                                ⚠️ 주의: 상단 상세 데이터의 '신규 검출 위배' 합계와 하단 '규칙 ID별 서브시스템 위배' 합계가 다른 서브시스템이 있습니다. 데이터를 확인해 주세요.
+                            </p>
+                        )}
+                    </section>
+                )}
+
                 {data ? (
                     <>
                         <div className="text-sm font-bold text-[var(--accent-color)] mb-2 mt-4">
@@ -220,7 +280,7 @@ export default function DataEditorPage() {
                                     const categoryType = 'Component';
                                     const itemId = `${subsystemChar}-${categoryType}`;
                                     const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType) || {
-                                        id: subsystemChar, category: categoryType, owner: "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
+                                        id: subsystemChar, category: categoryType, owner: currentUser?.name || "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
                                     };
 
                                     const updateSubsystem = (key: string, val: string | number) => {
@@ -290,7 +350,7 @@ export default function DataEditorPage() {
                                     const categoryType = 'Runnable';
                                     const itemId = `${subsystemChar}-${categoryType}`;
                                     const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType) || {
-                                        id: subsystemChar, category: categoryType, owner: "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
+                                        id: subsystemChar, category: categoryType, owner: currentUser?.name || "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
                                     };
 
                                     const updateSubsystem = (key: string, val: string | number) => {
@@ -478,62 +538,6 @@ export default function DataEditorPage() {
                     </div>
                 </section>
 
-                {/* 5. 데이터 정합성 검사 (Violation Sync Check) */}
-                <section className="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-md my-6">
-                    <h2 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 flex items-center gap-2">
-                        🔍 6. 데이터 정합성 검사 (상세 데이터 vs 규칙 매트릭스)
-                        <span className="text-xs font-normal text-slate-500">* 서브시스템별 위배 개수 일치 여부를 실시간으로 대조합니다.</span>
-                    </h2>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
-                        {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => {
-                            const comp = data.subsystemsList.find(s => s.id === ss && s.category === 'Component')?.newDetectedViolations || 0;
-                            const runn = data.subsystemsList.find(s => s.id === ss && s.category === 'Runnable')?.newDetectedViolations || 0;
-                            const totalDetail = comp + runn;
-
-                            const totalMatrix = (data.rulesList || [])
-                                .filter(r => r.id.trim() !== '')
-                                .reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.[ss]) || 0), 0);
-
-                            const isMatch = totalDetail === totalMatrix;
-                            const diff = totalMatrix - totalDetail;
-
-                            return (
-                                <div key={ss} className={`p-3 rounded-xl border-2 transition-all ${isMatch ? 'border-emerald-100 bg-emerald-50/50' : 'border-red-100 bg-red-50/50 shadow-inner'}`}>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className={`text-sm font-black w-6 h-6 flex items-center justify-center rounded-lg ${isMatch ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
-                                            {ss}
-                                        </span>
-                                        {isMatch ? (
-                                            <span className="text-emerald-600 text-[10px] font-bold">✅ 일치</span>
-                                        ) : (
-                                            <span className="text-red-600 text-[10px] font-bold animate-pulse">❌ 불일치</span>
-                                        )}
-                                    </div>
-                                    <div className="space-y-1 text-center">
-                                        <div className="text-[10px] text-slate-500 leading-tight">상세: <span className="font-bold text-slate-700">{totalDetail}</span></div>
-                                        <div className="text-[10px] text-slate-500 leading-tight">규칙: <span className="font-bold text-slate-700">{totalMatrix}</span></div>
-                                        {!isMatch && (
-                                            <div className="text-[10px] font-black text-red-600 border-t border-red-200 mt-1 pt-1">
-                                                {diff > 0 ? `+${diff}` : diff}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    {!['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].every(ss => {
-                        const comp = data.subsystemsList.find(s => s.id === ss && s.category === 'Component')?.newDetectedViolations || 0;
-                        const runn = data.subsystemsList.find(s => s.id === ss && s.category === 'Runnable')?.newDetectedViolations || 0;
-                        const totalMatrix = (data.rulesList || []).filter(r => r.id.trim() !== '').reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.[ss]) || 0), 0);
-                        return (comp + runn) === totalMatrix;
-                    }) && (
-                        <p className="text-[10px] text-red-500 mt-4 font-bold text-center">
-                            ⚠️ 주의: 상단 상세 데이터의 '신규 검출 위배' 합계와 하단 '규칙 ID별 서브시스템 위배' 합계가 다른 서브시스템이 있습니다. 데이터를 확인해 주세요.
-                        </p>
-                    )}
-                </section>
 
                 {/* 4. 정적검증 소요시간 평가 */}
                 <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm overflow-x-auto">
@@ -562,7 +566,7 @@ export default function DataEditorPage() {
                                         const autoPrevTime = prevCompItem ? prevCompItem.currentTime : "0h";
 
                                         const compItem = data.timeEvaluationComponent.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar) || {
-                                            subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
+                                            subsystem: subsystemChar, owner: currentUser?.name || "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateComp = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationComponent];
@@ -603,7 +607,7 @@ export default function DataEditorPage() {
                                         const autoPrevTime = prevRunnItem ? prevRunnItem.currentTime : "0h";
 
                                         const runnItem = data.timeEvaluationRunnable.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar) || {
-                                            subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
+                                            subsystem: subsystemChar, owner: currentUser?.name || "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateRunn = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationRunnable];
