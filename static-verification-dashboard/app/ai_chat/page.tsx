@@ -71,7 +71,18 @@ export default function AiChatPage() {
                 사용자 질문: "${userQuery}"
             `;
 
-            const aiResponse = await analyzeDataWithAI(contextPrompt);
+            const aiResponse = await analyzeDataWithAI(contextPrompt, state.geminiApiKey);
+
+            if (aiResponse === "ERROR_MISSING_KEY") {
+                const errorMsg: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: "ai",
+                    content: "AI API 키가 설정되지 않았습니다. 상단의 'AI 설정' 버튼을 눌러 키를 입력해 주세요.",
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, errorMsg]);
+                return;
+            }
 
             const newAiMsg: Message = {
                 id: (Date.now() + 1).toString(),

@@ -2,12 +2,19 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Use hardcoded key for the static build if env is missing in CI, 
 // but try to use env first for local development.
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(API_KEY);
+const API_KEY_ENV = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+const genAI = new GoogleGenerativeAI(API_KEY_ENV);
 
-export const getGeminiModel = () => genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string) => {
+    // Priority: 1. User provided override (from UI), 2. Environment variable
+    const finalApiKey = overrideApiKey || API_KEY_ENV;
+    
+    if (!finalApiKey) {
+        return "ERROR_MISSING_KEY";
+    }
 
-export const analyzeDataWithAI = async (prompt: string) => {
+    const client = new GoogleGenerativeAI(finalApiKey);
+    
     // Prioritize 1.5 models as they have more stable free quotas
     const modelsToTry = [
         "gemini-1.5-flash-latest",
@@ -24,7 +31,7 @@ export const analyzeDataWithAI = async (prompt: string) => {
     for (const modelName of modelsToTry) {
         try {
             console.log(`Gemini API Attempt: ${modelName}`);
-            const model = genAI.getGenerativeModel({ model: modelName });
+            const model = client.getGenerativeModel({ model: modelName });
             
             // Simple prompt execution
             const result = await model.generateContent(prompt);

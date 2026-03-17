@@ -79,7 +79,30 @@ export default function SettingPage() {
                         </div>
                     </section>
 
-                    {/* 2. 구글 시트 및 연동 (Mockup) */}
+                    {/* 2. AI 서비스 설정 (NEW) */}
+                    <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
+                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex items-center gap-2">
+                           <span className="text-xl">🤖</span> AI 서비스 설정 (Gemini)
+                        </h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-[var(--text-main)] mb-2">Gemini API Key</label>
+                                <div className="flex flex-col gap-2">
+                                    <input 
+                                        type="password"
+                                        value={useStore(s => s.geminiApiKey)}
+                                        onChange={(e) => useStore.getState().setGeminiApiKey(e.target.value)}
+                                        placeholder="AIzaSy..."
+                                        className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent-color)] outline-none transition-all"
+                                    />
+                                    <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
+                                        * 이 키는 브라우저 로컬 저장소에만 안전하게 저장되며, 소스 코드나 외부 서버로 전송되지 않습니다. <br/>
+                                        * 키가 없으면 대시보드 요약 및 AI 채팅 기능이 작동하지 않습니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                     <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
                         <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex items-center justify-between">데이터 동기화 설정 (Export)</h2>
                         <div className="space-y-4">

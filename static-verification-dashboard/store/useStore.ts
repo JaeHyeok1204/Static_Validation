@@ -124,6 +124,8 @@ interface AppState {
     syncToDB: (stateToSync?: Partial<AppState>) => Promise<void>;
 
     // Real AI Actions
+    geminiApiKey: string;
+    setGeminiApiKey: (key: string) => void;
     runAIAnalysis: () => Promise<void>;
     runAIRiskAnalysis: () => Promise<void>;
 }
@@ -323,6 +325,9 @@ export const useStore = create<AppState>()(
         });
     },
 
+    geminiApiKey: '',
+    setGeminiApiKey: (key: string) => set({ geminiApiKey: key }),
+
     runAIAnalysis: async () => {
         const state = get();
         const currentData = state.versionedData[state.currentVersionIndex];
@@ -342,7 +347,18 @@ export const useStore = create<AppState>()(
             분석을 시작해줘.
         `;
 
-        const summary = await analyzeDataWithAI(prompt);
+        const summary = await analyzeDataWithAI(prompt, state.geminiApiKey);
+        
+        if (summary === "ERROR_MISSING_KEY") {
+            get().updateVersionData(state.currentVersionIndex, {
+                dashboardData: {
+                    ...currentData.dashboardData,
+                    aiSummary: "AI API 키가 설정되지 않았습니다. 설정에서 키를 입력해 주세요."
+                }
+            });
+            return;
+        }
+
         get().updateVersionData(state.currentVersionIndex, {
             dashboardData: {
                 ...currentData.dashboardData,
@@ -368,7 +384,13 @@ export const useStore = create<AppState>()(
         `;
 
         try {
-            const rawResponse = await analyzeDataWithAI(prompt);
+            const rawResponse = await analyzeDataWithAI(prompt, state.geminiApiKey);
+            
+            if (rawResponse === "ERROR_MISSING_KEY") {
+                console.error("Gemini API Key missing");
+                return;
+            }
+
             // Clean markdown JSON block if exists
             const cleaned = rawResponse.replace(/```json|```/g, "").trim();
             const risks = JSON.parse(cleaned);
