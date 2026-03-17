@@ -20,8 +20,14 @@ export default function SettingPage() {
         }
     };
 
-    const handleSave = () => {
-        alert("설정이 저장되었습니다.");
+    const handleSave = async () => {
+        try {
+            // Force sync general settings to DB if needed
+            await useStore.getState().syncToDB();
+            alert("설정이 안전하게 저장되었습니다. (API 키는 브라우저에 보관됩니다)");
+        } catch (err) {
+            alert("설정 저장 중 오류가 발생했습니다.");
+        }
     };
 
     const handleExport = () => {

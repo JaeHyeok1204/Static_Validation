@@ -411,7 +411,8 @@ export const useStore = create<AppState>()(
           versions: state.versions,
           versionedData: state.versionedData,
           currentUser: state.currentUser,
-          usersList: state.usersList
+          usersList: state.usersList,
+          geminiApiKey: state.geminiApiKey
       }),
   }
 ));
