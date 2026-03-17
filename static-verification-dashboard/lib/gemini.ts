@@ -18,6 +18,9 @@ export const analyzeDataWithAI = async (prompt: string) => {
         "gemini-2.0-pro-exp",
         "gemini-3-flash" // Added as requested, just in case of new release
     ];
+    let lastError = "";
+
+    for (const modelName of modelsToTry) {
         try {
             console.log(`Gemini API Attempt: ${modelName}`);
             // Explicitly try with 'v1beta' as it's the most common for AI Studio keys
