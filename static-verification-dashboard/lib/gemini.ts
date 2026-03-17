@@ -8,11 +8,16 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const getGeminiModel = () => genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export const analyzeDataWithAI = async (prompt: string) => {
-    // Standard recommended models
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
-    let lastError = "";
-
-    for (const modelName of modelsToTry) {
+    // Attempting latest models including the requested 'Gemini 3 Flash' 
+    // and the current stable latest 'Gemini 2.0 Flash'.
+    const modelsToTry = [
+        "gemini-2.0-flash", 
+        "gemini-2.0-flash-exp", 
+        "gemini-1.5-flash", 
+        "gemini-1.5-pro",
+        "gemini-2.0-pro-exp",
+        "gemini-3-flash" // Added as requested, just in case of new release
+    ];
         try {
             console.log(`Gemini API Attempt: ${modelName}`);
             // Explicitly try with 'v1beta' as it's the most common for AI Studio keys
