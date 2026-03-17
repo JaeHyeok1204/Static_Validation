@@ -365,7 +365,7 @@ export default function DataEditorPage() {
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-40">규칙 ID</th>
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">MAB Sub ID</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">Sub ID</th>
                                     {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                         <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-blue-600">{ss}</th>
                                     ))}
@@ -419,7 +419,7 @@ export default function DataEditorPage() {
                                                         value={rule.mabSubId || ""} 
                                                         onChange={(e) => updateField('mabSubId', e.target.value)}
                                                         className="w-full p-1 border rounded text-center bg-white text-blue-600 border-slate-300 font-bold text-[10px]"
-                                                        placeholder="Sub ID"
+                                                        placeholder="Sub ID 입력"
                                                     />
                                                 ) : <div className="text-center text-gray-300">-</div>}
                                             </td>

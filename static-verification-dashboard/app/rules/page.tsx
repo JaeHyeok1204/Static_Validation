@@ -42,7 +42,7 @@ export default function RulesPage() {
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                             <td className="p-4">
                                                 <div className="font-bold text-[var(--accent-color)]">{rule.id}</div>
-                                                {rule.mabSubId && <div className="text-[10px] text-gray-400">Sub: {rule.mabSubId}</div>}
+                                                {rule.mabSubId && <div className="text-[10px] text-gray-400">Sub ID: {rule.mabSubId}</div>}
                                             </td>
                                             <td className="p-4">
                                                 <span className="bg-[var(--badge-bg)] border border-[var(--border-color)] px-2 py-1 rounded text-xs">{rule.category}</span>

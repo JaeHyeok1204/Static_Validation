@@ -110,13 +110,7 @@ export const INITIAL_MISRA_RULE_IDS = [
 const SUBSYSTEM_IDS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
 
 const getInitialRules = (): RuleData[] => {
-    const mabRules = INITIAL_MAB_RULE_IDS.map(id => ({
-        id, category: 'MAB' as const, subsystemViolations: {}
-    }));
-    const misraRules = INITIAL_MISRA_RULE_IDS.map(id => ({
-        id, category: 'MISRA' as const, subsystemViolations: {}
-    }));
-    return [...mabRules, ...misraRules];
+    return [];
 };
 
 const getInitialSubsystems = (): SubsystemData[] => {
@@ -138,7 +132,7 @@ export const emptyVersionData: VersionData = {
     },
     chartData: [],
     subsystemsList: getInitialSubsystems(),
-    rulesList: getInitialRules(),
+    rulesList: [],
     issuesList: [],
     risksList: [],
     timeEvaluationComponent: [],
@@ -389,6 +383,7 @@ export const useStore = create<AppState>()(
 
         const newRule: RuleData = {
             id: '',
+            mabSubId: '',
             category: 'MAB',
             subsystemViolations: {}
         };
