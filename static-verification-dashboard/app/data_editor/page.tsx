@@ -390,25 +390,15 @@ export default function DataEditorPage() {
                                         <tr key={displayedIdx} className="hover:bg-[var(--hover-bg)] transition-colors">
                                             <td className="p-1 border border-[var(--border-color)] font-medium sticky left-0 bg-white z-10">
                                                 <div className="flex gap-1 flex-col">
-                                                    <select 
-                                                        value={rule.category}
-                                                        onChange={(e) => updateField('category', e.target.value as any)}
-                                                        className="w-full text-[9px] border rounded bg-slate-50 text-black border-slate-300"
-                                                    >
-                                                        <option value="MAB">MAB</option>
-                                                        <option value="MISRA">MISRA</option>
-                                                    </select>
                                                     <input 
-                                                        list={rule.category === 'MAB' ? "mab-ids" : "misra-ids"}
+                                                        list="rule-ids"
                                                         value={rule.id}
                                                         onChange={(e) => updateField('id', e.target.value)}
                                                         className="w-full p-1 border rounded text-black bg-white border-slate-300 text-[10px]"
                                                         placeholder="ID 입력"
                                                     />
-                                                    <datalist id="mab-ids">
+                                                    <datalist id="rule-ids">
                                                         {INITIAL_MAB_RULE_IDS.map(id => <option key={id} value={id} />)}
-                                                    </datalist>
-                                                    <datalist id="misra-ids">
                                                         {INITIAL_MISRA_RULE_IDS.map(id => <option key={id} value={id} />)}
                                                     </datalist>
                                                 </div>
