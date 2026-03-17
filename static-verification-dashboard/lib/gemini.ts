@@ -13,8 +13,10 @@ export const analyzeDataWithAI = async (prompt: string) => {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         return response.text();
-    } catch (error) {
-        console.error("Gemini AI Analysis Error:", error);
-        return "AI 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+    } catch (error: any) {
+        console.error("Gemini AI Analysis Detailed Error:", error);
+        // Provide more descriptive error for debugging
+        const errorMessage = error?.message || "알 수 없는 오류";
+        return `AI 분석 중 오류가 발생했습니다. (${errorMessage})`;
     }
 };
