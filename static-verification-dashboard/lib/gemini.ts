@@ -8,32 +8,43 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const getGeminiModel = () => genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export const analyzeDataWithAI = async (prompt: string) => {
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-001", "gemini-1.5-pro", "gemini-1.0-pro"];
-    const apiVersions = ["v1", "v1beta"]; // Try 'v1' first as it might be more stable for 404 errors
+    // Standard recommended models
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
     let lastError = "";
 
     for (const modelName of modelsToTry) {
-        for (const apiVer of apiVersions) {
-            try {
-                console.log(`Trying Gemini model: ${modelName} with API: ${apiVer}`);
-                // In @google/generative-ai, the second argument to getGenerativeModel can specify apiVersion
-                const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: apiVer } as any);
-                const result = await model.generateContent(prompt);
-                const response = await result.response;
-                return response.text();
-            } catch (error: any) {
-                lastError = error?.message || "알 수 없는 오류";
-                console.error(`Gemini Error (${modelName}, ${apiVer}):`, lastError);
-                
-                // If it's a 404-related error, continue to the next version/model
-                if (lastError.includes("404") || lastError.toLowerCase().includes("not found") || lastError.includes("supported")) {
-                    continue;
-                }
-                // For other fatal errors (429, 401, etc.), we stop and return
-                return `AI 분석 중 오류가 발생했습니다. (${lastError})`;
+        try {
+            console.log(`Gemini API Attempt: ${modelName}`);
+            // Explicitly try with 'v1beta' as it's the most common for AI Studio keys
+            const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1beta' });
+            
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }]
+            });
+            
+            const response = await result.response;
+            const text = response.text();
+            
+            if (text) return text;
+        } catch (error: any) {
+            lastError = error?.message || "알 수 없는 오류";
+            console.error(`Gemini Error with ${modelName}:`, lastError);
+            
+            // If it's a 404, we continue to the next model
+            if (lastError.includes("404") || lastError.toLowerCase().includes("not found")) {
+                continue;
             }
+            
+            // If it's a 403 (Location/Permission), 429 (Quota), or 401 (Auth), stop and tell the user
+            break;
         }
     }
     
-    return `AI 분석 중 오류가 발생했습니다. (사용 가능한 모델을 찾을 수 없습니다: ${lastError})`;
+    // If we reached here, it means exhaustion or a fatal error
+    if (lastError.includes("404")) {
+        return `AI 분석 서버 연결 실패 (404: 모델을 찾을 수 없음). 
+        \n사용자님의 API 키가 'Google AI Studio'에서 생성된 것이 맞는지, 그리고 해당 프로젝트에서 'Generative Language API'가 활성화되어 있는지 확인이 필요합니다.`;
+    }
+    
+    return `AI 분석 중 오류가 발생했습니다. (${lastError})`;
 };
