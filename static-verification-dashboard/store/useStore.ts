@@ -230,11 +230,12 @@ export const useStore = create<AppState>()(
   {
       name: 'verification-portal-storage', // name of the item in the storage (must be unique)
       partialize: (state) => ({ 
-          // Specify which parts of the state to persist
           currentVersionIndex: state.currentVersionIndex,
           theme: state.theme,
           versions: state.versions,
-          versionedData: state.versionedData
+          versionedData: state.versionedData,
+          currentUser: state.currentUser,
+          usersList: state.usersList
       }),
   }
 ));
