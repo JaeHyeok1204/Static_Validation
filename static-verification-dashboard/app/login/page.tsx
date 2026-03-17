@@ -26,6 +26,7 @@ export default function LoginPage() {
         const success = await login(id, password);
         
         if (success) {
+            document.cookie = `auth_session=true; path=/; max-age=86400; SameSite=Strict; Secure`;
             router.push("/");
         } else {
             setError("회원 정보가 일치하지 않습니다. 가입 여부나 비밀번호를 확인해주세요.");

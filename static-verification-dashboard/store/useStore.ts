@@ -236,7 +236,10 @@ export const useStore = create<AppState>()(
             return false;
         }
     },
-    logout: () => set({ currentUser: null, geminiApiKey: '' }),
+    logout: () => {
+        document.cookie = "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure";
+        set({ currentUser: null, geminiApiKey: '' });
+    },
     register: async (user: User) => {
         if (!user.password) return;
         
@@ -662,8 +665,7 @@ export const useStore = create<AppState>()(
           versions: state.versions,
           versionedData: state.versionedData,
           currentUser: state.currentUser,
-          usersList: state.usersList,
-          geminiApiKey: state.geminiApiKey
+          // usersList and geminiApiKey are sensitive and should not be persisted in plaintext
       }),
   }
 ));
