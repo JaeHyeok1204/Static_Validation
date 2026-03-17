@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 const API_KEY_ENV = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
 export const listAvailableModels = async (key?: string) => {
