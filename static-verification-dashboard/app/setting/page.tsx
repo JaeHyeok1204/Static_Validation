@@ -99,6 +99,17 @@ export default function SettingPage() {
                                         * 이 키는 브라우저 로컬 저장소에만 안전하게 저장되며, 소스 코드나 외부 서버로 전송되지 않습니다. <br/>
                                         * 키가 없으면 대시보드 요약 및 AI 채팅 기능이 작동하지 않습니다.
                                     </p>
+                                    <button 
+                                        onClick={async () => {
+                                            const key = useStore.getState().geminiApiKey;
+                                            const { listAvailableModels } = await import('@/lib/gemini');
+                                            const result = await listAvailableModels(key);
+                                            alert(`[AI 진단 결과]\n${Array.isArray(result) ? "접속 가능 모델: " + result.join(", ") : "오류: " + result}`);
+                                        }}
+                                        className="mt-2 text-[11px] font-bold text-[var(--accent-color)] hover:underline text-left"
+                                    >
+                                        🔍 내 API 키로 접속 가능한 모델 진단하기
+                                    </button>
                                 </div>
                             </div>
                         </div>

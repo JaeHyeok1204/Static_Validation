@@ -1,8 +1,24 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Use hardcoded key for the static build if env is missing in CI, 
-// but try to use env first for local development.
 const API_KEY_ENV = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+
+export const listAvailableModels = async (key?: string) => {
+    const finalKey = key?.trim() || API_KEY_ENV;
+    if (!finalKey) return "KEY_MISSING";
+    
+    try {
+        // We use a raw fetch here to bypass SDK limitations and see the full list
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${finalKey}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            return `FAIL: ${data.error?.message || response.statusText}`;
+        }
+        
+        return data.models?.map((m: any) => m.name.replace("models/", "")) || [];
+    } catch (err: any) {
+        return `ERROR: ${err.message}`;
+    }
+};
+
 const genAI = new GoogleGenerativeAI(API_KEY_ENV);
 
 export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string) => {
