@@ -29,6 +29,7 @@ export const analyzeDataWithAI = async (prompt: string) => {
             // Simple prompt execution
             const result = await model.generateContent(prompt);
             const response = await result.response;
+            const text = response.text();
             if (text) {
                 console.log(`Gemini API Success with: ${modelName}`);
                 return text;
