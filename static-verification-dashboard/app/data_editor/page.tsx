@@ -13,6 +13,12 @@ export default function DataEditorPage() {
 
     const data = versionedData[currentVersionIndex];
     const [newVersionStr, setNewVersionStr] = useState("");
+    
+    // Rule Matrix State
+    const [ruleSearch, setRuleSearch] = useState("");
+    const [ruleCategoryFilter, setRuleCategoryFilter] = useState<'ALL' | 'MAB' | 'MISRA'>('ALL');
+    const [rulePage, setRulePage] = useState(1);
+    const rulesPerPage = 15;
 
     const handleCreateVersion = () => {
         if (!newVersionStr.trim()) return;
@@ -28,8 +34,13 @@ export default function DataEditorPage() {
 
         // 1. Calculate overall progress
         if (subsystemsList && subsystemsList.length > 0) {
-            const totalProgress = subsystemsList.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.progress || 0), 0);
-            newDashboard.overallProgress = Math.round(totalProgress / subsystemsList.length) + "%";
+            const validSubsystems = subsystemsList.filter((s: import('../../store/useStore').SubsystemData) => s.progress !== undefined);
+            if (validSubsystems.length > 0) {
+                const totalProgress = validSubsystems.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.progress || 0), 0);
+                newDashboard.overallProgress = Math.round(totalProgress / validSubsystems.length) + "%";
+            } else {
+                newDashboard.overallProgress = "0%";
+            }
         }
 
         // 2. Calculate expected schedule status
@@ -158,13 +169,13 @@ export default function DataEditorPage() {
 
                 {/* 2. 서브시스템 현황 편집 (Component / Runnable 분리) */}
                 <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
-                    {/* Component 박스 */}
+                    {/* Component 상세 데이터 */}
                     <section className="bg-[var(--bg-color)] border border-blue-200 dark:border-blue-900/50 rounded-2xl p-6 shadow-sm overflow-x-auto relative">
                         <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
                         <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                                Component 상세 데이터
+                                Component 상세 데이터 (A~P)
                             </div>
                         </h2>
                         <table className="w-full text-left border-collapse min-w-[500px]">
@@ -172,51 +183,38 @@ export default function DataEditorPage() {
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-xs text-center">
                                     <th className="p-2 font-semibold">서브시스템</th>
                                     <th className="p-2 font-semibold">담당자</th>
-                                    <th className="p-2 font-semibold">검출 위배</th>
-                                    <th className="p-2 font-semibold">신규 위배</th>
+                                    <th className="p-2 font-semibold">신규 검출 위배</th>
                                     <th className="p-2 font-semibold">분석 완료</th>
-                                    <th className="p-2 font-semibold">진척도 (%) - 자동</th>
+                                    <th className="p-2 font-semibold">진척도 (%)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
+                                {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"].map((subsystemChar) => {
                                     const categoryType = 'Component';
                                     const itemId = `${subsystemChar}-${categoryType}`;
-                                    const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType) || {
-                                        version: subsystemChar, category: categoryType, owner: "", detectedViolations: 0, newViolations: 0, analyzedViolations: 0, progress: 0
+                                    const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType) || {
+                                        id: subsystemChar, category: categoryType, owner: "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
                                     };
 
                                     const updateSubsystem = (key: string, val: string | number) => {
                                         const newList = [...data.subsystemsList];
-                                        const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType);
+                                        const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType);
                                         
                                         const mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
                                         
-                                        if (key === 'detectedViolations' || key === 'analyzedViolations') {
-                                            const dv = mergedItem.detectedViolations || 0;
+                                        if (key === 'newDetectedViolations' || key === 'analyzedViolations') {
+                                            const nv = mergedItem.newDetectedViolations || 0;
                                             const av = mergedItem.analyzedViolations || 0;
-                                            const detected = dv > 0 ? dv : 1;
-                                            mergedItem.progress = Number(Math.min(100, Math.round((av / detected) * 100)).toFixed(1));
-                                            if (dv === 0 && av === 0) {
-                                                mergedItem.progress = 0;
-                                            }
+                                            const total = nv > 0 ? nv : (av > 0 ? av : 1);
+                                            mergedItem.progress = Number(Math.min(100, Math.round((av / total) * 100)).toFixed(1));
+                                            if (nv === 0 && av === 0) mergedItem.progress = 0;
                                         }
 
-                                        if (existingIdx >= 0) {
-                                            newList[existingIdx] = mergedItem;
-                                        } else {
-                                            newList.push(mergedItem);
-                                        }
+                                        if (existingIdx >= 0) newList[existingIdx] = mergedItem;
+                                        else newList.push(mergedItem);
 
-                                        const updatedDashboard = calculateAutomatedMetrics({
-                                            ...data,
-                                            subsystemsList: newList
-                                        });
-
-                                        updateVersionData(currentVersionIndex, { 
-                                            subsystemsList: newList,
-                                            dashboardData: updatedDashboard
-                                        });
+                                        const updatedDashboard = calculateAutomatedMetrics({ ...data, subsystemsList: newList });
+                                        updateVersionData(currentVersionIndex, { subsystemsList: newList, dashboardData: updatedDashboard });
                                     };
 
                                     return (
@@ -225,17 +223,14 @@ export default function DataEditorPage() {
                                             <td className="p-2 w-24">
                                                 <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
                                             </td>
-                                            <td className="p-2 w-20">
-                                                <input type="number" value={currentItem.detectedViolations} onChange={(e) => updateSubsystem('detectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            <td className="p-2 w-28">
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
-                                            <td className="p-2 w-20">
-                                                <input type="number" value={currentItem.newViolations} onChange={(e) => updateSubsystem('newViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            <td className="p-2 w-28">
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
-                                            <td className="p-2 w-20">
-                                                <input type="number" value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                            </td>
-                                            <td className="p-2 w-20">
-                                                <input readOnly type="number" value={currentItem.progress} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold" />
+                                            <td className="p-2 w-24">
+                                                <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
                                             </td>
                                         </tr>
                                     );
@@ -244,13 +239,13 @@ export default function DataEditorPage() {
                         </table>
                     </section>
 
-                    {/* Runnable 박스 */}
+                    {/* Runnable 상세 데이터 */}
                     <section className="bg-[var(--bg-color)] border border-emerald-200 dark:border-emerald-900/50 rounded-2xl p-6 shadow-sm overflow-x-auto relative">
                         <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
                         <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                                Runnable 상세 데이터
+                                Runnable 상세 데이터 (A~P)
                             </div>
                         </h2>
                         <table className="w-full text-left border-collapse min-w-[500px]">
@@ -258,51 +253,38 @@ export default function DataEditorPage() {
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-xs text-center">
                                     <th className="p-2 font-semibold">서브시스템</th>
                                     <th className="p-2 font-semibold">담당자</th>
-                                    <th className="p-2 font-semibold">검출 위배</th>
-                                    <th className="p-2 font-semibold">신규 위배</th>
+                                    <th className="p-2 font-semibold">신규 검출 위배</th>
                                     <th className="p-2 font-semibold">분석 완료</th>
-                                    <th className="p-2 font-semibold">진척도 (%) - 자동</th>
+                                    <th className="p-2 font-semibold">진척도 (%)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
+                                {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"].map((subsystemChar) => {
                                     const categoryType = 'Runnable';
                                     const itemId = `${subsystemChar}-${categoryType}`;
-                                    const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType) || {
-                                        version: subsystemChar, category: categoryType, owner: "", detectedViolations: 0, newViolations: 0, analyzedViolations: 0, progress: 0
+                                    const currentItem = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType) || {
+                                        id: subsystemChar, category: categoryType, owner: "", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
                                     };
 
                                     const updateSubsystem = (key: string, val: string | number) => {
                                         const newList = [...data.subsystemsList];
-                                        const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === categoryType);
+                                        const existingIdx = newList.findIndex((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === categoryType);
                                         
                                         const mergedItem = existingIdx >= 0 ? { ...newList[existingIdx], [key]: val } : { ...currentItem, [key]: val };
                                         
-                                        if (key === 'detectedViolations' || key === 'analyzedViolations') {
-                                            const dv = mergedItem.detectedViolations || 0;
+                                        if (key === 'newDetectedViolations' || key === 'analyzedViolations') {
+                                            const nv = mergedItem.newDetectedViolations || 0;
                                             const av = mergedItem.analyzedViolations || 0;
-                                            const detected = dv > 0 ? dv : 1;
-                                            mergedItem.progress = Number(Math.min(100, Math.round((av / detected) * 100)).toFixed(1));
-                                            if (dv === 0 && av === 0) {
-                                                mergedItem.progress = 0;
-                                            }
+                                            const total = nv > 0 ? nv : (av > 0 ? av : 1);
+                                            mergedItem.progress = Number(Math.min(100, Math.round((av / total) * 100)).toFixed(1));
+                                            if (nv === 0 && av === 0) mergedItem.progress = 0;
                                         }
 
-                                        if (existingIdx >= 0) {
-                                            newList[existingIdx] = mergedItem;
-                                        } else {
-                                            newList.push(mergedItem);
-                                        }
+                                        if (existingIdx >= 0) newList[existingIdx] = mergedItem;
+                                        else newList.push(mergedItem);
 
-                                        const updatedDashboard = calculateAutomatedMetrics({
-                                            ...data,
-                                            subsystemsList: newList
-                                        });
-
-                                        updateVersionData(currentVersionIndex, { 
-                                            subsystemsList: newList,
-                                            dashboardData: updatedDashboard
-                                        });
+                                        const updatedDashboard = calculateAutomatedMetrics({ ...data, subsystemsList: newList });
+                                        updateVersionData(currentVersionIndex, { subsystemsList: newList, dashboardData: updatedDashboard });
                                     };
 
                                     return (
@@ -311,17 +293,14 @@ export default function DataEditorPage() {
                                             <td className="p-2 w-24">
                                                 <input value={currentItem.owner} onChange={(e) => updateSubsystem('owner', e.target.value)} placeholder="담당자" className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
                                             </td>
-                                            <td className="p-2 w-20">
-                                                <input type="number" value={currentItem.detectedViolations} onChange={(e) => updateSubsystem('detectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            <td className="p-2 w-28">
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
-                                            <td className="p-2 w-20">
-                                                <input type="number" value={currentItem.newViolations} onChange={(e) => updateSubsystem('newViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
+                                            <td className="p-2 w-28">
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
-                                            <td className="p-2 w-20">
-                                                <input type="number" value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-[var(--bg-color)] text-[var(--text-main)]" />
-                                            </td>
-                                            <td className="p-2 w-20">
-                                                <input readOnly type="number" value={currentItem.progress} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold" />
+                                            <td className="p-2 w-24">
+                                                <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
                                             </td>
                                         </tr>
                                     );
@@ -397,7 +376,7 @@ export default function DataEditorPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
+                                    {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"].map((subsystemChar) => {
                                         const prevVersionData = currentVersionIndex > 0 ? versionedData[currentVersionIndex - 1] : null;
                                         const prevRunnItem = prevVersionData?.timeEvaluationRunnable?.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
                                         const autoPrevTime = prevRunnItem ? prevRunnItem.currentTime : "0h";
@@ -415,9 +394,9 @@ export default function DataEditorPage() {
                                         return (
                                             <tr key={subsystemChar} className="border-b border-[var(--border-color)]">
                                                 <td className="p-1 text-center font-bold text-[var(--accent-color)]">{subsystemChar}</td>
-                                                <td className="p-1"><input value={runnItem.owner} onChange={(e) => updateRunn('owner', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)]" placeholder="담당자" /></td>
-                                                <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)]" placeholder="예: 4.2h" /></td>
-                                                <td className="p-1"><input readOnly value={autoPrevTime} className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold" /></td>
+                                                <td className="p-1"><input value={runnItem.owner} onChange={(e) => updateRunn('owner', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)] text-[var(--text-main)]" placeholder="담당자" /></td>
+                                                <td className="p-1"><input value={runnItem.currentTime} onChange={(e) => updateRunn('currentTime', e.target.value)} className="w-full border p-1 rounded bg-[var(--bg-color)] text-[var(--text-main)]" placeholder="예: 4.2h" /></td>
+                                                <td className="p-1"><div className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold text-center">{autoPrevTime}</div></td>
                                             </tr>
                                         );
                                     })}

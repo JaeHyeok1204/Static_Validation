@@ -23,9 +23,11 @@ export default function ReportsPage() {
 
     const handleRegenerate = async () => {
         setIsGenerating(true);
+        // Simulate AI analysis based on current version data
         setTimeout(() => {
-            setDraftTeam(prev => prev + "\n[AI Update] 추가 최신 분석 내용이 반영되었습니다.");
-            setDraftCustomer(prev => prev + "\n[AI Update] 최근 조치 내역 요약을 덧붙입니다.");
+            const summary = `버전 ${currentVersionIndex} 데이터 기반 분석 결과: 전체 진척도는 ${data.dashboardData.overallProgress}이며, ${data.dashboardData.newRuleViolationsCount}건의 신규 위배가 탐지되었습니다.`;
+            setDraftTeam(`[보고서 자동 생성]\n${summary}\n\n1. 주요 검증 결과:\n- Component/Runnable 통합 진척도 및 소요시간 데이터 분석 완료.\n2. 향후 계획:\n- 잔여 위배 항목에 대한 상세 분석 및 조치 예정.`);
+            setDraftCustomer(`[Verification Report Update]\nSummary: Overall progress has reached ${data.dashboardData.overallProgress}.\nNext Steps: Finalizing the analysis for the remaining ${data.dashboardData.newRuleViolationsCount} violations detected in this version.`);
             setIsGenerating(false);
         }, 1500);
     };

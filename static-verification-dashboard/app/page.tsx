@@ -77,9 +77,9 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.subsystemsList.slice(0, 3).map((item: import('@/store/useStore').SubsystemData, idx: number) => (
+                  {data.subsystemsList.slice(0, 6).map((item: import('@/store/useStore').SubsystemData, idx: number) => (
                     <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
-                      <td className="p-3 font-medium">{item.version}</td>
+                      <td className="p-3 font-medium">{item.id}</td>
                       <td className="p-3"><span className="px-2 py-1 rounded text-xs bg-[var(--badge-bg)]">{item.category}</span></td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">

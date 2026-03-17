@@ -32,21 +32,19 @@ export default function SubsystemsPage() {
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm whitespace-nowrap">
                                     <th className="p-3 font-semibold text-center">서브시스템</th>
                                     <th className="p-3 font-semibold text-center">담당자</th>
-                                    <th className="p-3 font-semibold text-center">검출 위배 건수</th>
-                                    <th className="p-3 font-semibold text-center">신규 위배 개수</th>
-                                    <th className="p-3 font-semibold text-center">분석 위배 건수</th>
+                                    <th className="p-3 font-semibold text-center">신규 검출 위배</th>
+                                    <th className="p-3 font-semibold text-center">분석 완료 건수</th>
                                     <th className="p-3 font-semibold min-w-[150px]">진척 퍼센티지 바</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar: string, idx: number) => {
-                                    const item = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === 'Component');
+                                {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"].map((subsystemChar: string, idx: number) => {
+                                    const item = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === 'Component');
                                     return (
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                             <td className="p-4 font-bold text-center text-blue-600 dark:text-blue-400">{subsystemChar}</td>
                                             <td className="p-4 text-center">{item ? item.owner : "-"}</td>
-                                            <td className="p-4 text-center text-[var(--text-muted)]">{item ? item.detectedViolations : 0}</td>
-                                            <td className="p-4 text-center font-bold text-red-500">{item ? item.newViolations : 0}</td>
+                                            <td className="p-4 text-center font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
                                             <td className="p-4 text-center text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
@@ -80,21 +78,19 @@ export default function SubsystemsPage() {
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm whitespace-nowrap">
                                     <th className="p-3 font-semibold text-center">서브시스템</th>
                                     <th className="p-3 font-semibold text-center">담당자</th>
-                                    <th className="p-3 font-semibold text-center">검출 위배 건수</th>
-                                    <th className="p-3 font-semibold text-center">신규 위배 개수</th>
-                                    <th className="p-3 font-semibold text-center">분석 위배 건수</th>
+                                    <th className="p-3 font-semibold text-center">신규 검출 위배</th>
+                                    <th className="p-3 font-semibold text-center">분석 완료 건수</th>
                                     <th className="p-3 font-semibold min-w-[150px]">진척 퍼센티지 바</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar: string, idx: number) => {
-                                    const item = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.version === subsystemChar && s.category === 'Runnable');
+                                {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"].map((subsystemChar: string, idx: number) => {
+                                    const item = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === 'Runnable');
                                     return (
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                             <td className="p-4 font-bold text-center text-emerald-600 dark:text-emerald-400">{subsystemChar}</td>
                                             <td className="p-4 text-center">{item ? item.owner : "-"}</td>
-                                            <td className="p-4 text-center text-[var(--text-muted)]">{item ? item.detectedViolations : 0}</td>
-                                            <td className="p-4 text-center font-bold text-red-500">{item ? item.newViolations : 0}</td>
+                                            <td className="p-4 text-center font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
                                             <td className="p-4 text-center text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
