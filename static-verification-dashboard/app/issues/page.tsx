@@ -22,6 +22,7 @@ export default function IssuesPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
     const versionedData = useStore((state) => state.versionedData);
     const updateVersionData = useStore((state) => state.updateVersionData);
+    const runIssueAIAnalysis = useStore((state) => state.runIssueAIAnalysis);
     
     const data = versionedData[currentVersionIndex];
     if (!data) return null;
@@ -97,12 +98,20 @@ export default function IssuesPage() {
                                         className="container flex-1 border border-[var(--border-color)] p-2 rounded-lg text-sm bg-[var(--bg-color)] text-[var(--text-main)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] min-h-[60px] resize-y" 
                                     />
                                 </div>
-                                <div className="bg-[#f0f4f8] dark:bg-[#1e293b] border border-[#cbd5e1] dark:border-[#334155] p-3 rounded-lg text-sm mt-1 flex gap-2 items-start shadow-inner">
-                                    <span className="text-xl">🤖</span>
-                                    <div className="text-[var(--text-main)] pt-0.5">
-                                        <span className="font-bold text-[#0ea5e9]">AI 해결 제안: </span>
-                                        {generateAIRecommendation(issue.title, issue.type)}
+                                <div className="bg-[#1e293b] border border-[#334155] p-4 rounded-xl text-sm mt-1 flex flex-col md:flex-row gap-3 items-start shadow-md">
+                                    <div className="flex gap-2 items-start flex-1 text-white">
+                                        <span className="text-xl">🤖</span>
+                                        <div className="pt-0.5">
+                                            <span className="font-bold text-[#38bdf8]">AI 해결 제안: </span>
+                                            {issue.aiRecommendation || generateAIRecommendation(issue.title, issue.type)}
+                                        </div>
                                     </div>
+                                    <button 
+                                        onClick={() => runIssueAIAnalysis(issue.id)}
+                                        className="shrink-0 bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                        ✨ AI 분석/갱신
+                                    </button>
                                 </div>
                             </div>
                         ))}

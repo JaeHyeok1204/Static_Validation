@@ -54,6 +54,7 @@ export interface IssueData {
     type: string;
     content: string;
     resolved: boolean;
+    aiRecommendation?: string;
 }
 
 export interface RiskData {
@@ -129,6 +130,7 @@ interface AppState {
     setGeminiApiKey: (key: string) => void;
     runAIAnalysis: () => Promise<void>;
     runAIRiskAnalysis: () => Promise<void>;
+    runIssueAIAnalysis: (issueId: string | number) => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -446,6 +448,37 @@ export const useStore = create<AppState>()(
             });
         } catch (err) {
             console.error("Risk analysis parsing error:", err);
+        }
+    },
+
+    runIssueAIAnalysis: async (issueId: string | number) => {
+        const state = get();
+        const currentData = state.versionedData[state.currentVersionIndex];
+        if (!currentData) return;
+
+        const issue = currentData.issuesList.find(i => i.id === issueId);
+        if (!issue || !issue.title) return;
+
+        const prompt = `
+            다음 소프트웨어 검증 이슈에 대한 전문적인 해결 방안을 권장해줘.
+            - 제목: ${issue.title}
+            - 분류: ${issue.type}
+            - 상세 내용: ${issue.content || '내용 없음'}
+            
+            지침: 전문적이고 실천 가능한 조언을 1~2문장으로 제안해줘. Gemini ✨ 태그를 앞에 붙여줘.
+        `;
+
+        try {
+            const recommendation = await analyzeDataWithAI(prompt, state.geminiApiKey);
+            if (recommendation === "ERROR_MISSING_KEY") return;
+
+            const newList = currentData.issuesList.map(i => 
+                i.id === issueId ? { ...i, aiRecommendation: recommendation } : i
+            );
+
+            get().updateVersionData(state.currentVersionIndex, { issuesList: newList });
+        } catch (err) {
+            console.error("Issue AI analysis error:", err);
         }
     }
   }),
