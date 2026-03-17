@@ -10,12 +10,12 @@ export const getGeminiModel = () => genAI.getGenerativeModel({ model: "gemini-1.
 export const analyzeDataWithAI = async (prompt: string) => {
     // Prioritize 1.5 models as they have more stable free quotas
     const modelsToTry = [
+        "gemini-1.5-flash-latest",
         "gemini-1.5-flash",
+        "gemini-1.5-pro-latest",
         "gemini-1.5-pro",
         "gemini-2.0-flash", 
-        "gemini-2.0-flash-exp", 
-        "gemini-1.0-pro",
-        "gemini-3-flash"
+        "gemini-1.0-pro"
     ];
     
     let lastError = "";
@@ -29,9 +29,10 @@ export const analyzeDataWithAI = async (prompt: string) => {
             // Simple prompt execution
             const result = await model.generateContent(prompt);
             const response = await result.response;
-            const text = response.text();
-            
-            if (text) return text;
+            if (text) {
+                console.log(`Gemini API Success with: ${modelName}`);
+                return text;
+            }
         } catch (error: any) {
             lastError = error?.message || "알 수 없는 오류";
             console.error(`Gemini Error with ${modelName}:`, lastError);
