@@ -8,28 +8,26 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const getGeminiModel = () => genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export const analyzeDataWithAI = async (prompt: string) => {
-    // Attempting latest models including the requested 'Gemini 3 Flash' 
-    // and the current stable latest 'Gemini 2.0 Flash'.
+    // Prioritize 1.5 models as they have more stable free quotas
     const modelsToTry = [
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
         "gemini-2.0-flash", 
         "gemini-2.0-flash-exp", 
-        "gemini-1.5-flash", 
-        "gemini-1.5-pro",
-        "gemini-2.0-pro-exp",
-        "gemini-3-flash" // Added as requested, just in case of new release
+        "gemini-1.0-pro",
+        "gemini-3-flash"
     ];
+    
     let lastError = "";
+    let hadQuotaError = false;
 
     for (const modelName of modelsToTry) {
         try {
             console.log(`Gemini API Attempt: ${modelName}`);
-            // Explicitly try with 'v1beta' as it's the most common for AI Studio keys
-            const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1beta' });
+            const model = genAI.getGenerativeModel({ model: modelName });
             
-            const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: prompt }] }]
-            });
-            
+            // Simple prompt execution
+            const result = await model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
             
@@ -38,26 +36,35 @@ export const analyzeDataWithAI = async (prompt: string) => {
             lastError = error?.message || "알 수 없는 오류";
             console.error(`Gemini Error with ${modelName}:`, lastError);
             
-            // If it's a 404 (Not Found) or 429 (Quota Exceeded), we continue to the next model
-            if (
-                lastError.includes("404") || 
-                lastError.toLowerCase().includes("not found") || 
-                lastError.includes("429") || 
-                lastError.toLowerCase().includes("quota")
-            ) {
-                console.log(`Skipping ${modelName} due to availability/quota and trying next...`);
+            // If it's a quota error, mark it and try next
+            if (lastError.includes("429") || lastError.toLowerCase().includes("quota")) {
+                hadQuotaError = true;
+                continue;
+            }
+
+            // If it's a 404, we continue to the next model
+            if (lastError.includes("404") || lastError.toLowerCase().includes("not found")) {
                 continue;
             }
             
-            // If it's a 403 (Location/Permission) or 401 (Auth), stop and tell the user
-            break;
+            // For 403 (Permission) or 401 (Auth), stop early
+            if (lastError.includes("403") || lastError.includes("401")) {
+                break;
+            }
         }
     }
     
-    // If we reached here, it means exhaustion or a fatal error
+    // Final Error Reporting
+    if (hadQuotaError) {
+        return `AI 분석 한도 초과 (429 Quota Exceeded). 
+        \n현재 사용 중인 API 키의 무료 할당량을 모두 소모했거나, 해당 모델의 사용 한도가 0으로 설정되어 있습니다. 
+        \nGoogle AI Studio에서 새로운 API 키를 생성하거나 내일 다시 시도해 주세요.`;
+    }
+
     if (lastError.includes("404")) {
-        return `AI 분석 서버 연결 실패 (404: 모델을 찾을 수 없음). 
-        \n사용자님의 API 키가 'Google AI Studio'에서 생성된 것이 맞는지, 그리고 해당 프로젝트에서 'Generative Language API'가 활성화되어 있는지 확인이 필요합니다.`;
+        return `AI 서버 접속 실패 (404 Not Found). 
+        \nAPI 키가 유효하지 않거나, 현재 지역에서 Gemini 서비스를 지원하지 않을 수 있습니다. 
+        \nAPI 키를 다시 한번 확인해 주세요.`;
     }
     
     return `AI 분석 중 오류가 발생했습니다. (${lastError})`;
