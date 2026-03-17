@@ -31,7 +31,7 @@ export default function RulesPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.rulesList.map((rule: import('../../store/useStore').RuleData, idx: number) => {
+                                {data.rulesList.filter((r: any) => r.id.trim() !== '').map((rule: import('../../store/useStore').RuleData, idx: number) => {
                                     const totalViolations = Object.values(rule.subsystemViolations || {}).reduce((a, b) => a + (Number(b) || 0), 0);
                                     const nonZeroSubsystems = Object.entries(rule.subsystemViolations || {})
                                         .filter(([_, count]) => (Number(count) || 0) > 0)
