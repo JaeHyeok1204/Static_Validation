@@ -24,29 +24,32 @@ export const listAvailableModels = async (key?: string) => {
 const genAI = new GoogleGenerativeAI(API_KEY_ENV);
 
 export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string) => {
-    // Priority: 1. User provided override (from UI), 2. Environment variable
     const rawKey = overrideApiKey || API_KEY_ENV;
     const finalApiKey = rawKey?.trim() || "";
     
-    if (!finalApiKey) {
-        return "ERROR_MISSING_KEY";
+    if (!finalApiKey) return "ERROR_MISSING_KEY";
+
+    // 1. Dynamic Discovery: Ask the API what models this key can actually use
+    const discovered = await listAvailableModels(finalApiKey);
+    let modelsToTry: string[] = [];
+
+    if (Array.isArray(discovered) && discovered.length > 0) {
+        // Filter for models likely to support generateContent
+        modelsToTry = discovered.filter(name => 
+            name.includes("flash") || name.includes("pro") || name.includes("gemini")
+        );
+    } 
+    
+    // Fallback list if discovery fails or returns nothing
+    if (modelsToTry.length === 0) {
+        modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"];
     }
 
-    const modelsToTry = [
-        "gemini-2.5-flash",
-        "gemini-2.5-pro",
-        "gemini-1.5-flash-latest",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro-latest",
-        "gemini-1.5-pro",
-        "gemini-2.0-flash", 
-        "gemini-1.0-pro"
-    ];
-    
     const apiVersions = ["v1beta", "v1"];
     let lastError = "";
     let hadQuotaError = false;
 
+    // 2. Attempt connection with discovered/fallback models
     for (const modelName of modelsToTry) {
         for (const apiVer of apiVersions) {
             try {
@@ -64,40 +67,31 @@ export const analyzeDataWithAI = async (prompt: string, overrideApiKey?: string)
                 }
             } catch (error: any) {
                 lastError = error?.message || "알 수 없는 오류";
-                console.warn(`Gemini Failed: ${modelName} (${apiVer}) - ${lastError}`);
-                
-                // If it's a quota error, mark it and try next version/model
+                // If quota error, we stop and report it (trying other models usually doesn't help if it's a global quota)
                 if (lastError.includes("429") || lastError.toLowerCase().includes("quota")) {
                     hadQuotaError = true;
-                    continue;
+                    continue; 
                 }
-
-                // If it's a 404, we continue to the next version/model
                 if (lastError.includes("404") || lastError.toLowerCase().includes("not found")) {
                     continue;
                 }
-                
-                // For 403 (Permission/Leaked/Location) or 401 (Auth), 
-                // we might want to try other versions just in case, or stop if it's clearly an auth issue
-                if (lastError.includes("401") || lastError.includes("leaked")) {
-                    return `AI 분석 서버 인증 실패. 키가 유효하지 않거나 유출된 키입니다. (${lastError})`;
+                if (lastError.includes("401") || lastError.includes("leaked") || lastError.includes("API key not valid")) {
+                    return `API 키가 유효하지 않습니다. (${lastError})`;
                 }
             }
         }
     }
     
-    // Final Error Reporting
     if (hadQuotaError) {
-        return `AI 분석 한도 초과 (429 Quota Exceeded). 
-        \n현재 사용 중인 API 키의 무료 할당량을 모두 소모했거나, 해당 모델의 사용 한도가 0으로 설정되어 있습니다. 
-        \n다른 Google 계정으로 새 키를 생성하거나 내일 다시 시도해 주세요.`;
+        return `AI 할당량 초과 (429). 잠시 후 다시 시도하거나 다른 키를 사용해 주세요.`;
     }
 
+    // Detailed 404 error
     if (lastError.includes("404")) {
-        return `AI 서버 접속 실패 (404 Not Found). 
-        \n[원인 진단]: 모든 모델과 API 버전(${apiVersions.join(", ")})에서 응답을 찾을 수 없습니다. 
-        \n1. API 키에 오타가 없는지 확인해 주세요. 
-        \n2. Google Cloud Console에서 'Generative Language API'가 활성화되어 있는지 확인이 필요합니다.`;
+        return `AI 모델을 찾을 수 없습니다 (404). 
+        \n[검색된 모델]: ${modelsToTry.join(", ") || "없음"}
+        \nAPI 서버가 해당 모델들을 인식하지 못하고 있습니다. 
+        \n계정의 '지역 제한' 또는 '결제 계정 연결' 상태를 확인해 주세요.`;
     }
     
     return `AI 분석 중 오류가 발생했습니다. (${lastError})`;
