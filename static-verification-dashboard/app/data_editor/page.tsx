@@ -389,19 +389,20 @@ export default function DataEditorPage() {
                                                     <input 
                                                         value={rule.mabSubId || ""} 
                                                         onChange={(e) => updateSubId(e.target.value)}
-                                                        className="w-full p-1 border rounded text-center bg-white text-[var(--accent-color)] font-bold"
+                                                        className="w-full p-1 border rounded text-center bg-white dark:bg-gray-800 text-[var(--accent-color)] font-bold text-[10px]"
                                                         placeholder="Sub ID"
                                                     />
                                                 ) : <div className="text-center text-gray-300">-</div>}
                                             </td>
                                             {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
-                                                <td key={ss} className="p-0 border border-[var(--border-color)]">
+                                                <td key={ss} className="p-0 border border-[var(--border-color)] group relative">
                                                     <input 
                                                         type="number" 
                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
                                                         value={rule.subsystemViolations?.[ss] || 0}
                                                         onChange={(e) => updateViolation(ss, Math.max(0, Number(e.target.value)))}
-                                                        className="w-full p-1 text-center bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:bg-blue-50 outline-none"
+                                                        className="w-full p-2 text-center bg-white dark:bg-gray-800 border-0 focus:ring-1 focus:ring-blue-400 focus:bg-blue-50 dark:focus:bg-blue-900/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none text-[10px]"
+                                                        title={`${rule.id} - Subsystem ${ss}`}
                                                     />
                                                 </td>
                                             ))}

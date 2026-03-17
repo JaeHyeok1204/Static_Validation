@@ -251,10 +251,26 @@ export const useStore = create<AppState>()(
 
             if (appStates && appStates.data && Object.keys(appStates.data).length > 0) {
                 const remoteData = appStates.data as any;
+                const remoteVersionedData = remoteData.versionedData || initialVersionedData;
+                
+                // MIGRATION: Ensure all versions have the latest structure (rulesList, subsystemsList A-P)
+                const migratedVersionedData: Record<number, VersionData> = {};
+                Object.keys(remoteVersionedData).forEach((idxStr) => {
+                    const idx = parseInt(idxStr);
+                    const vData = remoteVersionedData[idx];
+                    migratedVersionedData[idx] = {
+                        ...emptyVersionData,
+                        ...vData,
+                        // Ensure lists are initialized
+                        rulesList: (vData.rulesList && vData.rulesList.length > 0) ? vData.rulesList : getInitialRules(),
+                        subsystemsList: (vData.subsystemsList && vData.subsystemsList.length > 0) ? vData.subsystemsList : getInitialSubsystems(),
+                    };
+                });
+
                 const stateUpdates: any = {
                     usersList: mappedUsers,
                     versions: remoteData.versions || initialVersions,
-                    versionedData: remoteData.versionedData || initialVersionedData,
+                    versionedData: migratedVersionedData,
                 };
 
                 // CRITICAL: Update the current logged-in user's session from the refreshed list
