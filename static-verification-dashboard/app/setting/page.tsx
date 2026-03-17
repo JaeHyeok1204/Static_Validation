@@ -13,6 +13,7 @@ export default function SettingPage() {
     const currentUser = useStore((state) => state.currentUser);
     const resetValidationData = useStore((state) => state.resetValidationData);
     const resetAiData = useStore((state) => state.resetAiData);
+    const [showKey, setShowKey] = useState(false);
 
     const [localApiKey, setLocalApiKey] = useState(geminiApiKey);
 
@@ -114,13 +115,22 @@ export default function SettingPage() {
                             <div>
                                 <label className="block text-sm font-semibold text-[var(--text-main)] mb-2">Gemini API Key</label>
                                 <div className="flex flex-col gap-2">
-                                    <input 
-                                        type="password"
-                                        value={localApiKey}
-                                        onChange={(e) => setLocalApiKey(e.target.value)}
-                                        placeholder="AIzaSy..."
-                                        className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent-color)] outline-none transition-all"
-                                    />
+                                    <div className="relative">
+                                        <input 
+                                            type={showKey ? "text" : "password"}
+                                            value={localApiKey}
+                                            onChange={(e) => setLocalApiKey(e.target.value)}
+                                            placeholder="AIzaSy..."
+                                            className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[var(--accent-color)] outline-none transition-all pr-12"
+                                        />
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowKey(!showKey)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                                        >
+                                            {showKey ? "🙈" : "👁️"}
+                                        </button>
+                                    </div>
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
                                         * 현재 로그인된 계정: <strong>{currentUser?.name || "로그인 필요"}</strong> <br/>
                                         * 로그인 상태에서 저장 시, API 키가 계정에 자동 동기화되어 다른 기기에서도 유지됩니다.

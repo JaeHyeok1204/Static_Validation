@@ -14,7 +14,7 @@ export default function LoginPage() {
     const usersList = useStore((state) => state.usersList);
     const syncFromDB = useStore((state) => state.syncFromDB);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
@@ -23,10 +23,9 @@ export default function LoginPage() {
             return;
         }
 
-        const user = usersList.find((u: User) => u.id === id && u.password === password);
+        const success = await login(id, password);
         
-        if (user) {
-            login(user);
+        if (success) {
             router.push("/");
         } else {
             setError("회원 정보가 일치하지 않습니다. 가입 여부나 비밀번호를 확인해주세요.");

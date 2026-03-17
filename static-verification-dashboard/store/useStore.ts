@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { initialVersionedData, initialVersions } from '@/app/data/mockData';
 import { supabase } from '@/lib/supabase';
 import { analyzeDataWithAI } from '@/lib/gemini';
+import { hashPassword } from '@/lib/crypto';
 
 type ThemeType = 'light' | 'dark' | 'blue' | 'red';
 
@@ -162,7 +163,7 @@ interface AppState {
     addRuleRow: (versionIndex: number) => void;
     deleteRuleRow: (versionIndex: number, ruleIndex: number) => void;
     updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => void;
-    login: (user: User) => void;
+    login: (userId: string, passwordText: string) => Promise<boolean>;
     logout: () => void;
     register: (user: User) => void;
     
@@ -200,39 +201,77 @@ export const useStore = create<AppState>()(
 
     syncVersionIndex: (index: number) => set({ currentVersionIndex: index }),
 
-    login: async (user: User) => {
-        set({ 
-            currentUser: user,
-            // Automatically set the global Gemini key from the user's stored key if available
-            geminiApiKey: user.geminiApiKey || get().geminiApiKey 
-        });
+    login: async (userId: string, passwordText: string): Promise<boolean> => {
+        try {
+            const hashedPassword = await hashPassword(passwordText);
+            
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', userId)
+                .eq('password', hashedPassword)
+                .single();
+
+            if (error || !data) {
+                console.error("Login failed:", error?.message);
+                return false;
+            }
+
+            const user: User = {
+                id: data.id,
+                name: data.name,
+                birthDate: data.birth_date,
+                teamName: data.team_name,
+                position: data.position,
+                geminiApiKey: data.gemini_api_key || ""
+            };
+
+            set({ 
+                currentUser: user,
+                geminiApiKey: user.geminiApiKey || get().geminiApiKey 
+            });
+            return true;
+        } catch (err) {
+            console.error("Critical login error:", err);
+            return false;
+        }
     },
     logout: () => set({ currentUser: null, geminiApiKey: '' }),
     register: async (user: User) => {
-        // 1. Update local state
-        set((state) => ({ usersList: [...state.usersList, user] }));
+        if (!user.password) return;
         
-        // 2. Sync to Supabase
         try {
+            // Hash the password before storage
+            const hashedPassword = await hashPassword(user.password);
+            
+            // 1. Update local state (optional, just for session if needed)
+            // But we remove the password from the object first
+            const { password, ...userWithoutPassword } = user;
+            
+            // 2. Sync to Supabase
             const { error } = await supabase.from('users').insert([{
                 id: user.id,
-                password: user.password,
+                password: hashedPassword, // Store hashed
                 name: user.name,
                 birth_date: user.birthDate,
                 team_name: user.teamName,
                 position: user.position,
                 gemini_api_key: user.geminiApiKey || ""
             }]);
+            
             if (error) throw error;
+            
+            set((state) => ({ usersList: [...state.usersList, userWithoutPassword] }));
         } catch (err) {
             console.error("Failed to register user to Supabase:", err);
+            throw err;
         }
     },
 
     syncFromDB: async () => {
         try {
             // Load Users
-            const { data: users, error: userError } = await supabase.from('users').select('*');
+            const { data: users, error: userError } = await supabase.from('users').select('id, name, birth_date, team_name, position');
             if (userError) throw userError;
             
             // Load App State (Versioned Data)
@@ -244,11 +283,10 @@ export const useStore = create<AppState>()(
             const mappedUsers: User[] = (users || []).map(u => ({
                 id: u.id,
                 name: u.name,
-                password: u.password,
                 birthDate: u.birth_date,
                 teamName: u.team_name,
                 position: u.position,
-                geminiApiKey: u.gemini_api_key || ""
+                geminiApiKey: "" // Never fetch API key in bulk sync
             }));
 
             if (appStates && appStates.data && Object.keys(appStates.data).length > 0) {
