@@ -199,11 +199,26 @@ export const useStore = create<AppState>()(
 
             if (appStates && appStates.data && Object.keys(appStates.data).length > 0) {
                 const remoteData = appStates.data as any;
-                set({
+                const stateUpdates: any = {
                     usersList: mappedUsers,
                     versions: remoteData.versions || initialVersions,
                     versionedData: remoteData.versionedData || initialVersionedData,
-                });
+                };
+
+                // CRITICAL: Update the current logged-in user's session from the refreshed list
+                const state = get();
+                if (state.currentUser) {
+                    const refreshedUser = mappedUsers.find(u => u.id === state.currentUser?.id);
+                    if (refreshedUser) {
+                        stateUpdates.currentUser = refreshedUser;
+                        // Synchronize the global API key if the user has one stored in DB
+                        if (refreshedUser.geminiApiKey) {
+                            stateUpdates.geminiApiKey = refreshedUser.geminiApiKey;
+                        }
+                    }
+                }
+
+                set(stateUpdates);
             } else {
                 set({ usersList: mappedUsers });
             }
