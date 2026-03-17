@@ -14,10 +14,6 @@ export default function LoginPage() {
     const usersList = useStore((state) => state.usersList);
     const syncFromDB = useStore((state) => state.syncFromDB);
 
-    useState(() => {
-        syncFromDB();
-    });
-
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         setError("");

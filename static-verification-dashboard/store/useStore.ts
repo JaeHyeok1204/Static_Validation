@@ -206,13 +206,15 @@ export const useStore = create<AppState>()(
                 versionedData: state.versionedData
             };
             
-            // Upsert based on first row
-            const { error } = await supabase.from('app_state').update({
+            // Use upsert to create or update the record with id 1
+            const { error } = await supabase.from('app_state').upsert({
+                id: 1,
                 data: payload,
                 updated_at: new Date().toISOString()
-            }).eq('id', 1); // We assume the initial row has ID 1
+            }, { onConflict: 'id' });
 
             if (error) throw error;
+            console.log("Successfully synced app state to Supabase.");
         } catch (err) {
             console.error("Failed to sync app state to Supabase:", err);
         }

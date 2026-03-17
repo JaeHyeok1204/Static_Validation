@@ -2,7 +2,7 @@
 
 import { useStore } from "@/store/useStore";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
     const currentUser = useStore((state) => state.currentUser);
@@ -10,9 +10,17 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     const pathname = usePathname();
     const [isMounted, setIsMounted] = useState(false);
 
+    const syncFromDB = useStore((state) => state.syncFromDB);
+    const hasSynced = useRef(false);
+
     useEffect(() => {
         setIsMounted(true);
-    }, []);
+        // Trigger initial sync from DB if not already done in this session/mount
+        if (!hasSynced.current) {
+            syncFromDB();
+            hasSynced.current = true;
+        }
+    }, [syncFromDB]);
 
     useEffect(() => {
         if (!isMounted) return;
