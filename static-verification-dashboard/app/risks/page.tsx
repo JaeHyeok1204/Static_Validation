@@ -2,12 +2,21 @@
 
 import PageHeader from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
-// Remove mockData import
+import { useState } from "react"; // Added useState import
+import { AlertTriangle, Zap } from "lucide-react"; // Added icon imports
 
 export default function RisksPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
-    const versionedData = useStore((state) => state.versionedData);
-    const data = versionedData[currentVersionIndex];
+    const versions = useStore((state) => state.versions); // Added versions
+    const data = useStore((state) => state.versionedData[currentVersionIndex]);
+    const runAIRiskAnalysis = useStore((state) => state.runAIRiskAnalysis); // Added runAIRiskAnalysis
+    const [isAnalyzing, setIsAnalyzing] = useState(false); // Added isAnalyzing state
+
+    const handleRunAI = async () => {
+        setIsAnalyzing(true);
+        await runAIRiskAnalysis();
+        setIsAnalyzing(false);
+    };
 
     if (!data) return null;
 
@@ -19,6 +28,30 @@ export default function RisksPage() {
             />
 
             <div className="flex-1 overflow-y-auto pr-2 pb-6">
+                {/* New AI Analysis Guide and Button */}
+                <div className="flex justify-between items-center mb-6 bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-200 dark:border-yellow-900/30">
+                    <div className="flex items-center gap-3 text-yellow-700 dark:text-yellow-400">
+                        <AlertTriangle className="animate-pulse" />
+                        <div>
+                            <p className="font-bold text-sm">💡 AI 위험 분석 가이드</p>
+                            <p className="text-xs opacity-80">현재 검증 데이터와 이슈 내역을 종합 분석하여 도출된 위험 요소입니다.</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={handleRunAI}
+                        disabled={isAnalyzing}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                            isAnalyzing 
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed" 
+                            : "bg-yellow-500 text-white hover:bg-yellow-600 active:scale-95"
+                        }`}
+                    >
+                        <Zap size={16} />
+                        {isAnalyzing ? "위험 요소 추출 중..." : "AI 실시간 위험 분석 실행"}
+                    </button>
+                </div>
+                {/* End New AI Analysis Guide and Button */}
+
                 <div className="grid grid-cols-1 gap-6">
                     {data.risksList.map((risk: import('../../store/useStore').RiskData, idx: number) => (
                         <div key={idx} className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">

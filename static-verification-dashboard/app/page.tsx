@@ -1,22 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 // Removed mockData import
 import { useStore } from "@/store/useStore";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Zap, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
   const currentVersionIndex = useStore((state) => state.currentVersionIndex);
   const versionedData = useStore((state) => state.versionedData);
+  const versions = useStore((state) => state.versions); // Assuming versions is available in the store
   const data = versionedData[currentVersionIndex];
+
+  const aiSummary = data.dashboardData.aiSummary;
+  const runAIAnalysis = useStore((state) => state.runAIAnalysis);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleRunAI = async () => {
+      setIsAnalyzing(true);
+      await runAIAnalysis();
+      setIsAnalyzing(false);
+  };
 
   if (!data) return null;
 
   return (
     <div className="h-full flex flex-col">
       <PageHeader
-        title="개요"
-        description="업무 공수 절감과 판단 효율 향상을 위한 핵심 정보를 시각적으로 제공합니다."
+        title="정적검증 현황 대시보드"
+        description={`[${versions[currentVersionIndex]}] 버전에 대한 실시간 프로젝트 통계 및 AI 요약 통계입니다.`}
         showVersionSelector={true}
       />
 
@@ -90,10 +103,28 @@ export default function HomePage() {
           </section>
 
           {/* AI 종합 요약 */}
-          <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col">
-            <h2 className="text-lg font-bold text-[var(--text-main)] mb-4">AI 종합 요약</h2>
-            <div className="bg-[var(--badge-bg)] text-[var(--text-main)] rounded-xl p-4 text-sm leading-relaxed flex-grow">
-              {data.dashboardData.aiSummary}
+          <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent-color)]"></div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-[var(--text-main)] flex items-center gap-2">
+                <Zap size={20} className="text-yellow-500 fill-yellow-500" />
+                AI 실시간 분석 리포트
+              </h2>
+              <button 
+                onClick={handleRunAI}
+                disabled={isAnalyzing}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  isAnalyzing 
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                  : "bg-[var(--accent-color)] text-white hover:brightness-110 active:scale-95"
+                }`}
+              >
+                <RefreshCw size={14} className={isAnalyzing ? "animate-spin" : ""} />
+                {isAnalyzing ? "분석 중..." : "AI 실시간 분석 실행"}
+              </button>
+            </div>
+            <div className="bg-[var(--badge-bg)] text-[var(--text-main)] rounded-xl p-4 text-sm leading-relaxed flex-grow border border-[var(--border-color)]">
+              {aiSummary || "상단 'AI 실시간 분석 실행' 버튼을 눌러 프로젝트 요약을 생성하세요."}
             </div>
           </section>
         </div>

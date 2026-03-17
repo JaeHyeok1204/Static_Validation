@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { initialVersionedData, initialVersions } from '@/app/data/mockData';
 import { supabase } from '@/lib/supabase';
+import { analyzeDataWithAI } from '@/lib/gemini';
 
 type ThemeType = 'light' | 'dark' | 'blue' | 'red';
 
@@ -121,6 +122,10 @@ interface AppState {
     // Remote Sync Actions
     syncFromDB: () => Promise<void>;
     syncToDB: (stateToSync?: Partial<AppState>) => Promise<void>;
+
+    // Real AI Actions
+    runAIAnalysis: () => Promise<void>;
+    runAIRiskAnalysis: () => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -316,6 +321,64 @@ export const useStore = create<AppState>()(
             get().syncToDB({ ...state, ...newState });
             return newState;
         });
+    },
+
+    runAIAnalysis: async () => {
+        const state = get();
+        const currentData = state.versionedData[state.currentVersionIndex];
+        if (!currentData) return;
+
+        const prompt = `
+            다음은 '정적검증 업무 포탈'의 현재 검증 데이터입니다. 
+            전문적인 정적검증 엔지니어의 시각에서 전체 진행 상황을 요약하고, 지연이나 문제점이 있다면 이에 대한 원인과 대책을 한국어로 3~4문장 내외로 서술해줘.
+            
+            - 버전: ${state.versions[state.currentVersionIndex]}
+            - 전체 진척도: ${currentData.dashboardData.overallProgress}
+            - 검증 시작일: ${currentData.dashboardData.startDate || '미입력'}
+            - 검증 종료일: ${currentData.dashboardData.endDate || '미입력'}
+            - 예상 상태: ${currentData.dashboardData.expectedSchedule}
+            - 이슈 개수: ${currentData.issuesList.length}개
+            
+            분석을 시작해줘.
+        `;
+
+        const summary = await analyzeDataWithAI(prompt);
+        get().updateVersionData(state.currentVersionIndex, {
+            dashboardData: {
+                ...currentData.dashboardData,
+                aiSummary: summary
+            }
+        });
+    },
+
+    runAIRiskAnalysis: async () => {
+        const state = get();
+        const currentData = state.versionedData[state.currentVersionIndex];
+        if (!currentData) return;
+
+        const prompt = `
+            다음 검증 데이터를 바탕으로 프로젝트의 '위험 요소(Risks)'를 분석해줘.
+            JSON 형식으로 출력해주고, 각 항목은 { title: string, content: string, aiRecommendation: string, level: 'Low' | 'Medium' | 'High' } 구조로 3개 정도 만들어줘.
+            불필요한 설명 없이 JSON 배열만 출력해.
+
+            데이터:
+            - 진척도: ${currentData.dashboardData.overallProgress}
+            - 예상 상태: ${currentData.dashboardData.expectedSchedule}
+            - 이슈 목록: ${JSON.stringify(currentData.issuesList.map(i => i.title))}
+        `;
+
+        try {
+            const rawResponse = await analyzeDataWithAI(prompt);
+            // Clean markdown JSON block if exists
+            const cleaned = rawResponse.replace(/```json|```/g, "").trim();
+            const risks = JSON.parse(cleaned);
+            
+            get().updateVersionData(state.currentVersionIndex, {
+                risksList: risks
+            });
+        } catch (err) {
+            console.error("Risk analysis parsing error:", err);
+        }
     }
   }),
   {
