@@ -31,36 +31,53 @@ export default function RulesPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.rulesList.map((rule: import('../../store/useStore').RuleData, idx: number) => (
-                                    <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
-                                        <td className="p-4 font-bold text-[var(--accent-color)]">{rule.id}</td>
-                                        <td className="p-4">
-                                            <span className="bg-[var(--badge-bg)] border border-[var(--border-color)] px-2 py-1 rounded text-xs">{rule.category}</span>
-                                        </td>
-                                        <td className="p-4 leading-relaxed">{rule.description}</td>
-                                        <td className="p-4 text-[var(--text-muted)] whitespace-nowrap">{rule.location}</td>
-                                        <td className="p-4">
-                                            <div className="flex gap-2">
-                                                <span className="text-lg">🤖</span>
-                                                <span className="text-[var(--text-muted)] italic leading-relaxed">{rule.aiComment}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            {/* Severity indicates critical status, keep colored text but uniform borders/bgs */}
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-bold border border-[var(--border-color)] bg-[var(--bg-color)] ${
-                                                    rule.severity === "High"
-                                                        ? "text-red-500"
-                                                        : rule.severity === "Medium"
-                                                        ? "text-orange-500"
-                                                        : "text-green-500"
-                                                }`}
-                                            >
-                                                {rule.severity}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {data.rulesList.map((rule: import('../../store/useStore').RuleData, idx: number) => {
+                                    const totalViolations = Object.values(rule.subsystemViolations || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                                    const nonZeroSubsystems = Object.entries(rule.subsystemViolations || {})
+                                        .filter(([_, count]) => (Number(count) || 0) > 0)
+                                        .map(([id, count]) => `${id}(${count})`)
+                                        .join(", ");
+
+                                    return (
+                                        <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
+                                            <td className="p-4">
+                                                <div className="font-bold text-[var(--accent-color)]">{rule.id}</div>
+                                                {rule.mabSubId && <div className="text-[10px] text-gray-400">Sub: {rule.mabSubId}</div>}
+                                            </td>
+                                            <td className="p-4">
+                                                <span className="bg-[var(--badge-bg)] border border-[var(--border-color)] px-2 py-1 rounded text-xs">{rule.category}</span>
+                                            </td>
+                                            <td className="p-4 leading-relaxed">{rule.description || "-"}</td>
+                                            <td className="p-4 text-[var(--text-muted)]">
+                                                <div className="font-semibold text-xs mb-1">Total: {totalViolations}</div>
+                                                <div className="text-[10px] max-w-[150px] truncate" title={nonZeroSubsystems}>
+                                                    {nonZeroSubsystems || "없음"}
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex gap-2">
+                                                    <span className="text-lg">🤖</span>
+                                                    <span className="text-[var(--text-muted)] italic leading-relaxed text-xs">
+                                                        {rule.aiComment || "검출된 데이터에 기반한 AI 분석 코멘트가 여기에 표시됩니다."}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold border border-[var(--border-color)] bg-[var(--bg-color)] ${
+                                                        rule.severity === "High"
+                                                            ? "text-red-500"
+                                                            : rule.severity === "Medium"
+                                                            ? "text-orange-500"
+                                                            : "text-green-500"
+                                                    }`}
+                                                >
+                                                    {rule.severity || "Medium"}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                                 {data.rulesList.length === 0 && (
                                     <tr>
                                         <td colSpan={6} className="p-8 text-center text-[var(--text-muted)] text-sm">해당 버전의 데이터가 존재하지 않습니다.</td>

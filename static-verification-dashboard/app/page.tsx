@@ -77,23 +77,34 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.subsystemsList.slice(0, 6).map((item: import('@/store/useStore').SubsystemData, idx: number) => (
-                    <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
-                      <td className="p-3 font-medium">{item.id}</td>
-                      <td className="p-3"><span className="px-2 py-1 rounded text-xs bg-[var(--badge-bg)]">{item.category}</span></td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-full bg-[var(--border-color)] rounded-full h-2">
-                            <div
-                              className="bg-[var(--accent-color)] h-2 rounded-full transition-all duration-500"
-                              style={{ width: `${item.progress}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs font-semibold">{item.progress}%</span>
-                        </div>
+                  {data.subsystemsList.filter(s => (s.newDetectedViolations || 0) > 0 || (s.analyzedViolations || 0) > 0).length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="p-10 text-center text-[var(--text-muted)] italic">
+                        최근 검증된 서브시스템이 없습니다.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    data.subsystemsList
+                      .filter(s => (s.newDetectedViolations || 0) > 0 || (s.analyzedViolations || 0) > 0)
+                      .slice(0, 6)
+                      .map((item: import('@/store/useStore').SubsystemData, idx: number) => (
+                        <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
+                          <td className="p-3 font-medium">{item.id}</td>
+                          <td className="p-3"><span className="px-2 py-1 rounded text-xs bg-[var(--badge-bg)]">{item.category || "General"}</span></td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-full bg-[var(--border-color)] rounded-full h-2">
+                                <div
+                                  className="bg-[var(--accent-color)] h-2 rounded-full transition-all duration-500"
+                                  style={{ width: `${item.progress}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs font-semibold">{item.progress}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                  )}
                 </tbody>
               </table>
             </div>

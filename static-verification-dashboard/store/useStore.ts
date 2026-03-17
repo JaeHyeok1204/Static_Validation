@@ -40,7 +40,7 @@ export interface SubsystemData {
 
 export interface RuleData {
     id: string;
-    subId?: string; // MAB Sub ID support
+    mabSubId?: string; // MAB Sub ID support
     category: 'MAB' | 'MISRA';
     description?: string;
     location?: string;
@@ -121,7 +121,7 @@ const getInitialRules = (): RuleData[] => {
 
 const getInitialSubsystems = (): SubsystemData[] => {
     return SUBSYSTEM_IDS.map(id => ({
-        id, version: "V1.0", newDetectedViolations: 0, analyzedViolations: 0, progress: 0
+        id, newDetectedViolations: 0, analyzedViolations: 0, progress: 0
     }));
 };
 
@@ -341,13 +341,15 @@ export const useStore = create<AppState>()(
             const currentData = state.versionedData[versionIndex];
             if (!currentData) return state;
 
+            const updatedData = {
+                ...currentData,
+                ...partialData
+            };
+
             const newState = {
                 versionedData: {
                     ...state.versionedData,
-                    [versionIndex]: {
-                        ...currentData,
-                        ...partialData
-                    }
+                    [versionIndex]: updatedData
                 }
             };
             
@@ -411,6 +413,15 @@ export const useStore = create<AppState>()(
         const currentData = state.versionedData[state.currentVersionIndex];
         if (!currentData) return;
 
+        // Generate rule violation summary for prompt
+        const ruleViolationSummary = currentData.rulesList
+            .filter(r => Object.values(r.subsystemViolations || {}).some(v => (v as number) > 0))
+            .map(r => {
+                const total = Object.values(r.subsystemViolations || {}).reduce((acc, v) => acc + (v as number), 0);
+                return `${r.id}: 총 ${total}건 위배`;
+            })
+            .join(', ');
+
         const prompt = `
             다음은 '정적검증 업무 포탈'의 현재 검증 데이터입니다. 
             전문적인 정적검증 엔지니어의 시각에서 전체 진행 상황을 요약하고, 지연이나 문제점이 있다면 이에 대한 원인과 대책을 한국어로 3~4문장 내외로 서술해줘.
@@ -421,6 +432,7 @@ export const useStore = create<AppState>()(
             - 검증 종료일: ${currentData.dashboardData.endDate || '미입력'}
             - 예상 상태: ${currentData.dashboardData.expectedSchedule}
             - 이슈 개수: ${currentData.issuesList.length}개
+            - 규칙 위배 현황: ${ruleViolationSummary || '검출된 규칙 위배 없음'}
             
             분석을 시작해줘.
         `;

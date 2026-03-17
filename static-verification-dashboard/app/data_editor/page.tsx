@@ -100,6 +100,15 @@ export default function DataEditorPage() {
         });
     };
 
+    // Rule Matrix Logic
+    const filteredRules = (data?.rulesList || []).filter(r => {
+        const matchesSearch = r.id.toLowerCase().includes(ruleSearch.toLowerCase());
+        const matchesCategory = ruleCategoryFilter === 'ALL' || r.category === ruleCategoryFilter;
+        return matchesSearch && matchesCategory;
+    });
+
+    const paginatedRules = filteredRules.slice((rulePage - 1) * rulesPerPage, rulePage * rulesPerPage);
+
     return (
         <div className="h-full flex flex-col">
             <PageHeader
@@ -310,21 +319,134 @@ export default function DataEditorPage() {
                     </section>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6">
+                {/* 3. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P) */}
+                <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm overflow-x-auto my-6">
+                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
+                        📋 5. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P)
+                        <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 text-xs font-normal">
+                                <span>카테고리:</span>
+                                <select 
+                                    className="border rounded p-1 bg-[var(--bg-color)] text-[var(--text-main)]"
+                                    value={ruleCategoryFilter}
+                                    onChange={(e) => { setRuleCategoryFilter(e.target.value as any); setRulePage(1); }}
+                                >
+                                    <option value="ALL">전체</option>
+                                    <option value="MAB">MAB</option>
+                                    <option value="MISRA">MISRA</option>
+                                </select>
+                            </label>
+                            <div className="relative">
+                                <input 
+                                    type="text" 
+                                    placeholder="규칙 ID 검색..." 
+                                    className="border rounded p-1 pl-7 text-xs bg-[var(--bg-color)] text-[var(--text-main)] w-48"
+                                    value={ruleSearch}
+                                    onChange={(e) => { setRuleSearch(e.target.value); setRulePage(1); }}
+                                />
+                                <span className="absolute left-2 top-1.5 opacity-50">🔍</span>
+                            </div>
+                        </div>
+                    </h2>
 
-                </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse border border-[var(--border-color)] text-[10px]">
+                            <thead>
+                                <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-32">규칙 ID</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">MAB Sub ID</th>
+                                    {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
+                                        <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-blue-600">{ss}</th>
+                                    ))}
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-16 bg-blue-50">합계</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {paginatedRules.map((rule) => {
+                                    const updateViolation = (ssId: string, val: number) => {
+                                        const newViolations = { ...rule.subsystemViolations, [ssId]: val };
+                                        const ruleIdx = data.rulesList.findIndex(r => r.id === rule.id);
+                                        const newList = [...data.rulesList];
+                                        newList[ruleIdx] = { ...rule, subsystemViolations: newViolations };
+                                        updateVersionData(currentVersionIndex, { rulesList: newList });
+                                    };
+                                    const updateSubId = (val: string) => {
+                                        const ruleIdx = data.rulesList.findIndex(r => r.id === rule.id);
+                                        const newList = [...data.rulesList];
+                                        newList[ruleIdx] = { ...rule, mabSubId: val };
+                                        updateVersionData(currentVersionIndex, { rulesList: newList });
+                                    };
+                                    
+                                    const total = Object.values(rule.subsystemViolations || {}).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
+
+                                    return (
+                                        <tr key={rule.id} className="hover:bg-[var(--hover-bg)] transition-colors">
+                                            <td className="p-2 border border-[var(--border-color)] font-medium sticky left-0 bg-[var(--bg-color)] z-10 truncate max-w-[128px]" title={rule.id}>
+                                                {rule.id}
+                                            </td>
+                                            <td className="p-1 border border-[var(--border-color)]">
+                                                {rule.category === 'MAB' ? (
+                                                    <input 
+                                                        value={rule.mabSubId || ""} 
+                                                        onChange={(e) => updateSubId(e.target.value)}
+                                                        className="w-full p-1 border rounded text-center bg-white text-[var(--accent-color)] font-bold"
+                                                        placeholder="Sub ID"
+                                                    />
+                                                ) : <div className="text-center text-gray-300">-</div>}
+                                            </td>
+                                            {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
+                                                <td key={ss} className="p-0 border border-[var(--border-color)]">
+                                                    <input 
+                                                        type="number" 
+                                                        onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
+                                                        value={rule.subsystemViolations?.[ss] || 0}
+                                                        onChange={(e) => updateViolation(ss, Math.max(0, Number(e.target.value)))}
+                                                        className="w-full p-1 text-center bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:bg-blue-50 outline-none"
+                                                    />
+                                                </td>
+                                            ))}
+                                            <td className="p-2 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700">
+                                                {total}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Pagination for Rules Matrix */}
+                    <div className="flex items-center justify-between mt-4 text-xs">
+                        <div className="text-[var(--text-muted)]">
+                            총 <strong>{filteredRules.length}</strong>개 규칙 중 {(rulePage-1)*rulesPerPage + 1}-{(Math.min(rulePage*rulesPerPage, filteredRules.length))} 표시 중
+                        </div>
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => setRulePage(p => Math.max(1, p - 1))}
+                                disabled={rulePage === 1}
+                                className="px-3 py-1 border rounded disabled:opacity-30 hover:bg-[var(--hover-bg)]"
+                            >이전</button>
+                            <span className="px-3 py-1 font-bold">{rulePage} / {Math.ceil(filteredRules.length / rulesPerPage) || 1}</span>
+                            <button 
+                                onClick={() => setRulePage(p => p + 1)}
+                                disabled={rulePage >= Math.ceil(filteredRules.length / rulesPerPage)}
+                                className="px-3 py-1 border rounded disabled:opacity-30 hover:bg-[var(--hover-bg)]"
+                            >다음</button>
+                        </div>
+                    </div>
+                </section>
 
                 {/* 4. 정적검증 소요시간 평가 */}
                 <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm overflow-x-auto">
                     <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
-                        ⏱️ 정적검증 소요시간 평가 (A~M)
+                        ⏱️ 정적검증 소요시간 평가 (A~P)
                         <span className="text-xs font-normal text-[var(--accent-color)]">* 데이터 수정 즉시 소요시간 탭에 반영</span>
                     </h2>
                     
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                         {/* Component Time Array */}
                         <div>
-                            <h3 className="font-bold text-sm mb-2 text-[var(--text-muted)] border-b border-[var(--border-color)] pb-1">Component 평가시간 (A~M)</h3>
+                            <h3 className="font-bold text-sm mb-2 text-[var(--text-muted)] border-b border-[var(--border-color)] pb-1">Component 평가시간 (A~P)</h3>
                             <table className="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr className="border-b border-[var(--border-color)] bg-[var(--hover-bg)]">
@@ -335,7 +457,7 @@ export default function DataEditorPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].map((subsystemChar) => {
+                                    {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'].map((subsystemChar) => {
                                         const prevVersionData = currentVersionIndex > 0 ? versionedData[currentVersionIndex - 1] : null;
                                         const prevCompItem = prevVersionData?.timeEvaluationComponent?.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
                                         const autoPrevTime = prevCompItem ? prevCompItem.currentTime : "0h";
@@ -365,7 +487,7 @@ export default function DataEditorPage() {
 
                         {/* Runnable Time Array */}
                         <div>
-                            <h3 className="font-bold text-sm mb-2 text-[var(--text-muted)] border-b border-[var(--border-color)] pb-1">Runnable 평가시간 (A~M)</h3>
+                            <h3 className="font-bold text-sm mb-2 text-[var(--text-muted)] border-b border-[var(--border-color)] pb-1">Runnable 평가시간 (A~P)</h3>
                             <table className="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr className="border-b border-[var(--border-color)] bg-[var(--hover-bg)]">
