@@ -11,19 +11,27 @@ export default function HomePage() {
   const currentVersionIndex = useStore((state) => state.currentVersionIndex);
   const versionedData = useStore((state) => state.versionedData);
   const versions = useStore((state) => state.versions); // Assuming versions is available in the store
-  const data = versionedData[currentVersionIndex];
+    const data = versionedData[currentVersionIndex];
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const aiSummary = data.dashboardData.aiSummary;
-  const runAIAnalysis = useStore((state) => state.runAIAnalysis);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+    if (!data) return (
+        <div className="h-full flex flex-col items-center justify-center p-10 text-center">
+            <div className="bg-[var(--bg-color)] border border-[var(--border-color)] p-10 rounded-3xl shadow-xl max-w-md">
+                <h2 className="text-2xl font-bold text-[var(--text-main)] mb-4">새로운 시작! 🚀</h2>
+                <p className="text-[var(--text-muted)] mb-6">현재 등록된 검증 버전이 없습니다. [데이터 통합 에디터] 메뉴에서 첫 번째 버전을 생성하여 대시보드를 활성화하세요.</p>
+                <a href="/data_editor" className="inline-block bg-[var(--accent-color)] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:brightness-110 transition-all">버전 생성하러 가기</a>
+            </div>
+        </div>
+    );
 
-  const handleRunAI = async () => {
-      setIsAnalyzing(true);
-      await runAIAnalysis();
-      setIsAnalyzing(false);
-  };
+    const aiSummary = data.dashboardData.aiSummary;
+    const runAIAnalysis = useStore((state) => state.runAIAnalysis);
 
-  if (!data) return null;
+    const handleRunAI = async () => {
+        setIsAnalyzing(true);
+        await runAIAnalysis();
+        setIsAnalyzing(false);
+    };
 
   return (
     <div className="h-full flex flex-col">

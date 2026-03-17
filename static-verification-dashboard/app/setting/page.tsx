@@ -11,6 +11,8 @@ export default function SettingPage() {
     const geminiApiKey = useStore((state) => state.geminiApiKey);
     const setGeminiApiKey = useStore((state) => state.setGeminiApiKey);
     const currentUser = useStore((state) => state.currentUser);
+    const resetValidationData = useStore((state) => state.resetValidationData);
+    const resetAiData = useStore((state) => state.resetAiData);
 
     const [localApiKey, setLocalApiKey] = useState(geminiApiKey);
 
@@ -18,14 +20,16 @@ export default function SettingPage() {
         setLocalApiKey(geminiApiKey);
     }, [geminiApiKey]);
 
-    const handleResetValidation = () => {
+    const handleResetValidation = async () => {
         if (confirm("정말로 모든 [검증 데이터]를 초기화하시겠습니까? 이 작업은 복구할 수 없습니다.")) {
+            await resetValidationData();
             alert("검증 데이터가 초기화되었습니다.");
         }
     };
 
-    const handleResetAi = () => {
+    const handleResetAi = async () => {
         if (confirm("정말로 모든 [AI 분석 이력 및 캐시 데이터]를 초기화하시겠습니까?")) {
+            await resetAiData();
             alert("AI 데이터가 초기화되었습니다.");
         }
     };

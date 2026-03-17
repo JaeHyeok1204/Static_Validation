@@ -131,6 +131,8 @@ interface AppState {
     runAIAnalysis: () => Promise<void>;
     runAIRiskAnalysis: () => Promise<void>;
     runIssueAIAnalysis: (issueId: string | number) => Promise<void>;
+    resetValidationData: () => Promise<void>;
+    resetAiData: () => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -480,6 +482,45 @@ export const useStore = create<AppState>()(
         } catch (err) {
             console.error("Issue AI analysis error:", err);
         }
+    },
+
+    resetValidationData: async () => {
+        set({
+            versions: [],
+            versionedData: {},
+            currentVersionIndex: 0
+        });
+        await get().syncToDB({
+            versions: [],
+            versionedData: {}
+        } as any);
+    },
+
+    resetAiData: async () => {
+        const state = get();
+        const newVersionedData = { ...state.versionedData };
+
+        Object.keys(newVersionedData).forEach((key: any) => {
+            const data = newVersionedData[key];
+            newVersionedData[key] = {
+                ...data,
+                dashboardData: {
+                    ...data.dashboardData,
+                    aiSummary: "AI 데이터가 초기화되었습니다."
+                },
+                risksList: [],
+                issuesList: data.issuesList.map((issue: any) => ({
+                    ...issue,
+                    aiRecommendation: undefined
+                }))
+            };
+        });
+
+        set({ versionedData: newVersionedData });
+        await get().syncToDB({
+            versions: state.versions,
+            versionedData: newVersionedData
+        } as any);
     }
   }),
   {
