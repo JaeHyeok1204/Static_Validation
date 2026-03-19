@@ -180,6 +180,10 @@ interface AppState {
     resetValidationData: () => Promise<void>;
     resetAiData: () => Promise<void>;
     
+    // Password Reset Actions
+    sendResetCode: (userId: string) => Promise<boolean>;
+    resetWithCode: (userId: string, code: string, newPasswordText: string) => Promise<boolean>;
+
     INITIAL_MAB_RULE_IDS: string[];
     INITIAL_MISRA_RULE_IDS: string[];
 }
@@ -659,6 +663,88 @@ export const useStore = create<AppState>()(
             versions: state.versions,
             versionedData: newVersionedData
         } as any);
+    },
+
+    sendResetCode: async (userIdText: string) => {
+        const userId = userIdText.trim();
+        // Check if user exists
+        const { data: user, error: userError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('id', userId)
+            .maybeSingle();
+        
+        if (userError || !user) {
+            console.error("User not found for password reset:", userId);
+            return false;
+        }
+
+        // Generate 6-digit code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60000).toISOString(); // 10 minutes
+
+        try {
+            // Save code to DB
+            const { error: codeError } = await supabase.from('verification_codes').insert([{
+                user_id: userId,
+                code: code,
+                expires_at: expiresAt
+            }]);
+
+            if (codeError) throw codeError;
+
+            // Send email via lib/email (imported dynamically to avoid bundling issues if any)
+            const { sendVerificationEmail } = await import('@/lib/email');
+            const emailSent = await sendVerificationEmail(userId, code);
+            
+            return emailSent;
+        } catch (err) {
+            console.error("Failed to process reset code:", err);
+            return false;
+        }
+    },
+
+    resetWithCode: async (userIdText: string, codeText: string, newPasswordText: string) => {
+        const userId = userIdText.trim();
+        const code = codeText.trim();
+        const newPassword = newPasswordText.trim();
+
+        try {
+            // 1. Verify code
+            const { data: codeEntry, error: codeError } = await supabase
+                .from('verification_codes')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('code', code)
+                .gt('expires_at', new Date().toISOString())
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (codeError || !codeEntry) {
+                console.error("Invalid or expired code");
+                return false;
+            }
+
+            // 2. Hash new password
+            const hashedPassword = await hashPassword(newPassword);
+
+            // 3. Update password in users table
+            const { error: updateError } = await supabase
+                .from('users')
+                .update({ password: hashedPassword })
+                .eq('id', userId);
+
+            if (updateError) throw updateError;
+
+            // 4. Delete used code (cleanup)
+            await supabase.from('verification_codes').delete().eq('user_id', userId);
+
+            return true;
+        } catch (err) {
+            console.error("Reset password error:", err);
+            return false;
+        }
     }
   }),
   {

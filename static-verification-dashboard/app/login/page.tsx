@@ -92,6 +92,12 @@ export default function LoginPage() {
                             회원가입
                         </button>
                     </p>
+                    <button 
+                        onClick={() => router.push("/forgot-password")}
+                        className="mt-3 text-xs text-[var(--text-muted)] hover:text-[var(--accent-color)] underline bg-transparent border-none cursor-pointer block w-full text-center"
+                    >
+                        비밀번호를 잊으셨나요?
+                    </button>
                 </div>
             </div>
         </div>
