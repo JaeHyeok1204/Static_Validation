@@ -714,13 +714,8 @@ export const useStore = create<AppState>()(
                 return { success: false, error: "인증번호 저장 중 오류가 발생했습니다." };
             }
 
-            // Send email
-            const { sendVerificationEmail } = await import('@/lib/email');
-            const emailSent = await sendVerificationEmail(userEmail, code);
-            
-            if (!emailSent) {
-                return { success: false, error: "이메일 발송에 실패했습니다. 관리자에게 문의하거나 API 키 설정을 확인해주세요." };
-            }
+            // In static mode, the database trigger handles the actual email sending
+            return { success: true };
 
             return { success: true };
         } catch (err) {
