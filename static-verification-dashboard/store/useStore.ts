@@ -201,19 +201,21 @@ export const useStore = create<AppState>()(
 
     syncVersionIndex: (index: number) => set({ currentVersionIndex: index }),
 
-    login: async (userId: string, passwordText: string): Promise<boolean> => {
+    login: async (userIdText: string, passwordText: string): Promise<boolean> => {
+        const userId = userIdText.trim();
+        const rawPassword = passwordText.trim();
         try {
-            const hashedPassword = await hashPassword(passwordText);
+            const hashedPassword = await hashPassword(rawPassword);
             
             const { data, error } = await supabase
                 .from('users')
-                .select('*')
+                .select('id, name, birth_date, team_name, position, gemini_api_key')
                 .eq('id', userId)
                 .eq('password', hashedPassword)
-                .single();
+                .maybeSingle();
 
             if (error || !data) {
-                console.error("Login failed:", error?.message);
+                if (error) console.error("Login DB error:", error.message);
                 return false;
             }
 
@@ -237,27 +239,28 @@ export const useStore = create<AppState>()(
         }
     },
     logout: () => {
-        document.cookie = "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure";
+        document.cookie = "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
         set({ currentUser: null, geminiApiKey: '' });
     },
     register: async (user: User) => {
         if (!user.password) return;
         
         try {
+            const userId = user.id.trim();
+            const rawPassword = user.password.trim();
             // Hash the password before storage
-            const hashedPassword = await hashPassword(user.password);
+            const hashedPassword = await hashPassword(rawPassword);
             
-            // 1. Update local state (optional, just for session if needed)
-            // But we remove the password from the object first
-            const { password, ...userWithoutPassword } = user;
+            // 1. Update local state
+            const { password, ...userWithoutPassword } = { ...user, id: userId };
             
             // 2. Sync to Supabase
             const { error } = await supabase.from('users').insert([{
-                id: user.id,
+                id: userId,
                 password: hashedPassword, // Store hashed
-                name: user.name,
+                name: user.name.trim(),
                 birth_date: user.birthDate,
-                team_name: user.teamName,
+                team_name: user.teamName.trim(),
                 position: user.position,
                 gemini_api_key: user.geminiApiKey || ""
             }]);

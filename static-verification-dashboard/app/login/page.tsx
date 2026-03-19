@@ -26,7 +26,9 @@ export default function LoginPage() {
         const success = await login(id, password);
         
         if (success) {
-            document.cookie = `auth_session=true; path=/; max-age=86400; SameSite=Strict; Secure`;
+            // Use Lax and remove Secure for local development/HTTP compatibility if needed
+            // For production, Secure; SameSite=Strict is better, but maybe blocking user now
+            document.cookie = `auth_session=true; path=/; max-age=86400; SameSite=Lax`;
             router.push("/");
         } else {
             setError("회원 정보가 일치하지 않습니다. 가입 여부나 비밀번호를 확인해주세요.");

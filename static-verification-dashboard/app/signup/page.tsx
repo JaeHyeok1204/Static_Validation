@@ -46,11 +46,11 @@ export default function SignupPage() {
         }
 
         const newUser = {
-            id: formData.id,
-            password: formData.password,
-            name: formData.name,
+            id: formData.id.trim(),
+            password: formData.password.trim(),
+            name: formData.name.trim(),
             birthDate: formData.birthDate,
-            teamName: formData.teamName,
+            teamName: formData.teamName.trim(),
             position: formData.position
         };
 
