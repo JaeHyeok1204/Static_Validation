@@ -58,13 +58,13 @@ export default function LoginPage() {
 
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1.5 ml-1">ID (사원번호)</label>
+                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1.5 ml-1">ID</label>
                         <input
                             type="text"
                             value={id}
                             onChange={(e) => setId(e.target.value)}
                             className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] transition-all"
-                            placeholder="사원번호 입력"
+                            placeholder="아이디 입력"
                         />
                     </div>
                     

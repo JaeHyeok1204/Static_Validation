@@ -52,13 +52,13 @@ export default function ForgotPasswordPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-semibold mb-1.5 ml-1">ID (사원번호)</label>
+                        <label className="block text-sm font-semibold mb-1.5 ml-1">ID</label>
                         <input
                             type="text"
                             value={userId}
                             onChange={(e) => setUserId(e.target.value)}
                             className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--accent-color)] outline-none transition-all"
-                            placeholder="사원번호 입력"
+                            placeholder="아이디 입력"
                         />
                     </div>
                     <div>

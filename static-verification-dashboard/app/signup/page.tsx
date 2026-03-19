@@ -89,38 +89,38 @@ export default function SignupPage() {
                 <form onSubmit={handleSignup} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">ID (사원번호)</label>
+                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">ID</label>
                             <input
                                 name="id"
                                 type="text"
                                 value={formData.id}
                                 onChange={handleChange}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                                placeholder="사원번호"
+                                placeholder="아이디"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">성함</label>
+                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">이름</label>
                             <input
                                 name="name"
                                 type="text"
                                 value={formData.name}
                                 onChange={handleChange}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                                placeholder="성함"
+                                placeholder="이름"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">이메일 (회사 메일)</label>
+                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">이메일</label>
                         <input
                             name="email"
                             type="email"
                             value={formData.email}
                             onChange={handleChange}
                             className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                            placeholder="example@company.com"
+                            placeholder="이메일 주소 입력"
                         />
                     </div>
 
@@ -174,17 +174,19 @@ export default function SignupPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">직무</label>
+                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">직위</label>
                         <select
                             name="position"
                             value={formData.position}
                             onChange={handleChange}
                             className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
                         >
-                            <option value="정적검증 담당">정적검증 담당</option>
-                            <option value="품질 관리자">품질 관리자</option>
-                            <option value="시스템 설계자">시스템 설계자</option>
-                            <option value="개발자">개발자</option>
+                            <option value="전임연구원">전임연구원</option>
+                            <option value="선임연구원">선임연구원</option>
+                            <option value="책임연구원">책임연구원</option>
+                            <option value="수석연구원">수석연구원</option>
+                            <option value="팀장">팀장</option>
+                            <option value="실장">실장</option>
                         </select>
                     </div>
 
@@ -200,7 +202,7 @@ export default function SignupPage() {
                             disabled={loading}
                             className="w-full bg-[var(--accent-color)] text-[var(--bg-color)] font-bold rounded-xl px-4 py-3 shadow-md hover:brightness-110 transition-all flex justify-center items-center disabled:opacity-50"
                         >
-                            {loading ? "가입 중..." : "회원가입 완료"}
+                            {loading ? "가입 중..." : "회원가입"}
                         </button>
                         
                         <button 

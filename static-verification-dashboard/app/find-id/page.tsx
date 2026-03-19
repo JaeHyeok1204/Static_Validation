@@ -58,7 +58,7 @@ export default function FindIdPage() {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--accent-color)] outline-none transition-all"
-                                placeholder="성함 입력"
+                                placeholder="이름 입력"
                             />
                         </div>
                         <div>
