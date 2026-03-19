@@ -9,6 +9,7 @@ type ThemeType = 'light' | 'dark' | 'blue' | 'red';
 
 export interface User {
     id: string;
+    email: string; // NEW: Required for recovery and standard compliance
     password?: string;
     name: string;
     birthDate: string;
@@ -181,8 +182,9 @@ interface AppState {
     resetAiData: () => Promise<void>;
     
     // Password Reset Actions
-    sendResetCode: (userId: string) => Promise<boolean>;
+    sendResetCode: (userId: string, name: string, email: string, birthDate: string) => Promise<boolean>;
     resetWithCode: (userId: string, code: string, newPasswordText: string) => Promise<boolean>;
+    findUserId: (name: string, birthDate: string) => Promise<string | null>;
 
     INITIAL_MAB_RULE_IDS: string[];
     INITIAL_MISRA_RULE_IDS: string[];
@@ -213,7 +215,7 @@ export const useStore = create<AppState>()(
             
             const { data, error } = await supabase
                 .from('users')
-                .select('id, name, birth_date, team_name, position, gemini_api_key')
+                .select('id, email, name, birth_date, team_name, position, gemini_api_key')
                 .eq('id', userId)
                 .eq('password', hashedPassword)
                 .maybeSingle();
@@ -225,6 +227,7 @@ export const useStore = create<AppState>()(
 
             const user: User = {
                 id: data.id,
+                email: data.email || "",
                 name: data.name,
                 birthDate: data.birth_date,
                 teamName: data.team_name,
@@ -259,6 +262,7 @@ export const useStore = create<AppState>()(
             // 2. Sync to Supabase
             const { error } = await supabase.from('users').insert([{
                 id: userId,
+                email: user.email.trim(),
                 password: hashedPassword,
                 name: user.name.trim(),
                 birth_date: user.birthDate,
@@ -281,66 +285,52 @@ export const useStore = create<AppState>()(
 
     syncFromDB: async () => {
         try {
-            // Load Users
-            const { data: users, error: userError } = await supabase.from('users').select('id, name, birth_date, team_name, position');
+            // 1. Load Users
+            const { data: users, error: userError } = await supabase
+                .from('users')
+                .select('id, email, name, birth_date, team_name, position');
             if (userError) throw userError;
-            
-            // Load App State (Versioned Data)
-            const { data: appStates, error: stateError } = await supabase.from('app_state').select('data').limit(1).single();
-            if (stateError) {
-                if (stateError.code !== 'PGRST116') throw stateError; // Ignore if empty
-            }
 
-            const mappedUsers: User[] = (users || []).map(u => ({
+            const formattedUsers: User[] = (users || []).map(u => ({
                 id: u.id,
+                email: u.email || "",
                 name: u.name,
                 birthDate: u.birth_date,
                 teamName: u.team_name,
-                position: u.position,
-                geminiApiKey: "" // Never fetch API key in bulk sync
+                position: u.position
             }));
+            
+            set({ usersList: formattedUsers });
 
-            if (appStates && appStates.data && Object.keys(appStates.data).length > 0) {
+            // 2. Load App State (Versioned Data)
+            const { data: appStates, error: stateError } = await supabase
+                .from('app_state')
+                .select('data')
+                .limit(1)
+                .maybeSingle();
+            
+            if (stateError) {
+                console.error("Error loading app state:", stateError);
+            }
+
+            if (appStates && appStates.data) {
                 const remoteData = appStates.data as any;
-                const remoteVersionedData = remoteData.versionedData || initialVersionedData;
-                
-                // MIGRATION: Ensure all versions have the latest structure (rulesList, subsystemsList A-P)
-                const migratedVersionedData: Record<number, VersionData> = {};
-                Object.keys(remoteVersionedData).forEach((idxStr) => {
-                    const idx = parseInt(idxStr);
-                    const vData = remoteVersionedData[idx];
-                    migratedVersionedData[idx] = {
-                        ...emptyVersionData,
-                        ...vData,
-                        // Ensure lists are initialized
-                        rulesList: (vData.rulesList && vData.rulesList.length > 0) ? vData.rulesList : getInitialRules(),
-                        subsystemsList: (vData.subsystemsList && vData.subsystemsList.length > 0) ? vData.subsystemsList : getInitialSubsystems(),
-                    };
-                });
-
-                const stateUpdates: any = {
-                    usersList: mappedUsers,
-                    versions: remoteData.versions || initialVersions,
-                    versionedData: migratedVersionedData,
-                };
-
-                // CRITICAL: Update the current logged-in user's session from the refreshed list
-                const state = get();
-                if (state.currentUser) {
-                    const refreshedUser = mappedUsers.find(u => u.id === state.currentUser?.id);
-                    if (refreshedUser) {
-                        stateUpdates.currentUser = refreshedUser;
-                        // ONLY synchronize if the DB actually has a non-empty key.
-                        // This prevents missing columns or empty DB fields from wiping out local persistence.
-                        if (refreshedUser.geminiApiKey && refreshedUser.geminiApiKey.trim() !== "") {
-                            stateUpdates.geminiApiKey = refreshedUser.geminiApiKey;
-                        }
-                    }
+                if (remoteData.versions && remoteData.versionedData) {
+                    set({
+                        versions: remoteData.versions,
+                        versionedData: remoteData.versionedData,
+                        currentVersionIndex: remoteData.versions.length - 1
+                    });
                 }
+            }
 
-                set(stateUpdates);
-            } else {
-                set({ usersList: mappedUsers });
+            // 3. Update current user if exists
+            const state = get();
+            if (state.currentUser) {
+                const refreshedUser = formattedUsers.find(u => u.id === state.currentUser?.id);
+                if (refreshedUser) {
+                    set({ currentUser: refreshedUser });
+                }
             }
         } catch (err) {
             console.error("Critical: Failed to sync from Supabase:", err);
@@ -665,17 +655,23 @@ export const useStore = create<AppState>()(
         } as any);
     },
 
-    sendResetCode: async (userIdText: string) => {
+    sendResetCode: async (userIdText: string, name: string, email: string, birthDate: string) => {
         const userId = userIdText.trim();
-        // Check if user exists
+        const userEmail = email.trim();
+        const userName = name.trim();
+        
+        // Comprehensive verification: ID, Name, Email, BirthDate must all match
         const { data: user, error: userError } = await supabase
             .from('users')
             .select('id')
             .eq('id', userId)
+            .eq('name', userName)
+            .eq('email', userEmail)
+            .eq('birth_date', birthDate)
             .maybeSingle();
         
         if (userError || !user) {
-            console.error("User not found for password reset:", userId);
+            console.error("User identity verification failed for reset:", { userId, userName, userEmail, birthDate });
             return false;
         }
 
@@ -693,9 +689,9 @@ export const useStore = create<AppState>()(
 
             if (codeError) throw codeError;
 
-            // Send email via lib/email (imported dynamically to avoid bundling issues if any)
+            // Send email
             const { sendVerificationEmail } = await import('@/lib/email');
-            const emailSent = await sendVerificationEmail(userId, code);
+            const emailSent = await sendVerificationEmail(userEmail, code);
             
             return emailSent;
         } catch (err) {
@@ -744,6 +740,23 @@ export const useStore = create<AppState>()(
         } catch (err) {
             console.error("Reset password error:", err);
             return false;
+        }
+    },
+
+    findUserId: async (name: string, birthDate: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('id')
+                .eq('name', name.trim())
+                .eq('birth_date', birthDate)
+                .maybeSingle();
+            
+            if (error || !data) return null;
+            return data.id;
+        } catch (err) {
+            console.error("Find ID error:", err);
+            return null;
         }
     }
   }),

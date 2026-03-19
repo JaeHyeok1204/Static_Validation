@@ -11,15 +11,17 @@ export default function SignupPage() {
 
     const [formData, setFormData] = useState({
         id: "",
+        email: "",
         password: "",
         passwordConfirm: "",
         name: "",
         birthDate: "",
         teamName: "",
-        position: ""
+        position: "정적검증 담당"
     });
     
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,16 +47,23 @@ export default function SignupPage() {
             return;
         }
 
-        const newUser = {
-            id: formData.id.trim(),
-            password: formData.password.trim(),
-            name: formData.name.trim(),
-            birthDate: formData.birthDate,
-            teamName: formData.teamName.trim(),
-            position: formData.position
-        };
+        if (usersList.some(u => u.email === formData.email)) {
+            setError("이미 사용 중인 이메일입니다.");
+            return;
+        }
 
+        setLoading(true);
         try {
+            const newUser = {
+                id: formData.id.trim(),
+                email: formData.email.trim(),
+                password: formData.password.trim(),
+                name: formData.name.trim(),
+                birthDate: formData.birthDate,
+                teamName: formData.teamName.trim(),
+                position: formData.position
+            };
+
             await register(newUser);
             alert("회원가입이 완료되었습니다. 로그인 화면으로 이동합니다.");
             router.push("/login");
@@ -64,6 +73,8 @@ export default function SignupPage() {
             } else {
                 setError(`회원가입 중 오류가 발생했습니다: ${err.message || "서버 통신 실패"}`);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -71,34 +82,46 @@ export default function SignupPage() {
         <div className="min-h-screen bg-[var(--bg-color)] flex items-center justify-center p-4 py-12">
             <div className="bg-[var(--bg-color)] border border-[var(--border-color)] shadow-xl rounded-2xl p-8 w-full max-w-lg">
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold tracking-tight text-[var(--text-main)] mb-2">회원가입</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-[var(--text-main)] mb-1">회원가입</h1>
                     <p className="text-sm text-[var(--text-muted)]">포탈 사용을 위한 계정 정보를 입력해주세요.</p>
                 </div>
 
                 <form onSubmit={handleSignup} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">ID</label>
+                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">ID (사원번호)</label>
                             <input
                                 name="id"
                                 type="text"
                                 value={formData.id}
                                 onChange={handleChange}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                                placeholder="아이디"
+                                placeholder="사원번호"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">이름</label>
+                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">성함</label>
                             <input
                                 name="name"
                                 type="text"
                                 value={formData.name}
                                 onChange={handleChange}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                                placeholder="이름 (예: 홍길동)"
+                                placeholder="성함"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">이메일 (회사 메일)</label>
+                        <input
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
+                            placeholder="example@company.com"
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -126,18 +149,17 @@ export default function SignupPage() {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">생년월일</label>
-                        <input
-                            name="birthDate"
-                            type="date"
-                            value={formData.birthDate}
-                            onChange={handleChange}
-                            className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                        />
-                    </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">생년월일</label>
+                            <input
+                                name="birthDate"
+                                type="date"
+                                value={formData.birthDate}
+                                onChange={handleChange}
+                                className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
+                            />
+                        </div>
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-main)] mb-1">팀명</label>
                             <input
@@ -146,26 +168,24 @@ export default function SignupPage() {
                                 value={formData.teamName}
                                 onChange={handleChange}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                                placeholder="예: 개발 1팀"
+                                placeholder="소속 팀"
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[var(--text-main)] mb-1">직위</label>
-                            <select
-                                name="position"
-                                value={formData.position}
-                                onChange={handleChange}
-                                className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
-                            >
-                                <option value="">선택하세요</option>
-                                <option value="전임연구원">전임연구원</option>
-                                <option value="선임연구원">선임연구원</option>
-                                <option value="책임연구원">책임연구원</option>
-                                <option value="수석연구원">수석연구원</option>
-                                <option value="팀장">팀장</option>
-                                <option value="실장">실장</option>
-                            </select>
-                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--text-main)] mb-1">직무</label>
+                        <select
+                            name="position"
+                            value={formData.position}
+                            onChange={handleChange}
+                            className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]"
+                        >
+                            <option value="정적검증 담당">정적검증 담당</option>
+                            <option value="품질 관리자">품질 관리자</option>
+                            <option value="시스템 설계자">시스템 설계자</option>
+                            <option value="개발자">개발자</option>
+                        </select>
                     </div>
 
                     {error && (
@@ -174,19 +194,21 @@ export default function SignupPage() {
                         </div>
                     )}
 
-                    <div className="pt-4 flex gap-3">
-                        <button
-                            type="button"
-                            onClick={() => router.push("/login")}
-                            className="flex-1 bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--text-main)] font-medium rounded-xl px-4 py-3 hover:bg-[var(--hover-bg)] transition-colors"
-                        >
-                            취소
-                        </button>
+                    <div className="pt-6 flex flex-col gap-3">
                         <button
                             type="submit"
-                            className="flex-1 bg-[var(--accent-color)] text-[var(--bg-color)] font-bold rounded-xl px-4 py-3 shadow-md hover:brightness-110 transition-all"
+                            disabled={loading}
+                            className="w-full bg-[var(--accent-color)] text-[var(--bg-color)] font-bold rounded-xl px-4 py-3 shadow-md hover:brightness-110 transition-all flex justify-center items-center disabled:opacity-50"
                         >
-                            가입하기
+                            {loading ? "가입 중..." : "회원가입 완료"}
+                        </button>
+                        
+                        <button 
+                            type="button"
+                            onClick={() => router.push("/login")}
+                            className="w-full bg-transparent text-[var(--text-muted)] font-medium rounded-xl px-4 py-2 hover:bg-[var(--hover-bg)] transition-colors"
+                        >
+                            취소 후 로그인으로 돌아가기
                         </button>
                     </div>
                 </form>

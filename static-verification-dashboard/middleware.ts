@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
     '/setting'
   ];
 
-  const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+  const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/find-id'];
 
   const cookieValue = request.cookies.get('auth_session')?.value;
   const isAuthenticated = cookieValue === 'true';

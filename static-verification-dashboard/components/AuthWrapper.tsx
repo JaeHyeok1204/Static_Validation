@@ -25,7 +25,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     useEffect(() => {
         if (!isMounted) return;
         
-        const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+        const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/find-id'];
         const isPublicRoute = publicRoutes.includes(pathname);
 
         if (!currentUser && !isPublicRoute) {
@@ -42,7 +42,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
         return <div className="min-h-screen bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-main)]">로딩 중...</div>;
     }
 
-    const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+    const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/find-id'];
     if (!currentUser && !publicRoutes.includes(pathname)) {
         return null;
     }
