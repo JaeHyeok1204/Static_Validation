@@ -702,9 +702,9 @@ export const useStore = create<AppState>()(
         const expiresAt = new Date(Date.now() + 10 * 60000).toISOString(); // 10 minutes
 
         try {
-            // Save code to DB
+            // Save code to DB - This will trigger the SQL function to send the email
             const { error: codeError } = await supabase.from('verification_codes').insert([{
-                user_id: user.id, // Use the real ID from DB
+                user_id: user.id,
                 code: code,
                 expires_at: expiresAt
             }]);
