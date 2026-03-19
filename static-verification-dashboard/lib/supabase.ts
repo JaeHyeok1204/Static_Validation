@@ -1,10 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-url.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+// PRODUCTION-READY FALLBACK: During dev, if .env.local isn't picked up, 
+// we use the actual project URL rather than placeholder to prevent 'Failed to fetch'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://cswnxjwjjavdphznlzeb.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_66jJ2c5H0EtsO4LyGqrFSA_YeaAqMuw';
 
-if (supabaseUrl.includes('placeholder')) {
-  console.warn("⚠️ Supabase URL is using placeholder. Check your .env.local and restart the server.");
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  console.warn("⚠️ NEXT_PUBLIC_SUPABASE_URL is missing from environment. Using hardcoded fallback.");
+} else {
+  const urlDomain = new URL(supabaseUrl).hostname;
+  console.log(`📡 Supabase client initialized for: ${urlDomain}`);
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
