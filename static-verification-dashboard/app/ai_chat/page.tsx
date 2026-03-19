@@ -17,21 +17,62 @@ export default function AiChatPage() {
     const currentUser = useStore((state) => state.currentUser);
     const userNameDisplay = currentUser ? `${currentUser.name} ${currentUser.position}` : '연구원 (사용자)';
 
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "1",
-            role: "ai",
-            content: "안녕하세요! 모델 정적검증 운영 포털을 위한 Gemini AI 어시스턴트입니다.\n어떤 작업을 도와드릴까요? 데이터를 학습시키거나, 검증 로직에 대한 피드백을 받을 수 있습니다.",
-            timestamp: new Date()
-        }
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    const [isLoadingLogs, setIsLoadingLogs] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fetchStarted = useRef(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    // 1. Fetch existing messages from Supabase on mount
+    useEffect(() => {
+        if (!currentUser || fetchStarted.current) return;
+        fetchStarted.current = true;
+
+        const fetchMessages = async () => {
+            try {
+                const { supabase } = await import('@/lib/supabase');
+                const { data, error } = await supabase
+                    .from('chat_messages')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: true })
+                    .limit(50);
+
+                if (error) {
+                    console.error("Error fetching chat logs:", error);
+                } else if (data && data.length > 0) {
+                    const mappedMessages: Message[] = data.map(m => ({
+                        id: m.id,
+                        role: m.role as "user" | "ai",
+                        content: m.content,
+                        timestamp: new Date(m.created_at)
+                    }));
+                    setMessages(mappedMessages);
+                } else {
+                    // Initial welcome message if no history
+                    setMessages([
+                        {
+                            id: "1",
+                            role: "ai",
+                            content: "안녕하세요! 모델 정적검증 운영 포탈을 위한 Gemini AI 어시스턴트입니다.\n어떤 작업을 도와드릴까요? 데이터를 학습시키거나, 검증 로직에 대한 피드백을 받을 수 있습니다.",
+                            timestamp: new Date()
+                        }
+                    ]);
+                }
+            } catch (err) {
+                console.error("Failed to load chat history:", err);
+            } finally {
+                setIsLoadingLogs(false);
+            }
+        };
+
+        fetchMessages();
+    }, [currentUser]);
 
     useEffect(() => {
         scrollToBottom();
@@ -39,7 +80,7 @@ export default function AiChatPage() {
 
     const handleSend = async (manualInput?: string) => {
         const textToSend = manualInput || input;
-        if (!textToSend.trim()) return;
+        if (!textToSend.trim() || !currentUser) return;
 
         const userQuery = textToSend.trim();
         const newUserMsg: Message = {
@@ -54,19 +95,33 @@ export default function AiChatPage() {
         setIsTyping(true);
 
         try {
-            // Get current project context for better AI answers
+            const { supabase } = await import('@/lib/supabase');
+            
+            // Save User message to DB
+            await supabase.from('chat_messages').insert([{
+                user_id: currentUser.id,
+                role: 'user',
+                content: userQuery
+            }]);
+
             const state = useStore.getState();
             const currentData = state.versionedData[state.currentVersionIndex];
             
+            // Include recent history for better context (last 5 messages)
+            const historyText = messages.slice(-5).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n');
+
             const contextPrompt = `
                 너는 '정적검증 업무 관리 시스템'의 전문 AI 어시스턴트야.
-                사용자가 질문을 하거나 업무 지시를 내리면, 아래의 현재 프로젝트 데이터를 참고해서 전문적이고 친절하게 답변해줘.
+                사용자가 질문을 하거나 업무 지시를 내리면, 아래의 현재 프로젝트 데이터와 대화 흐름을 참고해서 전문적이고 친절하게 답변해줘.
                 
                 [현재 프로젝트 정보]
                 - 현재 버전: ${state.versions[state.currentVersionIndex]}
                 - 전체 진척도: ${currentData?.dashboardData.overallProgress}
                 - 일정 상태: ${currentData?.dashboardData.expectedSchedule}
                 - 검출된 이슈: ${currentData?.issuesList.length}개
+
+                [최근 대화 맥락]
+                ${historyText}
                 
                 사용자 질문: "${userQuery}"
             `;
@@ -84,11 +139,18 @@ export default function AiChatPage() {
                 return;
             }
 
+            // Save AI response to DB
+            const { data: savedMsg, error: saveError } = await supabase.from('chat_messages').insert([{
+                user_id: currentUser.id,
+                role: 'ai',
+                content: aiResponse
+            }]).select().single();
+
             const newAiMsg: Message = {
-                id: (Date.now() + 1).toString(),
+                id: savedMsg?.id || (Date.now() + 1).toString(),
                 role: "ai",
                 content: aiResponse,
-                timestamp: new Date()
+                timestamp: savedMsg ? new Date(savedMsg.created_at) : new Date()
             };
 
             setMessages(prev => [...prev, newAiMsg]);
