@@ -248,16 +248,14 @@ export const useStore = create<AppState>()(
         try {
             const userId = user.id.trim();
             const rawPassword = user.password.trim();
-            // Hash the password before storage
             const hashedPassword = await hashPassword(rawPassword);
             
-            // 1. Update local state
             const { password, ...userWithoutPassword } = { ...user, id: userId };
             
             // 2. Sync to Supabase
             const { error } = await supabase.from('users').insert([{
                 id: userId,
-                password: hashedPassword, // Store hashed
+                password: hashedPassword,
                 name: user.name.trim(),
                 birth_date: user.birthDate,
                 team_name: user.teamName.trim(),
@@ -265,11 +263,14 @@ export const useStore = create<AppState>()(
                 gemini_api_key: user.geminiApiKey || ""
             }]);
             
-            if (error) throw error;
+            if (error) {
+                if (error.code === '23505') throw new Error("ALREADY_EXISTS");
+                throw error;
+            }
             
             set((state) => ({ usersList: [...state.usersList, userWithoutPassword] }));
-        } catch (err) {
-            console.error("Failed to register user to Supabase:", err);
+        } catch (err: any) {
+            console.error("Registration error detail:", err);
             throw err;
         }
     },

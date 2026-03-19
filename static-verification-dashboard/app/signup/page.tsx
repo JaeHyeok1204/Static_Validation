@@ -58,8 +58,12 @@ export default function SignupPage() {
             await register(newUser);
             alert("회원가입이 완료되었습니다. 로그인 화면으로 이동합니다.");
             router.push("/login");
-        } catch (err) {
-            setError("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+        } catch (err: any) {
+            if (err.message === "ALREADY_EXISTS") {
+                setError("이미 사용 중인 ID입니다. 다른 ID를 선택해주세요.");
+            } else {
+                setError(`회원가입 중 오류가 발생했습니다: ${err.message || "서버 통신 실패"}`);
+            }
         }
     };
 
