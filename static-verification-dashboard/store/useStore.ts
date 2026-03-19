@@ -662,36 +662,40 @@ export const useStore = create<AppState>()(
         
         console.log("Starting reset code verification for:", { userId, userName, userEmail, birthDate });
 
-        // 1. Try case-sensitive exact match first
+        // 1. Try case-insensitive ID match first
         let { data: user, error: userError } = await supabase
             .from('users')
             .select('id, email, name, birth_date')
-            .eq('id', userId)
-            .eq('name', userName)
-            .eq('birth_date', birthDate)
+            .ilike('id', userId)
             .maybeSingle();
 
         if (userError) {
-            console.error("Supabase error during reset verification:", userError);
+            console.error("Supabase ID check error:", userError);
             return false;
         }
 
         if (!user) {
-            console.error("No user found with exact ID/Name/BirthDate match.");
+            console.error("ID mismatch: User not found with ID:", userId);
             return false;
         }
 
-        // 2. Case-insensitive email check
-        if (user.email && user.email.toLowerCase() !== userEmail) {
-            console.error("Email mismatch (case-insensitive check failed):", { 
-                provided: userEmail, 
-                stored: user.email.toLowerCase() 
-            });
+        if (user.name.trim() !== userName) {
+            console.error("Name mismatch: Stored:", user.name, "Provided:", userName);
+            return false;
+        }
+
+        if (String(user.birth_date || "").trim() !== birthDate) {
+            console.error("BirthDate mismatch: Stored:", user.birth_date, "Provided:", birthDate);
+            return false;
+        }
+
+        const storedEmail = (user.email || "").trim().toLowerCase();
+        if (storedEmail !== userEmail) {
+            console.error("Email mismatch: Stored:", storedEmail, "Provided:", userEmail);
             return false;
         }
         
-        // If everything matches, proceed
-        console.log("Identity verified for reset code.");
+        console.log("Identity verified successfully.");
 
         // Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
