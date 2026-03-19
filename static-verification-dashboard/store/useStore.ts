@@ -660,8 +660,6 @@ export const useStore = create<AppState>()(
         const userEmail = emailText.trim().toLowerCase();
         const userName = nameText.trim();
         
-        console.log("Starting reset code verification for:", { userId, userName, userEmail, birthDate });
-
         // 1. Try case-insensitive ID match first
         let { data: user, error: userError } = await supabase
             .from('users')
@@ -669,33 +667,13 @@ export const useStore = create<AppState>()(
             .ilike('id', userId)
             .maybeSingle();
 
-        if (userError) {
-            console.error("Supabase ID check error:", userError);
-            return false;
-        }
+        if (userError || !user) return false;
 
-        if (!user) {
-            console.error("ID mismatch: User not found with ID:", userId);
-            return false;
-        }
-
-        if (user.name.trim() !== userName) {
-            console.error("Name mismatch: Stored:", user.name, "Provided:", userName);
-            return false;
-        }
-
-        if (String(user.birth_date || "").trim() !== birthDate) {
-            console.error("BirthDate mismatch: Stored:", user.birth_date, "Provided:", birthDate);
-            return false;
-        }
+        if (user.name.trim() !== userName) return false;
+        if (String(user.birth_date || "").trim() !== birthDate) return false;
 
         const storedEmail = (user.email || "").trim().toLowerCase();
-        if (storedEmail !== userEmail) {
-            console.error("Email mismatch: Stored:", storedEmail, "Provided:", userEmail);
-            return false;
-        }
-        
-        console.log("Identity verified successfully.");
+        if (storedEmail !== userEmail) return false;
 
         // Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -712,8 +690,8 @@ export const useStore = create<AppState>()(
             if (codeError) throw codeError;
 
             // Send email
-            const { sendVerificationEmail } = await import('@/lib/email');
-            const emailSent = await sendVerificationEmail(userEmail, code);
+            const { sendVerificationEmailAction } = await import('@/app/actions/emailActions');
+            const emailSent = await sendVerificationEmailAction(userEmail, code);
             
             return emailSent;
         } catch (err) {
@@ -767,7 +745,6 @@ export const useStore = create<AppState>()(
 
     findUserId: async (name: string, birthDate: string) => {
         try {
-            console.log("Starting ID recovery for:", { name: name.trim(), birthDate });
             const { data, error } = await supabase
                 .from('users')
                 .select('id')
@@ -775,13 +752,10 @@ export const useStore = create<AppState>()(
                 .eq('birth_date', birthDate)
                 .maybeSingle();
             
-            if (error || !data) {
-                console.error("ID recovery failed:", error || "No user found");
-                return null;
-            }
+            if (error || !data) return null;
             return data.id;
         } catch (err) {
-            console.error("Critical Find ID error:", err);
+            console.error("Find ID error:", err);
             return null;
         }
     }
