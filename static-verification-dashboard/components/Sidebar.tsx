@@ -85,9 +85,14 @@ export default function Sidebar() {
         <div className="p-4 border-t border-[var(--border-color)] mt-auto bg-black/10">
           <div className="flex flex-col gap-1 mb-3">
             <span className="text-xs font-bold text-[var(--sidebar-text)] opacity-70">로그인 정보</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-sm font-bold text-[var(--sidebar-text)]">{currentUser.name}</span>
-              <span className="text-xs text-[var(--sidebar-text)] opacity-80">{currentUser.position}</span>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-2 text-[var(--sidebar-text)]">
+                <span className="text-sm font-bold">{currentUser.name}</span>
+                <span className="text-xs opacity-80">{currentUser.position}</span>
+              </div>
+              <div className="text-xs text-[var(--sidebar-text)] opacity-60">
+                {currentUser.teamName}
+              </div>
             </div>
           </div>
           <button
