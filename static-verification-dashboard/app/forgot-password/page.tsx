@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
 
         setLoading(true);
         try {
-            const success = await sendResetCode(userId, name, email, birthDate);
+            const success = await sendResetCode(userId, name, email.toLowerCase(), birthDate);
             if (success) {
                 alert("인증번호가 이메일로 전송되었습니다.");
                 router.push(`/reset-password?userId=${encodeURIComponent(userId)}`);

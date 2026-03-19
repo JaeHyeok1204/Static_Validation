@@ -262,7 +262,7 @@ export const useStore = create<AppState>()(
             // 2. Sync to Supabase
             const { error } = await supabase.from('users').insert([{
                 id: userId,
-                email: user.email.trim(),
+                email: user.email.trim().toLowerCase(),
                 password: hashedPassword,
                 name: user.name.trim(),
                 birth_date: user.birthDate,
@@ -655,25 +655,43 @@ export const useStore = create<AppState>()(
         } as any);
     },
 
-    sendResetCode: async (userIdText: string, name: string, email: string, birthDate: string) => {
+    sendResetCode: async (userIdText: string, nameText: string, emailText: string, birthDate: string) => {
         const userId = userIdText.trim();
-        const userEmail = email.trim();
-        const userName = name.trim();
+        const userEmail = emailText.trim().toLowerCase();
+        const userName = nameText.trim();
         
-        // Comprehensive verification: ID, Name, Email, BirthDate must all match
-        const { data: user, error: userError } = await supabase
+        console.log("Starting reset code verification for:", { userId, userName, userEmail, birthDate });
+
+        // 1. Try case-sensitive exact match first
+        let { data: user, error: userError } = await supabase
             .from('users')
-            .select('id')
+            .select('id, email, name, birth_date')
             .eq('id', userId)
             .eq('name', userName)
-            .eq('email', userEmail)
             .eq('birth_date', birthDate)
             .maybeSingle();
-        
-        if (userError || !user) {
-            console.error("User identity verification failed for reset:", { userId, userName, userEmail, birthDate });
+
+        if (userError) {
+            console.error("Supabase error during reset verification:", userError);
             return false;
         }
+
+        if (!user) {
+            console.error("No user found with exact ID/Name/BirthDate match.");
+            return false;
+        }
+
+        // 2. Case-insensitive email check
+        if (user.email && user.email.toLowerCase() !== userEmail) {
+            console.error("Email mismatch (case-insensitive check failed):", { 
+                provided: userEmail, 
+                stored: user.email.toLowerCase() 
+            });
+            return false;
+        }
+        
+        // If everything matches, proceed
+        console.log("Identity verified for reset code.");
 
         // Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -745,6 +763,7 @@ export const useStore = create<AppState>()(
 
     findUserId: async (name: string, birthDate: string) => {
         try {
+            console.log("Starting ID recovery for:", { name: name.trim(), birthDate });
             const { data, error } = await supabase
                 .from('users')
                 .select('id')
@@ -752,10 +771,13 @@ export const useStore = create<AppState>()(
                 .eq('birth_date', birthDate)
                 .maybeSingle();
             
-            if (error || !data) return null;
+            if (error || !data) {
+                console.error("ID recovery failed:", error || "No user found");
+                return null;
+            }
             return data.id;
         } catch (err) {
-            console.error("Find ID error:", err);
+            console.error("Critical Find ID error:", err);
             return null;
         }
     }
