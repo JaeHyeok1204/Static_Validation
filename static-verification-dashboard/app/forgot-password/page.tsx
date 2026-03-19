@@ -27,12 +27,12 @@ export default function ForgotPasswordPage() {
 
         setLoading(true);
         try {
-            const success = await sendResetCode(userId, name, email.toLowerCase(), birthDate);
-            if (success) {
+            const result = await sendResetCode(userId, name, email.toLowerCase(), birthDate);
+            if (result.success) {
                 alert("인증번호가 이메일로 전송되었습니다.");
                 router.push(`/reset-password?userId=${encodeURIComponent(userId)}`);
             } else {
-                setError("입력하신 정보가 일치하지 않습니다. 다시 확인해주세요.");
+                setError(result.error || "입력하신 정보가 일치하지 않습니다. 다시 확인해주세요.");
             }
         } catch (err) {
             console.error("Forgot password error:", err);

@@ -182,7 +182,7 @@ interface AppState {
     resetAiData: () => Promise<void>;
     
     // Password Reset Actions
-    sendResetCode: (userId: string, name: string, email: string, birthDate: string) => Promise<boolean>;
+    sendResetCode: (userIdText: string, nameText: string, emailText: string, birthDate: string) => Promise<{ success: boolean; error?: string }>;
     resetWithCode: (userId: string, code: string, newPasswordText: string) => Promise<boolean>;
     findUserId: (name: string, birthDate: string) => Promise<string | null>;
 
@@ -660,6 +660,8 @@ export const useStore = create<AppState>()(
         const userEmail = emailText.trim().toLowerCase();
         const userName = nameText.trim();
         
+        console.log("Password reset verification started:", { userId, userName, userEmail, birthDate });
+
         // 1. Try case-insensitive ID match first
         let { data: user, error: userError } = await supabase
             .from('users')
@@ -667,13 +669,33 @@ export const useStore = create<AppState>()(
             .ilike('id', userId)
             .maybeSingle();
 
-        if (userError || !user) return false;
+        if (userError) {
+            console.error("DB Error (ID check):", userError);
+            return { success: false, error: "데이터베이스 오류가 발생했습니다." };
+        }
 
-        if (user.name.trim() !== userName) return false;
-        if (String(user.birth_date || "").trim() !== birthDate) return false;
+        if (!user) {
+            console.warn("User not found with ID:", userId);
+            return { success: false, error: "일치하는 회원 정보가 없습니다. (ID 불일치)" };
+        }
+
+        if (user.name.trim() !== userName) {
+            console.warn("Name mismatch for ID:", userId);
+            return { success: false, error: "일치하는 회원 정보가 없습니다. (이름 불일치)" };
+        }
+
+        if (String(user.birth_date || "").trim() !== birthDate) {
+            console.warn("BirthDate mismatch for ID:", userId);
+            return { success: false, error: "일치하는 회원 정보가 없습니다. (생년월일 불일치)" };
+        }
 
         const storedEmail = (user.email || "").trim().toLowerCase();
-        if (storedEmail !== userEmail) return false;
+        if (storedEmail !== userEmail) {
+            console.warn("Email mismatch for ID:", userId);
+            return { success: false, error: "일치하는 회원 정보가 없습니다. (이메일 불일치)" };
+        }
+
+        console.log("Identity verified. Generating code...");
 
         // Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -682,21 +704,28 @@ export const useStore = create<AppState>()(
         try {
             // Save code to DB
             const { error: codeError } = await supabase.from('verification_codes').insert([{
-                user_id: userId,
+                user_id: user.id, // Use the real ID from DB
                 code: code,
                 expires_at: expiresAt
             }]);
 
-            if (codeError) throw codeError;
+            if (codeError) {
+                console.error("Failed to save verification code:", codeError);
+                return { success: false, error: "인증번호 저장 중 오류가 발생했습니다." };
+            }
 
             // Send email
             const { sendVerificationEmail } = await import('@/lib/email');
             const emailSent = await sendVerificationEmail(userEmail, code);
             
-            return emailSent;
+            if (!emailSent) {
+                return { success: false, error: "이메일 발송에 실패했습니다. 관리자에게 문의하거나 API 키 설정을 확인해주세요." };
+            }
+
+            return { success: true };
         } catch (err) {
-            console.error("Failed to process reset code:", err);
-            return false;
+            console.error("Process error:", err);
+            return { success: false, error: "처리 중 시스템 오류가 발생했습니다." };
         }
     },
 
