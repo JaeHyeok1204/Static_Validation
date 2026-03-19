@@ -29,8 +29,20 @@ function ResetPasswordForm() {
         e.preventDefault();
         setError("");
 
-        if (!userId || !code || !newPassword || !confirmPassword) {
-            setError("모든 필드를 입력해주세요.");
+        if (!userId) {
+            setError("ID를 입력해주세요.");
+            return;
+        }
+        if (!code) {
+            setError("인증번호를 입력해주세요.");
+            return;
+        }
+        if (!newPassword) {
+            setError("새 비밀번호를 입력해주세요.");
+            return;
+        }
+        if (!confirmPassword) {
+            setError("새 비밀번호 확인을 입력해주세요.");
             return;
         }
 
@@ -79,13 +91,13 @@ function ResetPasswordForm() {
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">ID (이메일)</label>
+                            <label className="block text-sm font-medium mb-1">ID</label>
                             <input
                                 type="text"
                                 value={userId}
                                 onChange={(e) => setUserId(e.target.value)}
                                 className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50"
-                                placeholder="abc@example.com"
+                                placeholder="아이디 입력"
                                 disabled={loading || !!searchParams.get("id")}
                             />
                         </div>

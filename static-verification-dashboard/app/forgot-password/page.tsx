@@ -20,8 +20,20 @@ export default function ForgotPasswordPage() {
         e.preventDefault();
         setError("");
 
-        if (!userId || !name || !email || !birthDate) {
-            setError("모든 필드를 입력해부세요.");
+        if (!userId) {
+            setError("ID를 입력해주세요.");
+            return;
+        }
+        if (!name) {
+            setError("이름을 입력해주세요.");
+            return;
+        }
+        if (!email) {
+            setError("이메일을 입력해주세요.");
+            return;
+        }
+        if (!birthDate) {
+            setError("생년월일을 입력해주세요.");
             return;
         }
 
