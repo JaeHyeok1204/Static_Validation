@@ -2,10 +2,10 @@
  * Email utility using Resend API to send verification codes.
  */
 export async function sendVerificationEmail(to: string, code: string): Promise<boolean> {
-    const apiKey = process.env.RESEND_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_RESEND_API_KEY;
     
     if (!apiKey) {
-        console.error("RESEND_API_KEY is not defined in environment.");
+        console.error("NEXT_PUBLIC_RESEND_API_KEY is not defined in environment.");
         return false;
     }
 

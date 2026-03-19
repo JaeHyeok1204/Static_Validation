@@ -690,8 +690,8 @@ export const useStore = create<AppState>()(
             if (codeError) throw codeError;
 
             // Send email
-            const { sendVerificationEmailAction } = await import('@/app/actions/emailActions');
-            const emailSent = await sendVerificationEmailAction(userEmail, code);
+            const { sendVerificationEmail } = await import('@/lib/email');
+            const emailSent = await sendVerificationEmail(userEmail, code);
             
             return emailSent;
         } catch (err) {
