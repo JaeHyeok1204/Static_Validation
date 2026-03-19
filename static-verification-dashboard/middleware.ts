@@ -3,6 +3,12 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Normalize pathname: remove trailing slash and convert to lowercase for comparison
+  const normalizedPathpos = pathname.endsWith('/') && pathname !== '/' 
+    ? pathname.slice(0, -1) 
+    : pathname;
+  const path = normalizedPathpos.toLowerCase();
 
   // Define protected routes
   const protectedRoutes = [
@@ -20,15 +26,23 @@ export function middleware(request: NextRequest) {
 
   const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
 
-  const currentUser = request.cookies.get('auth_session')?.value;
+  const cookieValue = request.cookies.get('auth_session')?.value;
+  const isAuthenticated = cookieValue === 'true';
 
-  if (protectedRoutes.some(route => pathname === route) && !currentUser) {
+  // DEBUG LOG (Server-side console)
+  console.log(`[Middleware] Path: ${path}, Authenticated: ${isAuthenticated}`);
+
+  // 1. Redirect unauthenticated users from protected routes
+  if (protectedRoutes.includes(path) && !isAuthenticated) {
+    console.log(`[Middleware] Redirection to /login from ${path}`);
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  if (publicRoutes.some(route => pathname === route) && currentUser) {
+  // 2. Redirect authenticated users from public routes to dashboard
+  if (publicRoutes.includes(path) && isAuthenticated) {
+    console.log(`[Middleware] Redirection to / from ${path}`);
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);

@@ -25,12 +25,16 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     useEffect(() => {
         if (!isMounted) return;
         
-        const isAuthRoute = pathname === '/login' || pathname === '/signup';
+        const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+        const isPublicRoute = publicRoutes.includes(pathname);
 
-        if (!currentUser && !isAuthRoute) {
+        if (!currentUser && !isPublicRoute) {
             router.push('/login');
-        } else if (currentUser && isAuthRoute) {
-            router.push('/');
+        } else if (currentUser && isPublicRoute && pathname !== '/forgot-password' && pathname !== '/reset-password') {
+            // Only redirect to dashboard if they are on login/signup while authenticated
+            if (pathname === '/login' || pathname === '/signup') {
+                router.push('/');
+            }
         }
     }, [currentUser, isMounted, pathname, router]);
 
@@ -38,7 +42,8 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
         return <div className="min-h-screen bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-main)]">로딩 중...</div>;
     }
 
-    if (!currentUser && pathname !== '/login' && pathname !== '/signup') {
+    const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+    if (!currentUser && !publicRoutes.includes(pathname)) {
         return null;
     }
 
