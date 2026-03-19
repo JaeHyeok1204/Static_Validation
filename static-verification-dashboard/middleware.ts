@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
     '/setting'
   ];
 
-  const publicRoutes = ['/login', '/signup'];
+  const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
 
   const currentUser = request.cookies.get('auth_session')?.value;
 

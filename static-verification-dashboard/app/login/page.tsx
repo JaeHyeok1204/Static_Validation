@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useStore, User } from "@/store/useStore";
 
 export default function LoginPage() {
@@ -85,19 +86,19 @@ export default function LoginPage() {
                 <div className="mt-8 pt-6 border-t border-[var(--border-color)] text-center">
                     <p className="text-sm text-[var(--text-muted)]">
                         아직 계정이 없으신가요?
-                        <button 
-                            onClick={() => router.push("/signup")}
-                            className="ml-2 text-[var(--accent-color)] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                        <Link 
+                            href="/signup"
+                            className="ml-2 text-[var(--accent-color)] font-bold hover:underline"
                         >
                             회원가입
-                        </button>
+                        </Link>
                     </p>
-                    <button 
-                        onClick={() => router.push("/forgot-password")}
-                        className="mt-3 text-xs text-[var(--text-muted)] hover:text-[var(--accent-color)] underline bg-transparent border-none cursor-pointer block w-full text-center"
+                    <Link 
+                        href="/forgot-password"
+                        className="mt-3 text-xs text-[var(--text-muted)] hover:text-[var(--accent-color)] underline block w-full text-center"
                     >
                         비밀번호를 잊으셨나요?
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>
