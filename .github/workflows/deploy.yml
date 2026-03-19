@@ -34,6 +34,10 @@ jobs:
       - name: Build with Next.js
         run: npx next build
         working-directory: static-verification-dashboard
+        env:
+          NEXT_PUBLIC_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
