@@ -326,10 +326,10 @@ export default function DataEditorPage() {
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -411,10 +411,10 @@ export default function DataEditorPage() {
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -518,14 +518,14 @@ export default function DataEditorPage() {
                                             </td>
                                             {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                                 <td key={ss} className="p-0 border border-[var(--border-color)] group relative">
-                                                    <input 
-                                                        type="number" 
-                                                        onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
-                                                        value={rule.subsystemViolations?.[ss] || 0}
-                                                        onChange={(e) => updateViolation(ss, Math.max(0, Number(e.target.value)))}
-                                                        className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-blue-400 focus:bg-blue-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none text-[10px]"
-                                                        title={`${rule.id} - Subsystem ${ss}`}
-                                                    />
+                                                     <input 
+                                                         type="number" 
+                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
+                                                         value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")}
+                                                         onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Math.max(0, Number(e.target.value)))}
+                                                         className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-blue-400 focus:bg-blue-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none text-[10px]"
+                                                         title={`${rule.id} - Subsystem ${ss}`}
+                                                     />
                                                 </td>
                                             ))}
                                             <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700 text-[10px]">
@@ -635,15 +635,15 @@ export default function DataEditorPage() {
                                                     />
                                                 </td>
                                                 <td className="p-1">
-                                                    <input 
-                                                        type="number"
-                                                        step="0.1"
-                                                        value={parseFloat(compItem.currentTime || "0")} 
-                                                        onChange={(e) => updateComp('currentTime', (e.target.value || "0") + "h")} 
-                                                        onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
-                                                        className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                                                        placeholder="0" 
-                                                    />
+                                                     <input 
+                                                         type="number"
+                                                         step="0.1"
+                                                         value={parseFloat(compItem.currentTime || "0") === 0 ? "" : parseFloat(compItem.currentTime || "0")} 
+                                                         onChange={(e) => updateComp('currentTime', (e.target.value === "" ? "0" : e.target.value) + "h")} 
+                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
+                                                         className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                                                         placeholder="0" 
+                                                     />
                                                 </td>
                                                 <td className="p-1"><input readOnly value={autoPrevTime} className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold" /></td>
                                             </tr>
@@ -711,15 +711,15 @@ export default function DataEditorPage() {
                                                     />
                                                 </td>
                                                 <td className="p-1">
-                                                    <input 
-                                                        type="number"
-                                                        step="0.1"
-                                                        value={parseFloat(runnItem.currentTime || "0")} 
-                                                        onChange={(e) => updateRunn('currentTime', (e.target.value || "0") + "h")} 
-                                                        onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
-                                                        className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                                                        placeholder="0" 
-                                                    />
+                                                     <input 
+                                                         type="number"
+                                                         step="0.1"
+                                                         value={parseFloat(runnItem.currentTime || "0") === 0 ? "" : parseFloat(runnItem.currentTime || "0")} 
+                                                         onChange={(e) => updateRunn('currentTime', (e.target.value === "" ? "0" : e.target.value) + "h")} 
+                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
+                                                         className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                                                         placeholder="0" 
+                                                     />
                                                 </td>
                                                 <td className="p-1"><div className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold text-center">{autoPrevTime}</div></td>
                                             </tr>
