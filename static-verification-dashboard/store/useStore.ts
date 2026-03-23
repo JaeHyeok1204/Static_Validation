@@ -247,7 +247,7 @@ export const useStore = create<AppState>()(
     },
     logout: () => {
         document.cookie = "auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-        set({ currentUser: null, geminiApiKey: '' });
+        set({ currentUser: null });
     },
     register: async (user: User) => {
         if (!user.password) return;
