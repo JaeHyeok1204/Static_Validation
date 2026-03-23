@@ -288,7 +288,7 @@ export const useStore = create<AppState>()(
             // 1. Load Users
             const { data: users, error: userError } = await supabase
                 .from('users')
-                .select('id, email, name, birth_date, team_name, position');
+                .select('id, email, name, birth_date, team_name, position, gemini_api_key');
             if (userError) throw userError;
 
             const formattedUsers: User[] = (users || []).map(u => ({
@@ -297,7 +297,8 @@ export const useStore = create<AppState>()(
                 name: u.name,
                 birthDate: u.birth_date,
                 teamName: u.team_name,
-                position: u.position
+                position: u.position,
+                geminiApiKey: u.gemini_api_key || ""
             }));
             
             set({ usersList: formattedUsers });
@@ -329,7 +330,10 @@ export const useStore = create<AppState>()(
             if (state.currentUser) {
                 const refreshedUser = formattedUsers.find(u => u.id === state.currentUser?.id);
                 if (refreshedUser) {
-                    set({ currentUser: refreshedUser });
+                    set({ 
+                        currentUser: refreshedUser,
+                        geminiApiKey: refreshedUser.geminiApiKey || get().geminiApiKey
+                    });
                 }
             }
         } catch (err) {
@@ -792,7 +796,7 @@ export const useStore = create<AppState>()(
           versions: state.versions,
           versionedData: state.versionedData,
           currentUser: state.currentUser,
-          // usersList and geminiApiKey are sensitive and should not be persisted in plaintext
+          geminiApiKey: state.geminiApiKey
       }),
   }
 ));
