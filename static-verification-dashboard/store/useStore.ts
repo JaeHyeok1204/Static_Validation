@@ -48,6 +48,7 @@ export interface RuleData {
     location?: string;
     aiComment?: string;
     severity?: string;
+    scope?: 'Component' | 'Runnable'; // NEW: Separate Component vs Runnable rules
     subsystemViolations: Record<string, number>; // SubsystemID -> Count mapping
 }
 
@@ -161,7 +162,7 @@ interface AppState {
     // V7 Data Editor Actions
     updateVersionData: (versionIndex: number, partialData: Partial<VersionData>) => void;
     createNewVersion: (versionName: string) => void;
-    addRuleRow: (versionIndex: number) => void;
+    addRuleRow: (versionIndex: number, scope: 'Component' | 'Runnable') => void;
     deleteRuleRow: (versionIndex: number, ruleIndex: number) => void;
     updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => void;
     login: (userId: string, passwordText: string) => Promise<boolean>;
@@ -419,15 +420,16 @@ export const useStore = create<AppState>()(
         });
     },
 
-    addRuleRow: (versionIndex: number) => {
+    addRuleRow: (versionIndex: number, scope: 'Component' | 'Runnable') => {
         const state = get();
         const currentData = state.versionedData[versionIndex];
         if (!currentData) return;
-
+        
         const newRule: RuleData = {
             id: '',
             mabSubId: '',
             category: 'MAB',
+            scope,
             subsystemViolations: {}
         };
         const newList = [...(currentData.rulesList || []), newRule];
