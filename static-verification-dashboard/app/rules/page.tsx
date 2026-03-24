@@ -27,8 +27,8 @@ export default function RulesPage() {
 
             <div className="flex-1 overflow-y-auto pr-2 pb-6">
                 <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                        <h2 className="text-lg font-bold text-[var(--text-main)]">검출된 위배 규칙 목록</h2>
+                    <div className="flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center mb-6 gap-4 w-full">
+                        <h2 className="text-lg font-bold text-[var(--text-main)] break-keep flex-1 min-w-[200px]">검출된 위배 규칙 목록</h2>
                         <button 
                             onClick={handleRunAI}
                             disabled={isAnalyzing}

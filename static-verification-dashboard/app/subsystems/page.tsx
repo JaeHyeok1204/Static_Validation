@@ -21,8 +21,8 @@ export default function SubsystemsPage() {
                     {/* Component Box */}
                     <div className="bg-[var(--bg-color)] border border-blue-200 dark:border-blue-900/50 rounded-2xl p-6 shadow-sm overflow-x-auto relative mt-[4px]">
                         <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
-                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
-                            <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-wrap justify-between items-center gap-2">
+                            <div className="flex items-center gap-2 break-keep">
                                 <span className="w-3 h-3 rounded-full bg-blue-500"></span>
                                 Component 진척 현황
                             </div>
@@ -67,8 +67,8 @@ export default function SubsystemsPage() {
                     {/* Runnable Box */}
                     <div className="bg-[var(--bg-color)] border border-emerald-200 dark:border-emerald-900/50 rounded-2xl p-6 shadow-sm overflow-x-auto relative mt-[4px]">
                         <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
-                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
-                            <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-wrap justify-between items-center gap-2">
+                            <div className="flex items-center gap-2 break-keep">
                                 <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                                 Runnable 진척 현황
                             </div>

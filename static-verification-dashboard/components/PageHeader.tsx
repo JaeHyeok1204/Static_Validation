@@ -30,11 +30,11 @@ export default function PageHeader({
     };
 
     return (
-        <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm flex flex-col gap-3 shrink-0 transition-colors">
+        <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm flex flex-col gap-3 shrink-0 transition-colors w-full min-w-0">
             {/* Title row */}
-            <div>
-                <h1 className="m-0 text-xl sm:text-3xl font-bold text-[var(--text-main)] leading-tight">{title}</h1>
-                <p className="mt-1 text-xs sm:text-sm text-[var(--text-muted)]">{description}</p>
+            <div className="min-w-0 w-full break-words">
+                <h1 className="m-0 text-xl sm:text-3xl font-bold text-[var(--text-main)] leading-tight break-keep sm:break-normal">{title}</h1>
+                <p className="mt-1 text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed break-keep sm:break-normal">{description}</p>
             </div>
 
             {/* Version selector — full-width on mobile, inline on desktop */}

@@ -56,7 +56,7 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* 1. 내부 개발 및 검증팀용 */}
                     <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                             <h2 className="text-lg font-bold text-[var(--text-main)] flex items-center gap-2">
                                 👨‍💻 팀 주진 보고
                             </h2>
@@ -71,7 +71,7 @@ export default function ReportsPage() {
 
                     {/* 2. 대고객 또는 개발PM 보고용 */}
                     <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                             <h2 className="text-lg font-bold text-[var(--text-main)] flex items-center gap-2">
                                 📊 KEFICO 주진 보고
                             </h2>
@@ -86,7 +86,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* 하단 공통 Control */}
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
                     <button 
                         onClick={handleRegenerate}
                         disabled={isGenerating}

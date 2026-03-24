@@ -71,28 +71,28 @@ export default function HomePage() {
       <div className="flex-1 overflow-y-auto pr-1 pb-4 sm:pr-2 sm:pb-6 space-y-4 sm:space-y-6">
 
         {/* 종합 요약 Card List - single col on mobile, 2-col sm, 5-col lg */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 min-w-0 w-full">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">전체 진행률</div>
             <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{dynamicProgress}</div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">Component 검사 / 분석</div>
             <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
               {compInspection.toLocaleString()} / {compAnalysis.toLocaleString()}
             </div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">Runnable 검사 / 분석</div>
             <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
               {runnInspection.toLocaleString()} / {runnAnalysis.toLocaleString()}
             </div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙 (이전 대비)</div>
             <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{trulyNewRulesCount.toLocaleString()}건</div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정</div>
             <div className={`text-base sm:text-lg font-bold mt-2 ${data.dashboardData.expectedSchedule?.includes('지연') ? 'text-red-500' : 'text-[var(--accent-color)]'}`}>
               {data.dashboardData.expectedSchedule}

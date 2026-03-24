@@ -532,7 +532,7 @@ export default function DataEditorPage() {
                 {/* 3. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P) - Component */}
                 <section className="bg-[var(--bg-color)] border border-blue-200 rounded-2xl p-6 shadow-sm overflow-x-auto my-6 relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
-                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3">
+                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-col sm:flex-row flex-wrap sm:justify-between items-start sm:items-center gap-3">
                         <div className="flex items-center gap-2 shrink-0">
                             <span className="w-3 h-3 rounded-full bg-blue-500"></span>
                             📋 3-1. 규칙 ID별 서브시스템 신규 위배 (Component)
@@ -624,7 +624,7 @@ export default function DataEditorPage() {
                 {/* 3. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P) - Runnable */}
                 <section className="bg-[var(--bg-color)] border border-emerald-200 rounded-2xl p-6 shadow-sm overflow-x-auto my-6 relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
-                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3">
+                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center gap-3">
                         <div className="flex items-center gap-2 shrink-0">
                             <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                             📋 3-2. 규칙 ID별 서브시스템 신규 위배 (Runnable)
