@@ -489,7 +489,7 @@ export default function DataEditorPage() {
                         <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-40">규칙 ID</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">Sub ID</th>
                                     {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                         <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-blue-600">{ss}</th>
@@ -512,7 +512,7 @@ export default function DataEditorPage() {
 
                                     return (
                                         <tr key={displayedIdx} className="hover:bg-[var(--hover-bg)] transition-colors">
-                                            <td className="p-1 border border-[var(--border-color)] font-medium sticky left-0 bg-white z-10">
+                                            <td className="p-1 border border-[var(--border-color)] font-medium sm:sticky sm:left-0 bg-white sm:z-10">
                                                 <input list="rule-ids" value={rule.id} onChange={(e) => updateField('id', e.target.value)} className="w-full p-1 border rounded text-black bg-white border-slate-300 text-[10px]" placeholder="ID 입력" />
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)]">
@@ -588,7 +588,7 @@ export default function DataEditorPage() {
                         <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-40">규칙 ID</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">Sub ID</th>
                                     {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                         <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-emerald-600">{ss}</th>
@@ -611,7 +611,7 @@ export default function DataEditorPage() {
 
                                     return (
                                         <tr key={displayedIdx} className="hover:bg-[var(--hover-bg)] transition-colors">
-                                            <td className="p-1 border border-[var(--border-color)] font-medium sticky left-0 bg-white z-10">
+                                            <td className="p-1 border border-[var(--border-color)] font-medium sm:sticky sm:left-0 bg-white sm:z-10">
                                                 <input list="rule-ids" value={rule.id} onChange={(e) => updateField('id', e.target.value)} className="w-full p-1 border rounded text-black bg-white border-slate-300 text-[10px]" placeholder="ID 입력" />
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)]">
