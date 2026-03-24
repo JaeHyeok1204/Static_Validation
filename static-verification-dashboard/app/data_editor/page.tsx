@@ -413,10 +413,10 @@ export default function DataEditorPage() {
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9,]*" value={currentItem.newDetectedViolations === 0 ? "" : (currentItem.newDetectedViolations ? Number(currentItem.newDetectedViolations).toLocaleString() : "")} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9,]*" value={currentItem.analyzedViolations === 0 ? "" : (currentItem.analyzedViolations ? Number(currentItem.analyzedViolations).toLocaleString() : "")} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -498,10 +498,10 @@ export default function DataEditorPage() {
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9,]*" value={currentItem.newDetectedViolations === 0 ? "" : (currentItem.newDetectedViolations ? Number(currentItem.newDetectedViolations).toLocaleString() : "")} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9,]*" value={currentItem.analyzedViolations === 0 ? "" : (currentItem.analyzedViolations ? Number(currentItem.analyzedViolations).toLocaleString() : "")} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>

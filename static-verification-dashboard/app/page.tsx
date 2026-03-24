@@ -79,18 +79,18 @@ export default function HomePage() {
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">Component 검사 / 분석</div>
             <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
-              {compInspection} / {compAnalysis}
+              {compInspection.toLocaleString()} / {compAnalysis.toLocaleString()}
             </div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">Runnable 검사 / 분석</div>
             <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
-              {runnInspection} / {runnAnalysis}
+              {runnInspection.toLocaleString()} / {runnAnalysis.toLocaleString()}
             </div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙 (이전 대비)</div>
-            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{trulyNewRulesCount}건</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{trulyNewRulesCount.toLocaleString()}건</div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정</div>

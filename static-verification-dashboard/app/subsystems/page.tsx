@@ -44,8 +44,8 @@ export default function SubsystemsPage() {
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                             <td data-label="서브시스템" className="p-3 sm:p-4 font-bold text-center sm:text-left text-blue-600 dark:text-blue-400">{subsystemChar}</td>
                                             <td data-label="담당자" className="p-3 sm:p-4 text-center sm:text-left">{item ? item.owner : "-"}</td>
-                                            <td data-label="신규 검출 위배" className="p-3 sm:p-4 text-center sm:text-left font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
-                                            <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
+                                            <td data-label="신규 검출 위배" className="p-3 sm:p-4 text-center sm:text-left font-bold text-red-500">{item ? Number(item.newDetectedViolations || 0).toLocaleString() : 0}</td>
+                                            <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? Number(item.analyzedViolations || 0).toLocaleString() : 0}</td>
                                             <td data-label="진척 퍼센티지 바" className="p-3 sm:p-4">
                                                 <div className="flex items-center justify-end sm:justify-start gap-3 w-full">
                                                     <div className="w-full max-w-[150px] sm:w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
@@ -90,8 +90,8 @@ export default function SubsystemsPage() {
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                             <td data-label="서브시스템" className="p-3 sm:p-4 font-bold text-center sm:text-left text-emerald-600 dark:text-emerald-400">{subsystemChar}</td>
                                             <td data-label="담당자" className="p-3 sm:p-4 text-center sm:text-left">{item ? item.owner : "-"}</td>
-                                            <td data-label="신규 검출 위배" className="p-3 sm:p-4 text-center sm:text-left font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
-                                            <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
+                                            <td data-label="신규 검출 위배" className="p-3 sm:p-4 text-center sm:text-left font-bold text-red-500">{item ? Number(item.newDetectedViolations || 0).toLocaleString() : 0}</td>
+                                            <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? Number(item.analyzedViolations || 0).toLocaleString() : 0}</td>
                                             <td data-label="진척 퍼센티지 바" className="p-3 sm:p-4">
                                                 <div className="flex items-center justify-end sm:justify-start gap-3 w-full">
                                                     <div className="w-full max-w-[150px] sm:w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
