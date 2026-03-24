@@ -190,6 +190,7 @@ interface AppState {
     duplicateRuleRow: (versionIndex: number, ruleIndex: number) => void;
     deleteRuleRow: (versionIndex: number, ruleIndex: number) => void;
     updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => void;
+    populateInitialRules: (versionIndex: number) => void;
     createNewVersion: (versionName: string) => void;
     setGeminiApiKey: (key: string) => Promise<void>;
     runAIAnalysis: () => Promise<void>;
@@ -504,6 +505,13 @@ export const useStore = create<AppState>()(
         const newList = [...currentData.rulesList];
         newList[ruleIndex] = { ...newList[ruleIndex], ...ruleData };
         get().updateVersionData(versionIndex, { rulesList: newList });
+    },
+
+    populateInitialRules: (versionIndex: number) => {
+        const state = get();
+        const currentData = state.versionedData[versionIndex];
+        if (!currentData) return;
+        get().updateVersionData(versionIndex, { rulesList: getInitialRules() });
     },
 
     createNewVersion: (versionName: string) => {

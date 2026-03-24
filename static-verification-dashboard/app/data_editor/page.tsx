@@ -489,6 +489,21 @@ export default function DataEditorPage() {
                     </section>
                 </div>
 
+                {data?.rulesList?.length === 0 && (
+                    <div className="bg-yellow-50 border border-yellow-200 p-5 rounded-2xl mb-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                        <div>
+                            <h3 className="font-bold text-yellow-800 text-sm">⚠️ 기존 버전 마이그레이션이 필요합니다</h3>
+                            <p className="text-xs text-yellow-700 mt-1">이 버전은 새로운 규칙 고정 시스템(총 540여 개 자동 할당) 도입 이전에 생성된 구형 버전입니다. 데이터를 수정하시려면 먼저 아래 버튼을 눌러 규칙 템플릿을 불러와 주세요.</p>
+                        </div>
+                        <button 
+                            onClick={() => useStore.getState().populateInitialRules(currentVersionIndex)}
+                            className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm border border-amber-600"
+                        >
+                            📥 전체 규칙 템플릿 불러오기
+                        </button>
+                    </div>
+                )}
+
                 {/* 3. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P) - Component */}
                 <section className="bg-[var(--bg-color)] border border-blue-200 rounded-2xl p-6 shadow-sm overflow-x-auto my-6 relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
