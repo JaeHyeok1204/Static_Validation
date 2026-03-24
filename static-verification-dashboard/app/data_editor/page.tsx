@@ -17,6 +17,8 @@ export default function DataEditorPage() {
     const INITIAL_MAB_RULE_IDS = useStore((state) => state.INITIAL_MAB_RULE_IDS);
     const INITIAL_MISRA_RULE_IDS = useStore((state) => state.INITIAL_MISRA_RULE_IDS);
     const currentUser = useStore((state) => state.currentUser);
+    const isSyncing = useStore((state) => state.isSyncing);
+    const lastSyncedAt = useStore((state) => state.lastSyncedAt);
 
     const data = versionedData[currentVersionIndex];
     const [newVersionStr, setNewVersionStr] = useState("");
@@ -831,6 +833,29 @@ export default function DataEditorPage() {
                     </div>
                 )}
 
+            </div>
+
+            {/* Floating Sync Status Indicator */}
+            <div className={`fixed bottom-6 right-6 px-4 py-2 rounded-full border shadow-lg transition-all flex items-center gap-2 z-50 ${
+                isSyncing 
+                ? "bg-blue-500 border-blue-400 text-white animate-pulse" 
+                : "bg-[var(--bg-color)] border-[var(--border-color)] text-[var(--text-muted)]"
+            }`}>
+                {isSyncing ? (
+                    <>
+                        <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                        <span className="text-xs font-bold">서버 동기화 중...</span>
+                    </>
+                ) : (
+                    <>
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                        <span className="text-xs">
+                            {lastSyncedAt 
+                                ? `모든 변경사항 저장됨 (${new Date(lastSyncedAt).toLocaleTimeString()})`
+                                : "저장 완료"}
+                        </span>
+                    </>
+                )}
             </div>
         </div>
     );

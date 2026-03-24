@@ -146,50 +146,46 @@ export const emptyVersionData: VersionData = {
 interface AppState {
     theme: ThemeType;
     projectName: string;
-    currentVersionIndex: number;
-    versions: string[];
-    versionedData: Record<number, VersionData>;
     currentUser: User | null;
     usersList: User[];
-    
+    versions: string[];
+    versionedData: Record<number, VersionData>;
+    currentVersionIndex: number;
+    geminiApiKey: string;
+    isSyncing: boolean;
+    lastSyncedAt: Date | null;
+
+    // Actions
     setTheme: (theme: ThemeType) => void;
+    setCurrentUser: (user: User | null) => void;
     setVersionIndex: (index: number) => void;
-    
-    // V4 & V5 Data Export & Import Actions
+    syncVersionIndex: (index: number) => void;
+    login: (userId: string, passwordText: string) => Promise<boolean>;
+    logout: () => void;
+    register: (user: User) => Promise<void>;
+    syncFromDB: () => Promise<void>;
+    syncToDB: (stateToSync?: any) => Promise<void>;
     exportData: () => string;
     importData: (jsonData: string) => boolean;
-
-    // V7 Data Editor Actions
     updateVersionData: (versionIndex: number, partialData: Partial<VersionData>) => void;
-    createNewVersion: (versionName: string) => void;
     addRuleRow: (versionIndex: number, scope: 'Component' | 'Runnable') => void;
     deleteRuleRow: (versionIndex: number, ruleIndex: number) => void;
     updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => void;
-    login: (userId: string, passwordText: string) => Promise<boolean>;
-    logout: () => void;
-    register: (user: User) => void;
-    
-    // Remote Sync Actions
-    syncFromDB: () => Promise<void>;
-    syncToDB: (stateToSync?: Partial<AppState>) => Promise<void>;
-
-    // Real AI Actions
-    geminiApiKey: string;
-    setGeminiApiKey: (key: string) => void;
+    createNewVersion: (versionName: string) => void;
+    setGeminiApiKey: (key: string) => Promise<void>;
     runAIAnalysis: () => Promise<void>;
     runAIRiskAnalysis: () => Promise<void>;
     runIssueAIAnalysis: (issueId: string | number) => Promise<void>;
     resetValidationData: () => Promise<void>;
     resetAiData: () => Promise<void>;
-    
-    // Password Reset Actions
-    sendResetCode: (userIdText: string, nameText: string, emailText: string, birthDate: string) => Promise<{ success: boolean; error?: string }>;
-    resetWithCode: (userId: string, code: string, newPasswordText: string) => Promise<boolean>;
+    sendResetCode: (userId: string, name: string, email: string, birthDate: string) => Promise<{ success: boolean; error?: string }>;
+    resetWithCode: (userId: string, code: string, newPassword: string) => Promise<boolean>;
     findUserId: (name: string, birthDate: string) => Promise<string | null>;
-
     INITIAL_MAB_RULE_IDS: string[];
     INITIAL_MISRA_RULE_IDS: string[];
 }
+
+let syncTimeout: any = null;
 
 export const useStore = create<AppState>()(
   persist(
@@ -201,10 +197,21 @@ export const useStore = create<AppState>()(
     versionedData: initialVersionedData,
     currentUser: null,
     usersList: [],
+    geminiApiKey: '',
+    isSyncing: false,
+    lastSyncedAt: null,
     INITIAL_MAB_RULE_IDS,
     INITIAL_MISRA_RULE_IDS,
 
-    setVersionIndex: (index) => set({ currentVersionIndex: index }),
+    setTheme: (theme: ThemeType) => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        set({ theme });
+    },
+    setCurrentUser: (user) => set({ currentUser: user }),
+
+    setVersionIndex: (index: number) => set({ currentVersionIndex: index }),
 
     syncVersionIndex: (index: number) => set({ currentVersionIndex: index }),
 
@@ -344,32 +351,38 @@ export const useStore = create<AppState>()(
 
     syncToDB: async (stateToSync?: Partial<AppState>) => {
         const state = stateToSync || get();
-        try {
-            const payload = {
-                versions: state.versions,
-                versionedData: state.versionedData
-            };
-            
-            // Use upsert to create or update the record with id 1
-            const { error } = await supabase.from('app_state').upsert({
-                id: 1,
-                data: payload,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'id' });
 
-            if (error) throw error;
-            console.log("Successfully synced app state to Supabase.");
-        } catch (err) {
-            console.error("Failed to sync app state to Supabase:", err);
-        }
+        // Immediate state update for visual feedback
+        set({ isSyncing: true });
+
+        // Debounce logic
+        if (syncTimeout) clearTimeout(syncTimeout);
+        
+        syncTimeout = setTimeout(async () => {
+            try {
+                // Must get the LATEST state inside the timeout to avoid staled data
+                const latestState = get();
+                const payload = {
+                    versions: latestState.versions,
+                    versionedData: latestState.versionedData
+                };
+                
+                const { error } = await supabase.from('app_state').upsert({
+                    id: 1,
+                    data: payload,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+
+                if (error) throw error;
+                console.log("Successfully synced app state to Supabase.");
+                set({ isSyncing: false, lastSyncedAt: new Date() });
+            } catch (err) {
+                console.error("Failed to sync app state to Supabase:", err);
+                set({ isSyncing: false });
+            }
+        }, 1500); // 1.5s debounce to feel fast but preserve DB
     },
     
-    setTheme: (theme) => {
-        if (typeof document !== 'undefined') {
-            document.documentElement.setAttribute('data-theme', theme);
-        }
-        set({ theme });
-    },
 
     exportData: () => {
         const state = get();
@@ -480,7 +493,6 @@ export const useStore = create<AppState>()(
         });
     },
 
-    geminiApiKey: '',
     setGeminiApiKey: async (key: string) => {
         const state = get();
         set({ geminiApiKey: key });
