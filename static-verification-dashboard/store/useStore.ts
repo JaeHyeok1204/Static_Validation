@@ -195,6 +195,7 @@ interface AppState {
     setGeminiApiKey: (key: string) => Promise<void>;
     runAIAnalysis: () => Promise<void>;
     runAIRiskAnalysis: () => Promise<void>;
+    runAIRuleAnalysis: () => Promise<void>;
     runIssueAIAnalysis: (issueId: string | number) => Promise<void>;
     resetValidationData: () => Promise<void>;
     resetAiData: () => Promise<void>;
@@ -645,6 +646,57 @@ export const useStore = create<AppState>()(
             });
         } catch (err) {
             console.error("Risk analysis parsing error:", err);
+        }
+    },
+
+    runAIRuleAnalysis: async () => {
+        const state = get();
+        const currentData = state.versionedData[state.currentVersionIndex];
+        if (!currentData) return;
+
+        const violatedRules = currentData.rulesList.filter(r => {
+            const total = Object.values(r.subsystemViolations || {}).reduce((acc, v) => acc + (Number(v) || 0), 0);
+            return total > 0 && r.id.trim() !== '';
+        });
+
+        if (violatedRules.length === 0) return;
+
+        const summaryData = violatedRules.map(r => ({
+            id: r.id, category: r.category, violations: Object.values(r.subsystemViolations || {}).reduce((a, b) => a + (Number(b) || 0), 0)
+        }));
+
+        const prompt = `
+            다음은 검출된 코딩 가이드라인 위배(MAB/MISRA) 목록이야.
+            실제 현업 시스템(자동차 소프트웨어 등)의 관점에서 각 규칙 ID가 시스템에 미치는 영향을 바탕으로 간단명료한 분석 코멘트(aiComment)와 심각도(severity: High/Medium/Low)를 JSON 배열로 분석해줘.
+            JSON 출력 형식: [{ "id": "규칙ID", "aiComment": "이 규칙 위배는 시스템의 ~한 오동작을 유발할 수 있어 주의가 필요합니다.", "severity": "High" }]
+            다른 설명 없이 JSON 배열만 출력해.
+
+            위배 규칙 데이터:
+            ${JSON.stringify(summaryData)}
+        `;
+
+        try {
+            const rawResponse = await analyzeDataWithAI(prompt, state.geminiApiKey);
+            if (rawResponse === "ERROR_MISSING_KEY") {
+                console.error("Gemini API Key missing");
+                return;
+            }
+            
+            const cleaned = rawResponse.replace(/```json|```/g, "").trim();
+            const analyzedRules = JSON.parse(cleaned);
+
+            const newRulesList = [...currentData.rulesList];
+            
+            analyzedRules.forEach((aiRule: any) => {
+                const idx = newRulesList.findIndex(r => r.id === aiRule.id);
+                if (idx !== -1) {
+                    newRulesList[idx] = { ...newRulesList[idx], aiComment: aiRule.aiComment, severity: aiRule.severity };
+                }
+            });
+
+            get().updateVersionData(state.currentVersionIndex, { rulesList: newRulesList });
+        } catch (err) {
+            console.error("Rule analysis parsing error:", err);
         }
     },
 

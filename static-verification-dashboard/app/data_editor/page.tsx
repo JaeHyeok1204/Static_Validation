@@ -47,7 +47,7 @@ export default function DataEditorPage() {
         const { dashboardData, subsystemsList, rulesList } = updatedData;
         const newDashboard = { ...dashboardData };
 
-        // 1. Calculate overall progress
+        // 1. Calculate overall progress and specific component/runnable inspection/analysis counts
         if (subsystemsList && subsystemsList.length > 0) {
             const validSubsystems = subsystemsList.filter((s: import('../../store/useStore').SubsystemData) => s.progress !== undefined);
             if (validSubsystems.length > 0) {
@@ -56,7 +56,27 @@ export default function DataEditorPage() {
             } else {
                 newDashboard.overallProgress = "0%";
             }
+
+            const compList = subsystemsList.filter(s => s.category === 'Component');
+            const runnList = subsystemsList.filter(s => s.category === 'Runnable');
+            
+            const compInspection = compList.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0);
+            const compAnalysis = compList.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0);
+            
+            const runnInspection = runnList.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0);
+            const runnAnalysis = runnList.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0);
+            
+            newDashboard.violationInspectionComponent = compInspection.toString();
+            newDashboard.violationAnalysisComponent = compAnalysis.toString();
+            newDashboard.violationInspectionRunnable = runnInspection.toString();
+            newDashboard.violationAnalysisRunnable = runnAnalysis.toString();
+        } else {
+            newDashboard.violationInspectionComponent = "0";
+            newDashboard.violationAnalysisComponent = "0";
+            newDashboard.violationInspectionRunnable = "0";
+            newDashboard.violationAnalysisRunnable = "0";
         }
+
 
         // 2. Calculate New Rule Violations Count from Rule Matrix
         if (rulesList && rulesList.length > 0) {
@@ -577,11 +597,11 @@ export default function DataEditorPage() {
                                                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.['TOTAL'] === 0 ? "" : (rule.subsystemViolations?.['TOTAL'] || "")} onChange={(e) => updateViolation('TOTAL', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-blue-50 text-blue-800 font-bold border-0 focus:ring-1 focus:ring-blue-400 outline-none text-[10px]" placeholder="0" />
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)] text-center align-middle">
-                                                <div className="flex flex-col gap-1 justify-center px-1">
+                                                <div className="flex flex-row gap-1 justify-center items-center px-1">
                                                     {rule.category === 'MAB' && (
-                                                        <button onClick={() => useStore.getState().duplicateRuleRow(currentVersionIndex, realIdx)} className="text-blue-600 font-bold bg-blue-50 py-0.5 rounded border border-blue-200" title="MAB 하위 ID 추가">+</button>
+                                                        <button onClick={() => useStore.getState().duplicateRuleRow(currentVersionIndex, realIdx)} className="flex-1 text-blue-600 font-bold bg-blue-50 py-0.5 rounded border border-blue-200" title="MAB 하위 ID 추가">+</button>
                                                     )}
-                                                    <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="text-red-500 bg-red-50 py-0.5 rounded border border-red-200" title="행 삭제">🗑️</button>
+                                                    <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="flex-1 text-red-500 bg-red-50 py-0.5 rounded border border-red-200" title="행 삭제">🗑️</button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -669,11 +689,11 @@ export default function DataEditorPage() {
                                                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.['TOTAL'] === 0 ? "" : (rule.subsystemViolations?.['TOTAL'] || "")} onChange={(e) => updateViolation('TOTAL', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-emerald-50 text-emerald-800 font-bold border-0 focus:ring-1 focus:ring-emerald-400 outline-none text-[10px]" placeholder="0" />
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)] text-center align-middle">
-                                                <div className="flex flex-col gap-1 justify-center px-1">
+                                                <div className="flex flex-row gap-1 justify-center items-center px-1">
                                                     {rule.category === 'MAB' && (
-                                                        <button onClick={() => useStore.getState().duplicateRuleRow(currentVersionIndex, realIdx)} className="text-emerald-600 font-bold bg-emerald-50 py-0.5 rounded border border-emerald-200" title="MAB 하위 ID 추가">+</button>
+                                                        <button onClick={() => useStore.getState().duplicateRuleRow(currentVersionIndex, realIdx)} className="flex-1 text-emerald-600 font-bold bg-emerald-50 py-0.5 rounded border border-emerald-200" title="MAB 하위 ID 추가">+</button>
                                                     )}
-                                                    <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="text-red-500 bg-red-50 py-0.5 rounded border border-red-200" title="행 삭제">🗑️</button>
+                                                    <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="flex-1 text-red-500 bg-red-50 py-0.5 rounded border border-red-200" title="행 삭제">🗑️</button>
                                                 </div>
                                             </td>
                                         </tr>

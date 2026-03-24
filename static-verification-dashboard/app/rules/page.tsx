@@ -1,13 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
-// Remove mockData import
+import { Zap, RefreshCw } from 'lucide-react';
 
 export default function RulesPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
     const versionedData = useStore((state) => state.versionedData);
+    const runAIRuleAnalysis = useStore((state) => state.runAIRuleAnalysis);
     const data = versionedData[currentVersionIndex] || { rulesList: [] };
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    const handleRunAI = async () => {
+        setIsAnalyzing(true);
+        await runAIRuleAnalysis();
+        setIsAnalyzing(false);
+    };
 
     return (
         <div className="h-full flex flex-col">
@@ -18,6 +27,26 @@ export default function RulesPage() {
 
             <div className="flex-1 overflow-y-auto pr-2 pb-6">
                 <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 className="text-lg font-bold text-[var(--text-main)]">검출된 위배 규칙 목록</h2>
+                        <button 
+                            onClick={handleRunAI}
+                            disabled={isAnalyzing}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                                isAnalyzing 
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                : "bg-[var(--accent-color)] text-white hover:brightness-110 active:scale-95"
+                            }`}
+                        >
+                            {isAnalyzing ? (
+                                <RefreshCw size={16} className="animate-spin" />
+                            ) : (
+                                <Zap size={16} className="text-yellow-300 fill-yellow-300" />
+                            )}
+                            {isAnalyzing ? "AI 규칙 심층 분석 중..." : "AI 규칙 심층 분석 실행"}
+                        </button>
+                    </div>
+
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[600px] text-left border-collapse">
                             <thead>
@@ -31,8 +60,12 @@ export default function RulesPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.rulesList.filter((r: any) => r.id.trim() !== '').map((rule: import('../../store/useStore').RuleData, idx: number) => {
-                                    const totalViolations = Object.values(rule.subsystemViolations || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                                {data.rulesList.filter((r: any) => {
+                                    if (r.id.trim() === '') return false;
+                                    const totalViolations = Object.values(r.subsystemViolations || {}).reduce((a: number, b: any) => a + (Number(b) || 0), 0);
+                                    return totalViolations > 0;
+                                }).map((rule: import('../../store/useStore').RuleData, idx: number) => {
+                                    const totalViolations = Object.values(rule.subsystemViolations || {}).reduce((a: number, b: any) => a + (Number(b) || 0), 0);
 
                                     return (
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
@@ -56,17 +89,21 @@ export default function RulesPage() {
                                                 </div>
                                             </td>
                                             <td className="p-4 text-center">
-                                                <span
-                                                    className={`px-3 py-1 rounded-full text-xs font-bold border border-[var(--border-color)] bg-[var(--bg-color)] ${
-                                                        rule.severity === "High"
-                                                            ? "text-red-500"
-                                                            : rule.severity === "Medium"
-                                                            ? "text-orange-500"
-                                                            : "text-green-500"
-                                                    }`}
-                                                >
-                                                    {rule.severity || "Medium"}
-                                                </span>
+                                                {rule.severity ? (
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-bold border border-[var(--border-color)] bg-[var(--bg-color)] ${
+                                                            rule.severity === "High" || rule.severity === "high"
+                                                                ? "text-red-500"
+                                                                : rule.severity === "Medium" || rule.severity === "medium"
+                                                                ? "text-orange-500"
+                                                                : "text-green-500"
+                                                        }`}
+                                                    >
+                                                        {rule.severity}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[var(--text-muted)]">-</span>
+                                                )}
                                             </td>
                                         </tr>
                                     );
