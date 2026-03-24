@@ -27,7 +27,7 @@ export default function ReportsPage() {
         setTimeout(() => {
             const summary = `버전 ${currentVersionIndex} 데이터 기반 분석 결과: 전체 진척도는 ${data.dashboardData.overallProgress}이며, ${data.dashboardData.newRuleViolationsCount}건의 신규 위배가 탐지되었습니다.`;
             setDraftTeam(`[보고서 자동 생성]\n${summary}\n\n1. 주요 검증 결과:\n- Component/Runnable 통합 진척도 및 소요시간 데이터 분석 완료.\n2. 향후 계획:\n- 잔여 위배 항목에 대한 상세 분석 및 조치 예정.`);
-            setDraftCustomer(`[Verification Report Update]\nSummary: Overall progress has reached ${data.dashboardData.overallProgress}.\nNext Steps: Finalizing the analysis for the remaining ${data.dashboardData.newRuleViolationsCount} violations detected in this version.`);
+            setDraftCustomer(`[KEFICO 주진 보고]\n\n요약: 버전 ${currentVersionIndex} 기준 전체 진척도는 ${data.dashboardData.overallProgress}를 달성했습니다.\n다음 단계: 본 버전에서 탐지된 나머지 ${data.dashboardData.newRuleViolationsCount}건의 신규 위배에 대한 상세 분석 및 조치를 마무리할 예정입니다.`);
             setIsGenerating(false);
         }, 1500);
     };

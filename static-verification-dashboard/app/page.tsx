@@ -22,6 +22,25 @@ export default function HomePage() {
         setIsAnalyzing(false);
     };
 
+    // Dynamically calculate metrics to ensure they stay up-to-date even for older versions
+    const compList = data.subsystemsList?.filter((s: import('@/store/useStore').SubsystemData) => s.category === 'Component') || [];
+    const runnList = data.subsystemsList?.filter((s: import('@/store/useStore').SubsystemData) => s.category === 'Runnable') || [];
+    
+    const compInspection = compList.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.newDetectedViolations || 0), 0);
+    const compAnalysis = compList.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.analyzedViolations || 0), 0);
+    
+    const runnInspection = runnList.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.newDetectedViolations || 0), 0);
+    const runnAnalysis = runnList.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.analyzedViolations || 0), 0);
+    
+    const validSubsystems = (data.subsystemsList || []).filter((s: import('@/store/useStore').SubsystemData) => s.progress !== undefined);
+    const dynamicProgress = validSubsystems.length > 0 
+        ? Math.round(validSubsystems.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.progress || 0), 0) / validSubsystems.length) + "%"
+        : "0%";
+
+    const totalViolations = (data.rulesList || [])
+        .filter((r: import('@/store/useStore').RuleData) => r.id.trim() !== '')
+        .reduce((acc: number, rule: import('@/store/useStore').RuleData) => acc + Object.values(rule.subsystemViolations || {}).reduce((sum, val) => sum + (Number(val) || 0), 0), 0);
+
   return (
     <div className="h-full flex flex-col">
       <PageHeader
@@ -37,23 +56,23 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">전체 진행률</div>
-            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{data.dashboardData.overallProgress}</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{dynamicProgress}</div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">Component 검사 / 분석</div>
             <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
-              {data.dashboardData.violationInspectionComponent} / {data.dashboardData.violationAnalysisComponent}
+              {compInspection} / {compAnalysis}
             </div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">Runnable 검사 / 분석</div>
             <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
-              {data.dashboardData.violationInspectionRunnable} / {data.dashboardData.violationAnalysisRunnable}
+              {runnInspection} / {runnAnalysis}
             </div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙</div>
-            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{data.dashboardData.newRuleViolationsCount}건</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{totalViolations}건</div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정</div>

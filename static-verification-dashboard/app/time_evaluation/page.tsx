@@ -6,8 +6,12 @@ import { useStore } from "@/store/useStore";
 
 export default function TimeEvalPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
+    const versions = useStore((state) => state.versions);
     const versionedData = useStore((state) => state.versionedData);
     const data = versionedData[currentVersionIndex] || { timeEvaluationComponent: [], timeEvaluationRunnable: [] };
+
+    const currentVersionName = versions[currentVersionIndex] || "이번 검증";
+    const previousVersionName = currentVersionIndex > 0 ? versions[currentVersionIndex - 1] : "이전 기준";
 
     return (
         <div className="h-full flex flex-col">
@@ -26,11 +30,11 @@ export default function TimeEvalPage() {
                                 <th className="p-3 font-bold text-[var(--text-main)] text-center" colSpan={3}>Runnable 평가 소요시간</th>
                             </tr>
                             <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm bg-[var(--hover-bg)]">
-                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)]">이번 검증</th>
-                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)]">이전 기준</th>
+                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)] max-w-[120px] truncate" title={currentVersionName}>{currentVersionName}</th>
+                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)] max-w-[120px] truncate" title={previousVersionName}>{previousVersionName}</th>
                                 <th className="p-2 font-semibold text-center border-r border-[var(--border-color)]">증감폭</th>
-                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)]">이번 검증</th>
-                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)]">이전 기준</th>
+                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)] max-w-[120px] truncate" title={currentVersionName}>{currentVersionName}</th>
+                                <th className="p-2 font-semibold text-center border-r border-[var(--border-color)] max-w-[120px] truncate" title={previousVersionName}>{previousVersionName}</th>
                                 <th className="p-2 font-semibold text-center">증감폭</th>
                             </tr>
                         </thead>
