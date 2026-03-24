@@ -142,3 +142,62 @@ button {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ── Mobile Responsive Table Cards (< 640px) ────────────────────────── */
+@media (max-width: 639px) {
+  /* Hide the table header completely on mobile */
+  .mobile-card-table thead {
+    display: none;
+  }
+
+  /* Force the table, tbody, tr, and td to not behave like a table */
+  .mobile-card-table,
+  .mobile-card-table tbody,
+  .mobile-card-table tr,
+  .mobile-card-table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* Style each row as a distinct "card" */
+  .mobile-card-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    background-color: var(--bg-color);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  /* Style each cell as a row within the card */
+  .mobile-card-table td {
+    position: relative;
+    padding: 0.75rem 1rem 0.75rem 45% !important; /* Left padding for label */
+    border-bottom: 1px solid var(--border-color);
+    text-align: right !important; /* Content floats right */
+    min-height: 44px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  /* The last cell in the card shouldn't have a bottom border */
+  .mobile-card-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* Insert the dynamic label based on 'data-label' attribute */
+  .mobile-card-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40%;
+    text-align: left;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+}

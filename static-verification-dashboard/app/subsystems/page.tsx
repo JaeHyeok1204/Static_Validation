@@ -27,7 +27,7 @@ export default function SubsystemsPage() {
                                 Component 진척 현황
                             </div>
                         </h2>
-                        <table className="w-full text-left border-collapse min-w-[500px]">
+                        <table className="w-full min-w-full sm:min-w-[500px] mobile-card-table text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm whitespace-nowrap">
                                     <th className="p-3 font-semibold text-center">서브시스템</th>
@@ -42,13 +42,13 @@ export default function SubsystemsPage() {
                                     const item = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === 'Component');
                                     return (
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
-                                            <td className="p-4 font-bold text-center text-blue-600 dark:text-blue-400">{subsystemChar}</td>
-                                            <td className="p-4 text-center">{item ? item.owner : "-"}</td>
-                                            <td className="p-4 text-center font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
-                                            <td className="p-4 text-center text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
-                                            <td className="p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
+                                            <td data-label="서브시스템" className="p-3 sm:p-4 font-bold text-center sm:text-left text-blue-600 dark:text-blue-400">{subsystemChar}</td>
+                                            <td data-label="담당자" className="p-3 sm:p-4 text-center sm:text-left">{item ? item.owner : "-"}</td>
+                                            <td data-label="신규 검출 위배" className="p-3 sm:p-4 text-center sm:text-left font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
+                                            <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
+                                            <td data-label="진척 퍼센티지 바" className="p-3 sm:p-4">
+                                                <div className="flex items-center justify-end sm:justify-start gap-3 w-full">
+                                                    <div className="w-full max-w-[150px] sm:w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
                                                         <div
                                                             className="bg-blue-500 h-2 rounded-full transition-all duration-500"
                                                             style={{ width: `${item ? item.progress : 0}%` }}
@@ -73,7 +73,7 @@ export default function SubsystemsPage() {
                                 Runnable 진척 현황
                             </div>
                         </h2>
-                        <table className="w-full text-left border-collapse min-w-[500px]">
+                        <table className="w-full min-w-full sm:min-w-[500px] mobile-card-table text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-[var(--border-color)] text-[var(--text-muted)] text-sm whitespace-nowrap">
                                     <th className="p-3 font-semibold text-center">서브시스템</th>
@@ -88,13 +88,13 @@ export default function SubsystemsPage() {
                                     const item = data.subsystemsList.find((s: import('../../store/useStore').SubsystemData) => s.id === subsystemChar && s.category === 'Runnable');
                                     return (
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
-                                            <td className="p-4 font-bold text-center text-emerald-600 dark:text-emerald-400">{subsystemChar}</td>
-                                            <td className="p-4 text-center">{item ? item.owner : "-"}</td>
-                                            <td className="p-4 text-center font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
-                                            <td className="p-4 text-center text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
-                                            <td className="p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
+                                            <td data-label="서브시스템" className="p-3 sm:p-4 font-bold text-center sm:text-left text-emerald-600 dark:text-emerald-400">{subsystemChar}</td>
+                                            <td data-label="담당자" className="p-3 sm:p-4 text-center sm:text-left">{item ? item.owner : "-"}</td>
+                                            <td data-label="신규 검출 위배" className="p-3 sm:p-4 text-center sm:text-left font-bold text-red-500">{item ? item.newDetectedViolations : 0}</td>
+                                            <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? item.analyzedViolations : 0}</td>
+                                            <td data-label="진척 퍼센티지 바" className="p-3 sm:p-4">
+                                                <div className="flex items-center justify-end sm:justify-start gap-3 w-full">
+                                                    <div className="w-full max-w-[150px] sm:w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
                                                         <div
                                                             className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
                                                             style={{ width: `${item ? item.progress : 0}%` }}
