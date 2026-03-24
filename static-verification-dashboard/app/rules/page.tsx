@@ -55,7 +55,7 @@ export default function RulesPage() {
                                     <th className="p-4 font-semibold">분류</th>
                                     <th className="p-4 font-semibold">설명</th>
                                     <th className="p-4 font-semibold">검출 위치</th>
-                                    <th className="p-4 font-semibold min-w-[250px]">AI 코멘트</th>
+                                    <th className="p-4 font-semibold min-w-[200px] max-w-[250px]">AI 코멘트</th>
                                     <th className="p-4 font-semibold text-center">심각도</th>
                                 </tr>
                             </thead>

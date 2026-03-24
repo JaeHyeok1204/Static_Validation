@@ -532,9 +532,9 @@ export default function DataEditorPage() {
                         <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]" onKeyDown={handleTableKeyDown}>
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
-                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">Sub ID</th>
-                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-24 text-blue-800">위배 개수</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-32 text-[9px]">규칙 ID</th>
+                                    <th className="p-2 border border-[var(--border-color)] font-bold text-center w-20">Sub ID</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-20 text-blue-800">위배 개수</th>
                                     <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12">관리</th>
                                 </tr>
                             </thead>

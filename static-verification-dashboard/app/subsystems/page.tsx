@@ -94,13 +94,13 @@ export default function SubsystemsPage() {
                                             <td data-label="분류 완료 건수" className="p-3 sm:p-4 text-center sm:text-left text-[var(--accent-color)]">{item ? Number(item.analyzedViolations || 0).toLocaleString() : 0}</td>
                                             <td data-label="진척 퍼센티지 바" className="p-3 sm:p-4">
                                                 <div className="flex items-center justify-end sm:justify-start gap-3 w-full">
-                                                    <div className="w-full max-w-[150px] sm:w-full bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden">
+                                                    <div className="w-full max-w-[100px] bg-[var(--border-color)] rounded-full h-2 relative overflow-hidden shrink-0">
                                                         <div
                                                             className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
                                                             style={{ width: `${item ? item.progress : 0}%` }}
                                                         ></div>
                                                     </div>
-                                                    <span className="text-xs font-bold w-10 text-right">{item ? item.progress : 0}%</span>
+                                                    <span className="text-xs font-bold w-10 text-right shrink-0">{item ? item.progress : 0}%</span>
                                                 </div>
                                             </td>
                                         </tr>
