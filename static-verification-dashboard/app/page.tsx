@@ -92,10 +92,10 @@ export default function HomePage() {
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙 (이전 대비)</div>
             <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{trulyNewRulesCount.toLocaleString()}건</div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words">
-            <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정</div>
-            <div className={`text-base sm:text-lg font-bold mt-2 ${data.dashboardData.expectedSchedule?.includes('지연') ? 'text-red-500' : 'text-[var(--accent-color)]'}`}>
-              {data.dashboardData.expectedSchedule}
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm min-w-0 break-words flex flex-col justify-center">
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정 (AI 분석결과)</div>
+            <div className={`text-base sm:text-lg font-bold mt-2 ${(data.dashboardData.expectedSchedule?.includes('지연') || data.dashboardData.expectedSchedule?.includes('위험')) ? 'text-red-500' : 'text-[var(--accent-color)]'}`}>
+              {data.dashboardData.expectedSchedule || "AI 분석 대기중"}
             </div>
           </div>
         </div>

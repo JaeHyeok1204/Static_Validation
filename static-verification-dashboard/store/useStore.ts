@@ -580,17 +580,22 @@ export const useStore = create<AppState>()(
 
         const prompt = `
             다음은 '정적검증 업무 포탈'의 현재 검증 데이터입니다. 
-            전문적인 정적검증 엔지니어의 시각에서 전체 진행 상황을 요약하고, 지연이나 문제점이 있다면 이에 대한 원인과 대책을 한국어로 3~4문장 내외로 서술해줘.
+            전문적인 정적검증 엔지니어의 시각에서 전체 진행 상황을 요약하고, 특히 Due Date(검증 종료일)와 현재 진척도를 확인하여 일정 내에 목표 달성(100%)이 가능한지 판단해 주세요.
+            전체 업무 흐름과 시기적절성을 분석해야 합니다.
+            
+            반드시 아래 JSON 형식으로만 응답해 주세요. (마크다운 백틱 없이 순수 JSON만 반환):
+            {
+                "expectedSchedule": "여기에 '일정 준수 예상', '진척 지연(위험)', '업무 완료', '분석 불가' 등 10글자 이내의 일정 단답형 요약 상태 입력",
+                "aiSummary": "여기에 전체 진행 상황 요약과 지연 발생 시 원인/대책을 포함한 상세 분석 내용 (한국어 3~4문장 내외)"
+            }
             
             - 버전: ${state.versions[state.currentVersionIndex]}
             - 전체 진척도: ${currentData.dashboardData.overallProgress}
             - 검증 시작일: ${currentData.dashboardData.startDate || '미입력'}
-            - 검증 종료일: ${currentData.dashboardData.endDate || '미입력'}
-            - 예상 상태: ${currentData.dashboardData.expectedSchedule}
+            - 검증 종료일 (Due Date): ${currentData.dashboardData.endDate || '미입력'}
+            - 현재 기준 날짜: ${new Date().toISOString().split('T')[0]}
             - 이슈 개수: ${currentData.issuesList.length}개
             - 규칙 위배 현황: ${ruleViolationSummary || '검출된 규칙 위배 없음'}
-            
-            분석을 시작해줘.
         `;
 
         const summary = await analyzeDataWithAI(prompt, state.geminiApiKey);
@@ -605,10 +610,24 @@ export const useStore = create<AppState>()(
             return;
         }
 
+        let parsedSchedule = currentData.dashboardData.expectedSchedule || "분석 완료";
+        let parsedSummary = summary;
+        try {
+            // Remove markdown code blocks if AI wrapped it
+            const cleanedSummary = summary.replace(/```json/g, "").replace(/```/g, "").trim();
+            const jsonResp = JSON.parse(cleanedSummary);
+            if (jsonResp.expectedSchedule) parsedSchedule = jsonResp.expectedSchedule;
+            if (jsonResp.aiSummary) parsedSummary = jsonResp.aiSummary;
+        } catch(e) {
+            // Fallback if AI didn't return proper JSON
+            parsedSummary = summary;
+        }
+
         get().updateVersionData(state.currentVersionIndex, {
             dashboardData: {
                 ...currentData.dashboardData,
-                aiSummary: summary
+                expectedSchedule: parsedSchedule,
+                aiSummary: parsedSummary
             }
         });
     },

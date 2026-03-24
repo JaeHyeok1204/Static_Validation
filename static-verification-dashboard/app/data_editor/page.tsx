@@ -91,43 +91,11 @@ export default function DataEditorPage() {
             newDashboard.newRuleViolationsCount = 0;
         }
 
-        // 3. Calculate expected schedule status
-        if (newDashboard.startDate && newDashboard.endDate) {
-            const start = new Date(newDashboard.startDate);
-            const end = new Date(newDashboard.endDate);
-            const today = new Date();
-            
-            // Normalize dates (strip time)
-            start.setHours(0,0,0,0);
-            end.setHours(0,0,0,0);
-            today.setHours(0,0,0,0);
-
-            const totalMs = end.getTime() - start.getTime();
-            const elapsedMs = today.getTime() - start.getTime();
-            const currentProgress = parseInt(newDashboard.overallProgress) || 0;
-
-            if (currentProgress === 100) {
-                newDashboard.expectedSchedule = "업무 완료";
-            } else if (today > end) {
-                newDashboard.expectedSchedule = "업무 지연";
-            } else if (today < start) {
-                newDashboard.expectedSchedule = "검증 예정";
-            } else {
-                if (totalMs > 0) {
-                    const targetProgress = Math.max(0, Math.min(100, (elapsedMs / totalMs) * 100));
-                    const diff = currentProgress - targetProgress;
-                    if (diff < -5) {
-                        newDashboard.expectedSchedule = `지연 (${Math.abs(Math.round(diff))}% 부족)`;
-                    } else if (diff > 5) {
-                        newDashboard.expectedSchedule = `쾌조 (${Math.round(diff)}% 초과)`;
-                    } else {
-                        newDashboard.expectedSchedule = "정상 진행 (On-track)";
-                    }
-                }
-            }
-        } else {
-            newDashboard.expectedSchedule = "측정불가";
+        // 3. Keep existing expected schedule or prompt for AI analysis
+        if (!newDashboard.expectedSchedule) {
+            newDashboard.expectedSchedule = "AI 분석 필요";
         }
+        // AI가 부여한 string이나 초기화 상태를 그대로 유지하도록 수동 알고리즘은 삭제함.
 
         return newDashboard;
     };
