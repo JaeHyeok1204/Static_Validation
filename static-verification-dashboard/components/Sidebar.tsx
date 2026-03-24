@@ -56,7 +56,7 @@ export default function Sidebar() {
         {/* Top: logo / title */}
         <div className="p-5 pt-6">
           <h1
-            className="text-base font-bold tracking-tight mb-6 leading-snug break-keep"
+            className="text-base font-bold tracking-tight mb-6 leading-snug break-words"
             style={{ color: 'var(--sidebar-text)' }}
           >
             {projectName}

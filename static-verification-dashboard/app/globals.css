@@ -157,6 +157,8 @@ button {
   .mobile-card-table td {
     display: block;
     width: 100%;
+    box-sizing: border-box;
+    max-width: 100vw;
   }
 
   /* Style each row as a distinct "card" */
@@ -179,6 +181,9 @@ button {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word; /* Prevent long strings from blowing out the flex cell */
   }
 
   /* The last cell in the card shouldn't have a bottom border */

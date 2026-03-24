@@ -113,8 +113,8 @@ export default function HomePage() {
           {/* AI 종합 요약 */}
           <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent-color)]"></div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-[var(--text-main)] flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 mb-4">
+              <h2 className="text-lg font-bold text-[var(--text-main)] flex items-center gap-2 shrink-0">
                 <Zap size={20} className="text-yellow-500 fill-yellow-500" />
                 AI 실시간 분석 리포트
               </h2>
@@ -140,8 +140,8 @@ export default function HomePage() {
         {/* 검증 추이 그래프 */}
         <section className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 shadow-sm min-h-[300px] sm:min-h-[350px] flex flex-col">
           <h2 className="text-base sm:text-lg font-bold text-[var(--text-main)] mb-2 sm:mb-4">검증 추이 그래프</h2>
-          <div className="flex-grow w-full h-[250px] sm:h-[300px]">
-            <ResponsiveContainer width="100%" height="100%" minHeight={1}>
+          <div className="flex-grow w-full min-w-0 h-[250px] sm:h-[300px] overflow-hidden">
+            <ResponsiveContainer width="99%" height="100%" minHeight={1}>
               <LineChart
                 data={data.chartData}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
