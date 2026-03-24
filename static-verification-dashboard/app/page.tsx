@@ -31,42 +31,42 @@ export default function HomePage() {
       />
 
       {/* scrollable main area to prevent overflow out of viewport */}
-      <div className="flex-1 overflow-y-auto pr-2 pb-6 space-y-6">
+      <div className="flex-1 overflow-y-auto pr-1 pb-4 sm:pr-2 sm:pb-6 space-y-4 sm:space-y-6">
 
-        {/* 종합 요약 Card List */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
-            <div className="text-sm text-[var(--text-muted)]">전체 진행률</div>
-            <div className="text-3xl font-bold mt-2 text-[var(--accent-color)]">{data.dashboardData.overallProgress}</div>
+        {/* 종합 요약 Card List - single col on mobile, 2-col sm, 5-col lg */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">전체 진행률</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{data.dashboardData.overallProgress}</div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
-            <div className="text-sm text-[var(--text-muted)]">Component 검사 / 분석</div>
-            <div className="text-xl font-bold mt-2 text-[var(--text-main)]">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">Component 검사 / 분석</div>
+            <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
               {data.dashboardData.violationInspectionComponent} / {data.dashboardData.violationAnalysisComponent}
             </div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
-            <div className="text-sm text-[var(--text-muted)]">Runnable 검사 / 분석</div>
-            <div className="text-xl font-bold mt-2 text-[var(--text-main)]">
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">Runnable 검사 / 분석</div>
+            <div className="text-lg sm:text-xl font-bold mt-2 text-[var(--text-main)]">
               {data.dashboardData.violationInspectionRunnable} / {data.dashboardData.violationAnalysisRunnable}
             </div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
-            <div className="text-sm text-[var(--text-muted)]">신규 위배 규칙</div>
-            <div className="text-3xl font-bold mt-2 text-[var(--accent-color)]">{data.dashboardData.newRuleViolationsCount}건</div>
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{data.dashboardData.newRuleViolationsCount}건</div>
           </div>
-          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
-            <div className="text-sm text-[var(--text-muted)]">예상 일정</div>
-            <div className={`text-lg font-bold mt-2 ${data.dashboardData.expectedSchedule?.includes('지연') ? 'text-red-500' : 'text-[var(--accent-color)]'}`}>
+          <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정</div>
+            <div className={`text-base sm:text-lg font-bold mt-2 ${data.dashboardData.expectedSchedule?.includes('지연') ? 'text-red-500' : 'text-[var(--accent-color)]'}`}>
               {data.dashboardData.expectedSchedule}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* 서브시스템 현황 Table */}
-          <section className="lg:col-span-2 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm flex flex-col">
-            <h2 className="text-lg font-bold text-[var(--text-main)] mb-4">최근 주요 서브시스템 검증 현황</h2>
+          <section className="lg:col-span-2 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col">
+            <h2 className="text-base sm:text-lg font-bold text-[var(--text-main)] mb-3 sm:mb-4">최근 주요 서브시스템 검증 현황</h2>
             <div className="overflow-x-auto flex-1">
               <table className="w-full min-w-[500px] text-left border-collapse">
                 <thead>

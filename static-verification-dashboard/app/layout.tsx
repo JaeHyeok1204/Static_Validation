@@ -6,6 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "VPC-S 1.2 HEV 모델 정적검증 업무 포탈",
   description: "VPC-S 1.2 HEV 모델 정적검증 현황 UI 웹사이트",
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
 };
 
 export default function RootLayout({
@@ -19,7 +20,9 @@ export default function RootLayout({
         <div className="flex h-screen overflow-hidden">
           <AuthWrapper>
             <Sidebar />
-            <main className="flex-1 p-6 overflow-hidden flex flex-col">
+            {/* Responsive padding: tight on mobile, comfortable on desktop */}
+            {/* pt-16 on mobile leaves room for the hamburger overlay button */}
+            <main className="flex-1 p-3 pt-16 sm:p-6 sm:pt-6 overflow-hidden flex flex-col">
               {children}
             </main>
           </AuthWrapper>

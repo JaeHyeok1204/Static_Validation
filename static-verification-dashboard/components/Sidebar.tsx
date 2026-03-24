@@ -28,86 +28,102 @@ export default function Sidebar() {
 
   return (
     <>
-      <button 
-        className="md:hidden fixed top-4 right-4 z-50 p-2 rounded-lg shadow-md transition-colors"
+      {/* ── Mobile hamburger: top-left for one-thumb reach ── */}
+      <button
+        className="md:hidden fixed top-3 left-3 z-50 p-3 rounded-xl shadow-lg transition-colors"
         style={{ backgroundColor: 'var(--sidebar-bg)', color: 'var(--sidebar-text)' }}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "메뉴 닫기" : "메뉴 열기"}
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
+      {/* Backdrop */}
       {isOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-black/50 z-40" 
-          onClick={() => setIsOpen(false)} 
+        <div
+          className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
         />
       )}
 
-      <div 
-        className={`fixed md:relative top-0 left-0 h-screen w-64 flex flex-col shrink-0 transition-transform duration-300 z-40 shadow-xl md:shadow-none ${
+      {/* ── Sidebar panel ── */}
+      <div
+        className={`fixed md:relative top-0 left-0 h-screen w-72 md:w-64 flex flex-col shrink-0 transition-transform duration-300 z-40 shadow-xl md:shadow-none ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
         style={{ backgroundColor: 'var(--sidebar-bg)' }}
       >
-      <div className="p-6">
-        <h1 
-          className="text-xl font-bold tracking-tight mb-8 leading-snug break-keep"
-          style={{ color: 'var(--sidebar-text)' }}
-        >
-          {projectName}
-        </h1>
-        <nav className="space-y-1">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.path;
-            
-            return (
-              <Link 
-                key={item.path} 
-                href={item.path}
-                onClick={() => setIsOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isActive ? 'shadow-md' : ''
-                }`}
-                style={{
-                  backgroundColor: isActive ? 'var(--sidebar-active)' : 'transparent',
-                  color: 'var(--sidebar-text)',
-                  opacity: isActive ? 1 : 0.7
-                }}
-              >
-                {item.title}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+        {/* Top: logo / title */}
+        <div className="p-5 pt-6">
+          <h1
+            className="text-base font-bold tracking-tight mb-6 leading-snug break-keep"
+            style={{ color: 'var(--sidebar-text)' }}
+          >
+            {projectName}
+          </h1>
 
-      {currentUser && (
-        <div className="p-4 border-t border-[var(--border-color)] mt-auto bg-black/10">
-          <div className="flex flex-col gap-1 mb-3">
-            <span className="text-xs font-bold text-[var(--sidebar-text)] opacity-70">로그인 정보</span>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-baseline gap-2 text-[var(--sidebar-text)]">
+          {/* Nav links */}
+          <nav className="space-y-0.5">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.path;
+
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors min-h-[44px] ${
+                    isActive ? 'shadow-md' : ''
+                  }`}
+                  style={{
+                    backgroundColor: isActive ? 'var(--sidebar-active)' : 'transparent',
+                    color: 'var(--sidebar-text)',
+                    opacity: isActive ? 1 : 0.8
+                  }}
+                >
+                  {item.title}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom: user info + logout */}
+        {currentUser && (
+          <div
+            className="p-4 border-t mt-auto"
+            style={{
+              borderColor: 'var(--sidebar-hover)',
+              paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+            }}
+          >
+            <div className="flex flex-col gap-1 mb-3">
+              <span className="text-xs font-bold opacity-60" style={{ color: 'var(--sidebar-text)' }}>로그인 정보</span>
+              <div className="flex items-baseline gap-2" style={{ color: 'var(--sidebar-text)' }}>
                 <span className="text-sm font-bold">{currentUser.name}</span>
                 <span className="text-xs opacity-80">{currentUser.position}</span>
               </div>
-              <div className="text-xs text-[var(--sidebar-text)] opacity-60">
+              <div className="text-xs opacity-60" style={{ color: 'var(--sidebar-text)' }}>
                 {currentUser.teamName}
               </div>
             </div>
+            <button
+              onClick={() => logout()}
+              className="w-full text-xs font-bold bg-white/10 hover:bg-white/20 py-3 rounded-xl transition-colors min-h-[44px]"
+              style={{ color: 'var(--sidebar-text)' }}
+            >
+              로그아웃
+            </button>
           </div>
-          <button
-            onClick={() => logout()}
-            className="w-full text-xs font-bold bg-white/10 hover:bg-white/20 text-[var(--sidebar-text)] py-2 rounded-lg transition-colors"
-          >
-            로그아웃
-          </button>
+        )}
+
+        <div
+          className="p-4 text-xs text-center border-t opacity-40 transition-colors duration-300"
+          style={{ color: 'var(--sidebar-text)', borderColor: 'var(--sidebar-hover)' }}
+        >
+          © 2026 Verification Portal.<br />All rights reserved.
         </div>
-      )}
-      <div className="p-6 text-xs text-center border-t opacity-50 transition-colors duration-300"
-           style={{ color: 'var(--sidebar-text)', borderColor: 'var(--sidebar-hover)' }}>
-        © 2026 Verification Portal.<br/>All rights reserved.
       </div>
-    </div>
     </>
   );
 }
