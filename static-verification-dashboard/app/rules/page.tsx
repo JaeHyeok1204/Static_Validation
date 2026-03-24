@@ -33,10 +33,6 @@ export default function RulesPage() {
                             <tbody>
                                 {data.rulesList.filter((r: any) => r.id.trim() !== '').map((rule: import('../../store/useStore').RuleData, idx: number) => {
                                     const totalViolations = Object.values(rule.subsystemViolations || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-                                    const nonZeroSubsystems = Object.entries(rule.subsystemViolations || {})
-                                        .filter(([_, count]) => (Number(count) || 0) > 0)
-                                        .map(([id, count]) => `${id}(${count})`)
-                                        .join(", ");
 
                                     return (
                                         <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
@@ -49,10 +45,7 @@ export default function RulesPage() {
                                             </td>
                                             <td className="p-4 leading-relaxed">{rule.description || "-"}</td>
                                             <td className="p-4 text-[var(--text-muted)]">
-                                                <div className="font-semibold text-xs mb-1">Total: {totalViolations}</div>
-                                                <div className="text-[10px] max-w-[150px] truncate" title={nonZeroSubsystems}>
-                                                    {nonZeroSubsystems || "없음"}
-                                                </div>
+                                                <div className="font-bold text-sm text-[var(--text-main)]">{totalViolations > 0 ? `${totalViolations}건 검출` : "0건"}</div>
                                             </td>
                                             <td className="p-4">
                                                 <div className="flex gap-2">

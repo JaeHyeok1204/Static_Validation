@@ -230,54 +230,59 @@ export default function DataEditorPage() {
                             <span className="text-xs font-normal text-slate-500">* 서브시스템별 위배 개수 일치 여부를 실시간으로 대조합니다.</span>
                         </h2>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
-                            {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => {
-                                const comp = data.subsystemsList.find(s => s.id === ss && s.category === 'Component')?.newDetectedViolations || 0;
-                                const runn = data.subsystemsList.find(s => s.id === ss && s.category === 'Runnable')?.newDetectedViolations || 0;
-                                const totalDetail = comp + runn;
-
-                                const totalMatrix = (data.rulesList || [])
-                                    .filter(r => r.id.trim() !== '')
-                                    .reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.[ss]) || 0), 0);
-
-                                const isMatch = totalDetail === totalMatrix;
-                                const diff = totalMatrix - totalDetail;
-
+                        <div className="flex flex-col sm:flex-row gap-4 mb-2">
+                            {/* Component Consistency */}
+                            {(() => {
+                                const compTotalDetail = data.subsystemsList.filter(s => s.category === 'Component').reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0);
+                                const compTotalMatrix = (data.rulesList || []).filter(r => r.scope === 'Component' && r.id.trim() !== '').reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.['TOTAL']) || 0), 0);
+                                const isMatch = compTotalDetail === compTotalMatrix;
                                 return (
-                                    <div key={ss} className={`p-3 rounded-xl border-2 transition-all ${isMatch ? 'border-emerald-100 bg-emerald-50/50' : 'border-red-100 bg-red-50/50 shadow-inner'}`}>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className={`text-sm font-black w-6 h-6 flex items-center justify-center rounded-lg ${isMatch ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
-                                                {ss}
-                                            </span>
-                                            {isMatch ? (
-                                                <span className="text-emerald-600 text-[10px] font-bold">✅ 일치</span>
-                                            ) : (
-                                                <span className="text-red-600 text-[10px] font-bold animate-pulse">❌ 불일치</span>
-                                            )}
+                                    <div className={`flex-1 p-4 rounded-xl border-2 transition-all ${isMatch ? 'border-emerald-100 bg-emerald-50/50' : 'border-red-100 bg-red-50/50 shadow-inner'}`}>
+                                        <div className="font-bold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                                            <span className="w-5 h-5 flex items-center justify-center bg-blue-500 text-white rounded text-xs">C</span>
+                                            Component 총합 점검
                                         </div>
-                                        <div className="space-y-1 text-center">
-                                            <div className="text-[10px] text-slate-500 leading-tight">상세: <span className="font-bold text-slate-700">{totalDetail}</span></div>
-                                            <div className="text-[10px] text-slate-500 leading-tight">규칙: <span className="font-bold text-slate-700">{totalMatrix}</span></div>
-                                            {!isMatch && (
-                                                <div className="text-[10px] font-black text-red-600 border-t border-red-200 mt-1 pt-1">
-                                                    {diff > 0 ? `+${diff}` : diff}
-                                                </div>
-                                            )}
+                                        <div className="flex justify-between items-center text-xs mb-1">
+                                            <span className="text-slate-600">서브시스템 상세 합계:</span>
+                                            <span className="font-bold text-slate-800">{compTotalDetail}건</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs mb-3">
+                                            <span className="text-slate-600">규칙 매트릭스 합계:</span>
+                                            <span className="font-bold text-slate-800">{compTotalMatrix}건</span>
+                                        </div>
+                                        <div className={`p-2 rounded-lg text-center text-xs font-bold ${isMatch ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                            {isMatch ? '✅ 완벽하게 일치합니다' : `❌ 불일치 (차이: ${Math.abs(compTotalMatrix - compTotalDetail)}건)`}
                                         </div>
                                     </div>
                                 );
-                            })}
+                            })()}
+
+                            {/* Runnable Consistency */}
+                            {(() => {
+                                const runnTotalDetail = data.subsystemsList.filter(s => s.category === 'Runnable').reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0);
+                                const runnTotalMatrix = (data.rulesList || []).filter(r => r.scope === 'Runnable' && r.id.trim() !== '').reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.['TOTAL']) || 0), 0);
+                                const isMatch = runnTotalDetail === runnTotalMatrix;
+                                return (
+                                    <div className={`flex-1 p-4 rounded-xl border-2 transition-all ${isMatch ? 'border-emerald-100 bg-emerald-50/50' : 'border-red-100 bg-red-50/50 shadow-inner'}`}>
+                                        <div className="font-bold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                                            <span className="w-5 h-5 flex items-center justify-center bg-emerald-500 text-white rounded text-xs">R</span>
+                                            Runnable 총합 점검
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs mb-1">
+                                            <span className="text-slate-600">서브시스템 상세 합계:</span>
+                                            <span className="font-bold text-slate-800">{runnTotalDetail}건</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs mb-3">
+                                            <span className="text-slate-600">규칙 매트릭스 합계:</span>
+                                            <span className="font-bold text-slate-800">{runnTotalMatrix}건</span>
+                                        </div>
+                                        <div className={`p-2 rounded-lg text-center text-xs font-bold ${isMatch ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                            {isMatch ? '✅ 완벽하게 일치합니다' : `❌ 불일치 (차이: ${Math.abs(runnTotalMatrix - runnTotalDetail)}건)`}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
-                        {!['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].every(ss => {
-                            const comp = data.subsystemsList.find(s => s.id === ss && s.category === 'Component')?.newDetectedViolations || 0;
-                            const runn = data.subsystemsList.find(s => s.id === ss && s.category === 'Runnable')?.newDetectedViolations || 0;
-                            const totalMatrix = (data.rulesList || []).filter(r => r.id.trim() !== '').reduce((acc, rule) => acc + (Number(rule.subsystemViolations?.[ss]) || 0), 0);
-                            return (comp + runn) === totalMatrix;
-                        }) && (
-                            <p className="text-[10px] text-red-500 mt-4 font-bold text-center">
-                                ⚠️ 주의: 상단 상세 데이터의 '신규 검출 위배' 합계와 하단 '규칙 ID별 서브시스템 위배' 합계가 다른 서브시스템이 있습니다. 데이터를 확인해 주세요.
-                            </p>
-                        )}
                     </section>
                 )}
 
@@ -544,10 +549,7 @@ export default function DataEditorPage() {
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">Sub ID</th>
-                                    {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
-                                        <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-blue-600">{ss}</th>
-                                    ))}
-                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12 bg-blue-50 text-blue-800">합계</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-24 text-blue-800">위배 개수</th>
                                     <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12">관리</th>
                                 </tr>
                             </thead>
@@ -571,12 +573,9 @@ export default function DataEditorPage() {
                                             <td className="p-1 border border-[var(--border-color)]">
                                                 {rule.category === 'MAB' ? <input value={rule.mabSubId || ""} onChange={(e) => updateField('mabSubId', e.target.value)} className="w-full p-1 border rounded text-center bg-white text-blue-600 border-slate-300 font-bold text-[10px]" placeholder="Sub ID" /> : "-"}
                                             </td>
-                                            {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
-                                                <td key={ss} className="p-0 border border-[var(--border-color)]">
-                                                     <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")} onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-blue-400 outline-none text-[10px]" />
-                                                </td>
-                                            ))}
-                                            <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700 text-[10px]">{total}</td>
+                                            <td className="p-0 border border-[var(--border-color)]">
+                                                 <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.['TOTAL'] === 0 ? "" : (rule.subsystemViolations?.['TOTAL'] || "")} onChange={(e) => updateViolation('TOTAL', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-blue-50 text-blue-800 font-bold border-0 focus:ring-1 focus:ring-blue-400 outline-none text-[10px]" placeholder="0" />
+                                            </td>
                                             <td className="p-1 border border-[var(--border-color)] text-center align-middle">
                                                 <div className="flex flex-col gap-1 justify-center px-1">
                                                     {rule.category === 'MAB' && (
@@ -642,10 +641,7 @@ export default function DataEditorPage() {
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center w-24">Sub ID</th>
-                                    {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
-                                        <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-emerald-600">{ss}</th>
-                                    ))}
-                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12 bg-emerald-50 text-emerald-800">합계</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-24 text-emerald-800">위배 개수</th>
                                     <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12">관리</th>
                                 </tr>
                             </thead>
@@ -669,12 +665,9 @@ export default function DataEditorPage() {
                                             <td className="p-1 border border-[var(--border-color)]">
                                                 {rule.category === 'MAB' ? <input value={rule.mabSubId || ""} onChange={(e) => updateField('mabSubId', e.target.value)} className="w-full p-1 border rounded text-center bg-white text-emerald-600 border-slate-300 font-bold text-[10px]" placeholder="Sub ID" /> : "-"}
                                             </td>
-                                            {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
-                                                <td key={ss} className="p-0 border border-[var(--border-color)]">
-                                                     <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")} onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-emerald-400 outline-none text-[10px]" />
-                                                </td>
-                                            ))}
-                                            <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-emerald-50 text-emerald-700 text-[10px]">{total}</td>
+                                            <td className="p-0 border border-[var(--border-color)]">
+                                                 <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.['TOTAL'] === 0 ? "" : (rule.subsystemViolations?.['TOTAL'] || "")} onChange={(e) => updateViolation('TOTAL', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-emerald-50 text-emerald-800 font-bold border-0 focus:ring-1 focus:ring-emerald-400 outline-none text-[10px]" placeholder="0" />
+                                            </td>
                                             <td className="p-1 border border-[var(--border-color)] text-center align-middle">
                                                 <div className="flex flex-col gap-1 justify-center px-1">
                                                     {rule.category === 'MAB' && (
