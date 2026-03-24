@@ -3,6 +3,7 @@
 import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { useStore } from "@/store/useStore";
+import { hmsToSeconds, secondsToHms } from "@/lib/timeUtils";
 
 export default function DataEditorPage() {
     const currentVersionIndex = useStore((state) => state.currentVersionIndex);
@@ -670,31 +671,31 @@ export default function DataEditorPage() {
                                     {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'].map((subsystemChar) => {
                                         const prevVersionData = currentVersionIndex > 0 ? versionedData[currentVersionIndex - 1] : null;
                                         const prevCompItem = prevVersionData?.timeEvaluationComponent?.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
-                                        const autoPrevTime = prevCompItem ? prevCompItem.currentTime : "0h";
+                                        const autoPrevTime = prevCompItem ? prevCompItem.currentTime : "00:00:00";
 
                                         const compItem = data.timeEvaluationComponent.find((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar) || {
-                                            subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
+                                            subsystem: subsystemChar, owner: "", currentTime: "00:00:00", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateComp = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationComponent];
                                             const idx = newList.findIndex((c: import('../../store/useStore').TimeEvaluationData) => c.subsystem === subsystemChar);
                                             
                                             let updatedOwner = compItem.owner;
-                                            if (key === 'currentTime' && val !== "" && val !== "0h") {
+                                            if (key === 'currentTime' && val !== "" && val !== "00:00:00") {
                                                 updatedOwner = currentUser?.name || "";
-                                            } else if (key === 'currentTime' && (val === "" || val === "0h")) {
+                                            } else if (key === 'currentTime' && (val === "" || val === "00:00:00")) {
                                                 updatedOwner = "";
                                             }
 
-                                            const currentVal = key === 'currentTime' ? val : (compItem.currentTime || "0h");
-                                            const prevVal = key === 'prevTime' ? val : (autoPrevTime || "0h");
+                                            const currentHms = key === 'currentTime' ? val : (compItem.currentTime || "00:00:00");
+                                            const prevHms = key === 'prevTime' ? val : (autoPrevTime || "00:00:00");
                                             
                                             // Calculate Diff
-                                            const curNum = parseFloat(currentVal);
-                                            const prevNum = parseFloat(prevVal);
-                                            const diffNum = curNum - prevNum;
-                                            const formattedDiff = (diffNum > 0 ? "+" : "") + diffNum.toFixed(1) + "h";
-                                            const color = diffNum > 0 ? "text-red-500" : (diffNum < 0 ? "text-green-600" : "text-gray-400");
+                                            const curSec = hmsToSeconds(currentHms);
+                                            const prevSec = hmsToSeconds(prevHms);
+                                            const diffSec = curSec - prevSec;
+                                            const formattedDiff = secondsToHms(diffSec, true);
+                                            const color = diffSec > 0 ? "text-red-500" : (diffSec < 0 ? "text-green-600" : "text-gray-400");
 
                                             if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner, diff: formattedDiff, diffColor: color };
                                             else newList.push({ ...compItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime, diff: formattedDiff, diffColor: color });
@@ -713,13 +714,17 @@ export default function DataEditorPage() {
                                                 </td>
                                                 <td className="p-1">
                                                      <input 
-                                                         type="number"
-                                                         step="0.1"
-                                                         value={parseFloat(compItem.currentTime || "0") === 0 ? "" : parseFloat(compItem.currentTime || "0")} 
-                                                         onChange={(e) => updateComp('currentTime', (e.target.value === "" ? "0" : e.target.value) + "h")} 
-                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
-                                                         className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                                                         placeholder="0" 
+                                                         type="text"
+                                                         value={compItem.currentTime === "00:00:00" ? "" : compItem.currentTime} 
+                                                         onChange={(e) => {
+                                                             const val = e.target.value;
+                                                             // Basic validation for HH:MM:SS
+                                                             if (/^(\d{0,2}:?){0,2}\d{0,2}$/.test(val)) {
+                                                                 updateComp('currentTime', val);
+                                                             }
+                                                         }} 
+                                                         className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center font-mono text-[10px]" 
+                                                         placeholder="00:00:00" 
                                                      />
                                                 </td>
                                                 <td className="p-1"><input readOnly value={autoPrevTime} className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold" /></td>
@@ -746,31 +751,31 @@ export default function DataEditorPage() {
                                     {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"].map((subsystemChar) => {
                                         const prevVersionData = currentVersionIndex > 0 ? versionedData[currentVersionIndex - 1] : null;
                                         const prevRunnItem = prevVersionData?.timeEvaluationRunnable?.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
-                                        const autoPrevTime = prevRunnItem ? prevRunnItem.currentTime : "0h";
+                                        const autoPrevTime = prevRunnItem ? prevRunnItem.currentTime : "00:00:00";
 
                                         const runnItem = data.timeEvaluationRunnable.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar) || {
-                                            subsystem: subsystemChar, owner: "", currentTime: "0h", prevTime: autoPrevTime, diff: "-", diffColor: ""
+                                            subsystem: subsystemChar, owner: "", currentTime: "00:00:00", prevTime: autoPrevTime, diff: "-", diffColor: ""
                                         };
                                         const updateRunn = (key: string, val: string) => {
                                             const newList = [...data.timeEvaluationRunnable];
                                             const idx = newList.findIndex((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
                                             
                                             let updatedOwner = runnItem.owner;
-                                            if (key === 'currentTime' && val !== "" && val !== "0h") {
+                                            if (key === 'currentTime' && val !== "" && val !== "00:00:00") {
                                                 updatedOwner = currentUser?.name || "";
-                                            } else if (key === 'currentTime' && (val === "" || val === "0h")) {
+                                            } else if (key === 'currentTime' && (val === "" || val === "00:00:00")) {
                                                 updatedOwner = "";
                                             }
 
-                                            const currentVal = key === 'currentTime' ? val : (runnItem.currentTime || "0h");
-                                            const prevVal = key === 'prevTime' ? val : (autoPrevTime || "0h");
+                                            const currentHms = key === 'currentTime' ? val : (runnItem.currentTime || "00:00:00");
+                                            const prevHms = key === 'prevTime' ? val : (autoPrevTime || "00:00:00");
                                             
                                             // Calculate Diff
-                                            const curNum = parseFloat(currentVal);
-                                            const prevNum = parseFloat(prevVal);
-                                            const diffNum = curNum - prevNum;
-                                            const formattedDiff = (diffNum > 0 ? "+" : "") + diffNum.toFixed(1) + "h";
-                                            const color = diffNum > 0 ? "text-red-500" : (diffNum < 0 ? "text-green-600" : "text-gray-400");
+                                            const curSec = hmsToSeconds(currentHms);
+                                            const prevSec = hmsToSeconds(prevHms);
+                                            const diffSec = curSec - prevSec;
+                                            const formattedDiff = secondsToHms(diffSec, true);
+                                            const color = diffSec > 0 ? "text-red-500" : (diffSec < 0 ? "text-green-600" : "text-gray-400");
 
                                             if (idx >= 0) newList[idx] = { ...newList[idx], [key]: val, owner: updatedOwner, diff: formattedDiff, diffColor: color };
                                             else newList.push({ ...runnItem, [key]: val, owner: updatedOwner, prevTime: autoPrevTime, diff: formattedDiff, diffColor: color });
@@ -789,13 +794,16 @@ export default function DataEditorPage() {
                                                 </td>
                                                 <td className="p-1">
                                                      <input 
-                                                         type="number"
-                                                         step="0.1"
-                                                         value={parseFloat(runnItem.currentTime || "0") === 0 ? "" : parseFloat(runnItem.currentTime || "0")} 
-                                                         onChange={(e) => updateRunn('currentTime', (e.target.value === "" ? "0" : e.target.value) + "h")} 
-                                                         onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()}
-                                                         className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                                                         placeholder="0" 
+                                                         type="text"
+                                                         value={runnItem.currentTime === "00:00:00" ? "" : runnItem.currentTime} 
+                                                         onChange={(e) => {
+                                                             const val = e.target.value;
+                                                             if (/^(\d{0,2}:?){0,2}\d{0,2}$/.test(val)) {
+                                                                 updateRunn('currentTime', val);
+                                                             }
+                                                         }} 
+                                                         className="w-full border p-1 rounded bg-white text-black border-slate-300 text-center font-mono text-[10px]" 
+                                                         placeholder="00:00:00" 
                                                      />
                                                 </td>
                                                 <td className="p-1"><div className="w-full border p-1 rounded bg-gray-100 text-gray-500 font-bold text-center">{autoPrevTime}</div></td>
