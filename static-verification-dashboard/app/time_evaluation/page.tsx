@@ -44,7 +44,7 @@ export default function TimeEvalPage() {
                                 const runn = data.timeEvaluationRunnable?.find((r: import('../../store/useStore').TimeEvaluationData) => r.subsystem === subsystemChar);
 
                                 return (
-                                    <tr key={idx} className="text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
+                                    <tr key={idx} className="h-[48px] text-sm text-[var(--text-main)] border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--hover-bg)] transition-colors">
                                         <td className="p-3 font-bold text-center border-r border-[var(--border-color)] text-[var(--accent-color)]">{subsystemChar}</td>
                                         
                                         {/* Component Stats */}

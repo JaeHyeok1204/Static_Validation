@@ -32,14 +32,32 @@ export default function HomePage() {
     const runnInspection = runnList.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.newDetectedViolations || 0), 0);
     const runnAnalysis = runnList.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.analyzedViolations || 0), 0);
     
-    const validSubsystems = (data.subsystemsList || []).filter((s: import('@/store/useStore').SubsystemData) => s.progress !== undefined);
-    const dynamicProgress = validSubsystems.length > 0 
-        ? Math.round(validSubsystems.reduce((acc: number, s: import('@/store/useStore').SubsystemData) => acc + (s.progress || 0), 0) / validSubsystems.length) + "%"
-        : "0%";
+    // Overall progress by evaluating the sum of all analyses / sum of all inspections
+    const totalDetected = compInspection + runnInspection;
+    const totalAnalyzed = compAnalysis + runnAnalysis;
+    const dynamicProgress = totalDetected > 0 ? Math.round((totalAnalyzed / totalDetected) * 100) + "%" : "0%";
 
-    const totalViolations = (data.rulesList || [])
-        .filter((r: import('@/store/useStore').RuleData) => r.id.trim() !== '')
-        .reduce((acc: number, rule: import('@/store/useStore').RuleData) => acc + Object.values(rule.subsystemViolations || {}).reduce((sum, val) => sum + (Number(val) || 0), 0), 0);
+    // Refactored new Rule Violations Count logic: Count rules violated in the current version that were NEVER violated in any past versions.
+    const getRuleKey = (r: import('@/store/useStore').RuleData) => r.category === 'MAB' && r.mabSubId ? `${r.id}-${r.mabSubId}` : r.id;
+    const previouslyViolatedRuleKeys = new Set<string>();
+    
+    for (let i = 0; i < currentVersionIndex; i++) {
+        const pastData = versionedData[i];
+        if (pastData && pastData.rulesList) {
+            pastData.rulesList.forEach((r: import('@/store/useStore').RuleData) => {
+                const isViolated = Object.values(r.subsystemViolations || {}).reduce((sum, val) => sum + (Number(val) || 0), 0) > 0;
+                if (isViolated && r.id.trim() !== '') {
+                    previouslyViolatedRuleKeys.add(getRuleKey(r));
+                }
+            });
+        }
+    }
+
+    const trulyNewRulesCount = (data.rulesList || []).filter((r: import('@/store/useStore').RuleData) => {
+        if (r.id.trim() === '') return false;
+        const total = Object.values(r.subsystemViolations || {}).reduce((sum, val) => sum + (Number(val) || 0), 0);
+        return total > 0 && !previouslyViolatedRuleKeys.has(getRuleKey(r));
+    }).length;
 
   return (
     <div className="h-full flex flex-col">
@@ -71,8 +89,8 @@ export default function HomePage() {
             </div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
-            <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙</div>
-            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{totalViolations}건</div>
+            <div className="text-xs sm:text-sm text-[var(--text-muted)]">신규 위배 규칙 (이전 대비)</div>
+            <div className="text-2xl sm:text-3xl font-bold mt-2 text-[var(--accent-color)]">{trulyNewRulesCount}건</div>
           </div>
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-sm">
             <div className="text-xs sm:text-sm text-[var(--text-muted)]">예상 일정</div>
