@@ -160,7 +160,7 @@ export default function DataEditorPage() {
                     <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex items-center justify-between">
                         🚀 신규 버전 데이터 생성
                     </h2>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <input 
                             type="text" 
                             className="flex-1 border border-[var(--border-color)] bg-white rounded-lg p-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]" 
@@ -249,7 +249,7 @@ export default function DataEditorPage() {
                         📅 프로젝트 검증 일정
                         <span className="text-xs text-[var(--accent-color)] font-normal">* 예상 일정 계산 시 활용됩니다.</span>
                     </h2>
-                    <div className="flex gap-4 items-center">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                         <div className="flex-1">
                             <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">업무 시작일</label>
                             <input 
@@ -344,10 +344,10 @@ export default function DataEditorPage() {
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -429,10 +429,10 @@ export default function DataEditorPage() {
                                                 />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.newDetectedViolations === 0 ? "" : currentItem.newDetectedViolations} onChange={(e) => updateSubsystem('newDetectedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-28">
-                                                <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                <input type="text" inputMode="numeric" pattern="[0-9]*" value={currentItem.analyzedViolations === 0 ? "" : currentItem.analyzedViolations} onChange={(e) => updateSubsystem('analyzedViolations', e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-white text-black" />
                                             </td>
                                             <td className="p-2 w-24">
                                                 <div className="w-full border border-[var(--border-color)] rounded p-1 text-xs text-center bg-gray-100 text-gray-500 font-bold">{currentItem.progress}%</div>
@@ -448,16 +448,16 @@ export default function DataEditorPage() {
                 {/* 3. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P) - Component */}
                 <section className="bg-[var(--bg-color)] border border-blue-200 rounded-2xl p-6 shadow-sm overflow-x-auto my-6 relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
-                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
-                        <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
                             <span className="w-3 h-3 rounded-full bg-blue-500"></span>
                             📋 3-1. 규칙 ID별 서브시스템 신규 위배 (Component)
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                             <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)]">
                                 <span>카테고리:</span>
                                 <select 
-                                    className="border rounded p-1 bg-white text-black text-[10px]"
+                                    className="border rounded p-1.5 bg-white text-black text-[10px] w-full sm:w-auto"
                                     value={compRuleCategoryFilter}
                                     onChange={(e) => { setCompRuleCategoryFilter(e.target.value as any); setCompRulePage(1); }}
                                 >
@@ -466,19 +466,19 @@ export default function DataEditorPage() {
                                     <option value="MISRA">MISRA</option>
                                 </select>
                             </label>
-                            <div className="relative">
+                            <div className="relative flex-1 sm:flex-none">
                                 <input 
                                     type="text" 
                                     placeholder="규칙 ID 검색..." 
-                                    className="border rounded p-1 pl-7 text-[10px] bg-white text-black w-40"
+                                    className="border rounded p-1.5 pl-7 text-[10px] bg-white text-black w-full"
                                     value={compRuleSearch}
                                     onChange={(e) => { setCompRuleSearch(e.target.value); setCompRulePage(1); }}
                                 />
-                                <span className="absolute left-2 top-1.5 opacity-50 text-gray-400 text-[10px]">🔍</span>
+                                <span className="absolute left-2 top-2 opacity-50 text-gray-400 text-[10px]">🔍</span>
                             </div>
                             <button 
                                 onClick={() => addRuleRow(currentVersionIndex, 'Component')}
-                                className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-blue-700 transition-colors"
+                                className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition-colors whitespace-nowrap"
                             >
                                 + Component 규칙 추가
                             </button>
@@ -486,7 +486,7 @@ export default function DataEditorPage() {
                     </h2>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse border border-[var(--border-color)] text-[10px]">
+                        <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-40">규칙 ID</th>
@@ -520,7 +520,7 @@ export default function DataEditorPage() {
                                             </td>
                                             {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                                 <td key={ss} className="p-0 border border-[var(--border-color)]">
-                                                     <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")} onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Math.max(0, Number(e.target.value)))} className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-blue-400 outline-none text-[10px]" />
+                                                     <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")} onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-blue-400 outline-none text-[10px]" />
                                                 </td>
                                             ))}
                                             <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700 text-[10px]">{total}</td>
@@ -547,16 +547,16 @@ export default function DataEditorPage() {
                 {/* 3. 규칙 ID별 서브시스템 신규 위배 개수 산출 (A~P) - Runnable */}
                 <section className="bg-[var(--bg-color)] border border-emerald-200 rounded-2xl p-6 shadow-sm overflow-x-auto my-6 relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
-                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex justify-between items-center">
-                        <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-[var(--text-main)] mb-4 border-b border-[var(--border-color)] pb-2 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
                             <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                             📋 3-2. 규칙 ID별 서브시스템 신규 위배 (Runnable)
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                             <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)]">
                                 <span>카테고리:</span>
                                 <select 
-                                    className="border rounded p-1 bg-white text-black text-[10px]"
+                                    className="border rounded p-1.5 bg-white text-black text-[10px] w-full sm:w-auto"
                                     value={runnRuleCategoryFilter}
                                     onChange={(e) => { setRunnRuleCategoryFilter(e.target.value as any); setRunnRulePage(1); }}
                                 >
@@ -565,19 +565,19 @@ export default function DataEditorPage() {
                                     <option value="MISRA">MISRA</option>
                                 </select>
                             </label>
-                            <div className="relative">
+                            <div className="relative flex-1 sm:flex-none">
                                 <input 
                                     type="text" 
                                     placeholder="규칙 ID 검색..." 
-                                    className="border rounded p-1 pl-7 text-[10px] bg-white text-black w-40"
+                                    className="border rounded p-1.5 pl-7 text-[10px] bg-white text-black w-full"
                                     value={runnRuleSearch}
                                     onChange={(e) => { setRunnRuleSearch(e.target.value); setRunnRulePage(1); }}
                                 />
-                                <span className="absolute left-2 top-1.5 opacity-50 text-gray-400 text-[10px]">🔍</span>
+                                <span className="absolute left-2 top-2 opacity-50 text-gray-400 text-[10px]">🔍</span>
                             </div>
                             <button 
                                 onClick={() => addRuleRow(currentVersionIndex, 'Runnable')}
-                                className="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-emerald-700 transition-colors"
+                                className="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-emerald-700 transition-colors whitespace-nowrap"
                             >
                                 + Runnable 규칙 추가
                             </button>
@@ -585,7 +585,7 @@ export default function DataEditorPage() {
                     </h2>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse border border-[var(--border-color)] text-[10px]">
+                        <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sticky left-0 bg-[var(--hover-bg)] z-10 w-40">규칙 ID</th>
@@ -619,7 +619,7 @@ export default function DataEditorPage() {
                                             </td>
                                             {['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'].map(ss => (
                                                 <td key={ss} className="p-0 border border-[var(--border-color)]">
-                                                     <input type="number" onFocus={(e) => e.target.onwheel = (ev) => ev.preventDefault()} value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")} onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Math.max(0, Number(e.target.value)))} className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-emerald-400 outline-none text-[10px]" />
+                                                     <input type="text" inputMode="numeric" pattern="[0-9]*" value={rule.subsystemViolations?.[ss] === 0 ? "" : (rule.subsystemViolations?.[ss] || "")} onChange={(e) => updateViolation(ss, e.target.value === "" ? 0 : Number(e.target.value.replace(/[^0-9]/g, '')))} className="w-full p-2 text-center bg-white text-black border-0 focus:ring-1 focus:ring-emerald-400 outline-none text-[10px]" />
                                                 </td>
                                             ))}
                                             <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-emerald-50 text-emerald-700 text-[10px]">{total}</td>
