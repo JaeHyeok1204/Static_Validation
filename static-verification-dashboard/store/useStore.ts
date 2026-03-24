@@ -113,7 +113,25 @@ export const INITIAL_MISRA_RULE_IDS = [
 const SUBSYSTEM_IDS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"];
 
 const getInitialRules = (): RuleData[] => {
-    return [];
+    const rules: RuleData[] = [];
+    
+    // Component rules
+    INITIAL_MAB_RULE_IDS.forEach(id => {
+        rules.push({ id, mabSubId: "", category: 'MAB', scope: 'Component', subsystemViolations: {} });
+    });
+    INITIAL_MISRA_RULE_IDS.forEach(id => {
+        rules.push({ id, category: 'MISRA', scope: 'Component', subsystemViolations: {} });
+    });
+
+    // Runnable rules
+    INITIAL_MAB_RULE_IDS.forEach(id => {
+        rules.push({ id, mabSubId: "", category: 'MAB', scope: 'Runnable', subsystemViolations: {} });
+    });
+    INITIAL_MISRA_RULE_IDS.forEach(id => {
+        rules.push({ id, category: 'MISRA', scope: 'Runnable', subsystemViolations: {} });
+    });
+
+    return rules;
 };
 
 const getInitialSubsystems = (): SubsystemData[] => {
@@ -135,7 +153,7 @@ export const emptyVersionData: VersionData = {
     },
     chartData: [],
     subsystemsList: getInitialSubsystems(),
-    rulesList: [],
+    rulesList: getInitialRules(),
     issuesList: [],
     risksList: [],
     timeEvaluationComponent: [],
@@ -169,6 +187,7 @@ interface AppState {
     importData: (jsonData: string) => boolean;
     updateVersionData: (versionIndex: number, partialData: Partial<VersionData>) => void;
     addRuleRow: (versionIndex: number, scope: 'Component' | 'Runnable') => void;
+    duplicateRuleRow: (versionIndex: number, ruleIndex: number) => void;
     deleteRuleRow: (versionIndex: number, ruleIndex: number) => void;
     updateRuleRow: (versionIndex: number, ruleIndex: number, ruleData: Partial<RuleData>) => void;
     createNewVersion: (versionName: string) => void;
@@ -449,6 +468,24 @@ export const useStore = create<AppState>()(
         get().updateVersionData(versionIndex, { rulesList: newList });
     },
 
+    duplicateRuleRow: (versionIndex: number, ruleIndex: number) => {
+        const state = get();
+        const currentData = state.versionedData[versionIndex];
+        if (!currentData || !currentData.rulesList) return;
+
+        const originalRule = currentData.rulesList[ruleIndex];
+        const newRule: RuleData = { 
+            ...originalRule, 
+            mabSubId: "", 
+            subsystemViolations: {} 
+        };
+
+        const newList = [...currentData.rulesList];
+        newList.splice(ruleIndex + 1, 0, newRule);
+        
+        get().updateVersionData(versionIndex, { rulesList: newList });
+    },
+
     deleteRuleRow: (versionIndex: number, ruleIndex: number) => {
         const state = get();
         const currentData = state.versionedData[versionIndex];
@@ -482,7 +519,7 @@ export const useStore = create<AppState>()(
                     [newIndex]: { 
                         ...emptyVersionData,
                         subsystemsList: getInitialSubsystems(),
-                        rulesList: [] // Start with empty for dynamic management
+                        rulesList: getInitialRules()
                     }
                 },
                 currentVersionIndex: newIndex

@@ -146,6 +146,50 @@ export default function DataEditorPage() {
     });
     const paginatedRunnRules = filteredRunnRules.slice((runnRulePage - 1) * rulesPerPage, runnRulePage * rulesPerPage);
 
+    const handleTableKeyDown = (e: React.KeyboardEvent<HTMLTableElement>) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT') return;
+
+        const row = target.closest('tr');
+        if (!row) return;
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevRow = row.previousElementSibling;
+            if (prevRow) {
+                const index = Array.from(row.children).indexOf(target.closest('td')!);
+                const targetInput = prevRow.children[index]?.querySelector('input');
+                if (targetInput) targetInput.focus();
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextRow = row.nextElementSibling;
+            if (nextRow) {
+                const index = Array.from(row.children).indexOf(target.closest('td')!);
+                const targetInput = nextRow.children[index]?.querySelector('input');
+                if (targetInput) targetInput.focus();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            const input = target as HTMLInputElement;
+            if (input.selectionStart === 0 && input.selectionEnd === 0) {
+                e.preventDefault();
+                const td = target.closest('td');
+                const prevTd = td?.previousElementSibling;
+                const targetInput = prevTd?.querySelector('input');
+                if (targetInput) targetInput.focus();
+            }
+        } else if (e.key === 'ArrowRight') {
+            const input = target as HTMLInputElement;
+            if (input.selectionStart === input.value.length && input.selectionEnd === input.value.length) {
+                e.preventDefault();
+                const td = target.closest('td');
+                const nextTd = td?.nextElementSibling;
+                const targetInput = nextTd?.querySelector('input');
+                if (targetInput) targetInput.focus();
+            }
+        }
+    };
+
     return (
         <div className="h-full flex flex-col">
             <PageHeader
@@ -486,7 +530,7 @@ export default function DataEditorPage() {
                     </h2>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]">
+                        <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]" onKeyDown={handleTableKeyDown}>
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
@@ -495,7 +539,7 @@ export default function DataEditorPage() {
                                         <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-blue-600">{ss}</th>
                                     ))}
                                     <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12 bg-blue-50 text-blue-800">합계</th>
-                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-10">삭제</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12">관리</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -524,8 +568,13 @@ export default function DataEditorPage() {
                                                 </td>
                                             ))}
                                             <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-blue-50 text-blue-700 text-[10px]">{total}</td>
-                                            <td className="p-1 border border-[var(--border-color)] text-center">
-                                                <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="text-red-500 hover:bg-red-50 p-1 rounded">🗑️</button>
+                                            <td className="p-1 border border-[var(--border-color)] text-center align-middle">
+                                                <div className="flex flex-col gap-1 justify-center px-1">
+                                                    {rule.category === 'MAB' && (
+                                                        <button onClick={() => useStore.getState().duplicateRuleRow(currentVersionIndex, realIdx)} className="text-blue-600 font-bold bg-blue-50 py-0.5 rounded border border-blue-200" title="MAB 하위 ID 추가">+</button>
+                                                    )}
+                                                    <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="text-red-500 bg-red-50 py-0.5 rounded border border-red-200" title="행 삭제">🗑️</button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -585,7 +634,7 @@ export default function DataEditorPage() {
                     </h2>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]">
+                        <table className="w-full min-w-max text-left border-collapse border border-[var(--border-color)] text-[10px]" onKeyDown={handleTableKeyDown}>
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] whitespace-nowrap">
                                     <th className="p-2 border border-[var(--border-color)] font-bold text-center sm:sticky sm:left-0 bg-[var(--hover-bg)] sm:z-10 w-40">규칙 ID</th>
@@ -594,7 +643,7 @@ export default function DataEditorPage() {
                                         <th key={ss} className="p-1 border border-[var(--border-color)] font-bold text-center w-10 text-emerald-600">{ss}</th>
                                     ))}
                                     <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12 bg-emerald-50 text-emerald-800">합계</th>
-                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-10">삭제</th>
+                                    <th className="p-1 border border-[var(--border-color)] font-bold text-center w-12">관리</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -623,8 +672,13 @@ export default function DataEditorPage() {
                                                 </td>
                                             ))}
                                             <td className="p-1 border border-[var(--border-color)] text-center font-bold bg-emerald-50 text-emerald-700 text-[10px]">{total}</td>
-                                            <td className="p-1 border border border-[var(--border-color)] text-center">
-                                                <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="text-red-500 hover:bg-red-50 p-1 rounded">🗑️</button>
+                                            <td className="p-1 border border-[var(--border-color)] text-center align-middle">
+                                                <div className="flex flex-col gap-1 justify-center px-1">
+                                                    {rule.category === 'MAB' && (
+                                                        <button onClick={() => useStore.getState().duplicateRuleRow(currentVersionIndex, realIdx)} className="text-emerald-600 font-bold bg-emerald-50 py-0.5 rounded border border-emerald-200" title="MAB 하위 ID 추가">+</button>
+                                                    )}
+                                                    <button onClick={() => deleteRuleRow(currentVersionIndex, realIdx)} className="text-red-500 bg-red-50 py-0.5 rounded border border-red-200" title="행 삭제">🗑️</button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
