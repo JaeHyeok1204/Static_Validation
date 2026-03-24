@@ -197,6 +197,7 @@ interface AppState {
     runAIRiskAnalysis: () => Promise<void>;
     runAIRuleAnalysis: () => Promise<void>;
     runIssueAIAnalysis: (issueId: string | number) => Promise<void>;
+    generateReportsDraft: () => Promise<void>;
     resetValidationData: () => Promise<void>;
     resetAiData: () => Promise<void>;
     sendResetCode: (userId: string, name: string, email: string, birthDate: string) => Promise<{ success: boolean; error?: string }>;
@@ -638,14 +639,21 @@ export const useStore = create<AppState>()(
         if (!currentData) return;
 
         const prompt = `
-            다음 검증 데이터를 바탕으로 프로젝트의 '위험 요소(Risks)'를 분석해줘.
-            JSON 형식으로 출력해주고, 각 항목은 { title: string, content: string, aiRecommendation: string, level: 'Low' | 'Medium' | 'High' } 구조로 3개 정도 만들어줘.
-            불필요한 설명 없이 JSON 배열만 출력해.
+            다음은 '정적검증 업무 포탈(차량 제어기 SW 검증)'의 현재 프로젝트 데이터입니다.
+            현재 선택된 버전(${state.versions[state.currentVersionIndex]})의 데이터를 바탕으로 프로젝트의 '위험 요소(Risks)'를 분석해줘.
+            JSON 형식으로 출력해주고, 각 항목은 { "title": "string", "content": "string", "aiRecommendation": "string", "level": "Low" | "Medium" | "High" } 구조로 3개 정도 만들어줘.
+            불필요한 설명 없이 순수 JSON 배열만 출력해.
 
-            데이터:
-            - 진척도: ${currentData.dashboardData.overallProgress}
+            프로젝트 컨텍스트:
+            - 버전: ${state.versions[state.currentVersionIndex]}
+            - 전체 진척도: ${currentData.dashboardData.overallProgress}
+            - 검증 종료일 (Due Date): ${currentData.dashboardData.endDate || '미입력'}
             - 예상 상태: ${currentData.dashboardData.expectedSchedule}
-            - 이슈 목록: ${JSON.stringify(currentData.issuesList.map(i => i.title))}
+            
+            현재 등록된 이슈 목록: 
+            ${JSON.stringify(currentData.issuesList.map(i => ({ title: i.title, type: i.type, resolved: i.resolved })))}
+            
+            위 정보를 바탕으로 잠재적인 위험 요소를 도출해라.
         `;
 
         try {
@@ -728,12 +736,19 @@ export const useStore = create<AppState>()(
         if (!issue || !issue.title) return;
 
         const prompt = `
-            다음 소프트웨어 검증 이슈에 대한 전문적인 해결 방안을 권장해줘.
+            다음은 '정적검증 업무 포탈(차량 제어기 SW 검증)'에서 발생한 구체적인 소프트웨어 검증 이슈입니다.
+            현재 프로젝트 상황을 고려하여 이 이슈에 대한 전문적이고 실무적인 해결 방안을 권장해줘.
+            
+            프로젝트 상황:
+            - 진행 버전: ${state.versions[state.currentVersionIndex]}
+            - 전체 진척률: ${currentData.dashboardData.overallProgress}
+            
+            이슈 상세 내역:
             - 제목: ${issue.title}
             - 분류: ${issue.type}
             - 상세 내용: ${issue.content || '내용 없음'}
             
-            지침: 전문적이고 실천 가능한 조언을 1~2문장으로 제안해줘. Gemini ✨ 태그를 앞에 붙여줘.
+            지침: 전문적이고 실천 가능한 조언을 1~2문장으로 제안해줘. 답변 맨 앞에 "Gemini ✨: " 태그를 항상 붙여줘.
         `;
 
         try {
@@ -747,6 +762,51 @@ export const useStore = create<AppState>()(
             get().updateVersionData(state.currentVersionIndex, { issuesList: newList });
         } catch (err) {
             console.error("Issue AI analysis error:", err);
+        }
+    },
+
+    generateReportsDraft: async () => {
+        const state = get();
+        const currentData = state.versionedData[state.currentVersionIndex];
+        if (!currentData) return;
+
+        const prompt = `
+            다음은 '차량 제어기 SW 정적검증' 프로젝트의 데이터입니다.
+            현재 버전(${state.versions[state.currentVersionIndex]}) 데이터를 기반으로, 두 종류의 주진 보고서(Markdown 포맷) 초안을 작성해주세요.
+            
+            반드시 아래 JSON 형식으로 응답해 주세요. (마크다운 백틱 없이 순수 JSON만 반환):
+            {
+                "team": "내부 개발 및 검증팀용 상세 보고서 초안 (이슈, 해결방안 등 기술적 내용 포함)",
+                "customer": "대고객 (KEFICO) 주진 보고용 요약 보고서 초안 (진척도, 위배 건수 등 명확하고 정제된 내용)"
+            }
+
+            프로젝트 상황:
+            - 진행 버전: ${state.versions[state.currentVersionIndex]}
+            - 전체 진척률: ${currentData.dashboardData.overallProgress}
+            - 검증 종료일 (Due Date): ${currentData.dashboardData.endDate || '미입력'}
+            - 예상 상태: ${currentData.dashboardData.expectedSchedule}
+            - 신규 위배 규칙: ${currentData.dashboardData.newRuleViolationsCount}건
+            - 추적 중인 주요 이슈 개수: ${currentData.issuesList.length}건
+        `;
+
+        try {
+            const rawResponse = await analyzeDataWithAI(prompt, state.geminiApiKey);
+            if (rawResponse === "ERROR_MISSING_KEY") {
+                console.error("Gemini API Key missing");
+                return;
+            }
+            
+            const cleaned = rawResponse.replace(/```json|```/g, "").trim();
+            const reports = JSON.parse(cleaned);
+
+            get().updateVersionData(state.currentVersionIndex, {
+                reportsDraft: {
+                    team: reports.team || "생성 실패",
+                    customer: reports.customer || "생성 실패"
+                }
+            });
+        } catch (err) {
+            console.error("Report generation error:", err);
         }
     },
 
