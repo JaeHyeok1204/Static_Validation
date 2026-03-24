@@ -520,12 +520,6 @@ export default function DataEditorPage() {
                                 />
                                 <span className="absolute left-2 top-2 opacity-50 text-gray-400 text-[10px]">🔍</span>
                             </div>
-                            <button 
-                                onClick={() => addRuleRow(currentVersionIndex, 'Component')}
-                                className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition-colors whitespace-nowrap"
-                            >
-                                + Component 규칙 추가
-                            </button>
                         </div>
                     </h2>
 
@@ -557,7 +551,7 @@ export default function DataEditorPage() {
                                     return (
                                         <tr key={displayedIdx} className="hover:bg-[var(--hover-bg)] transition-colors">
                                             <td className="p-1 border border-[var(--border-color)] font-medium sm:sticky sm:left-0 bg-white sm:z-10">
-                                                <input list="rule-ids" value={rule.id} onChange={(e) => updateField('id', e.target.value)} className="w-full p-1 border rounded text-black bg-white border-slate-300 text-[10px]" placeholder="ID 입력" />
+                                                <input readOnly value={rule.id} className="w-full p-1 border rounded text-slate-600 bg-slate-50 border-slate-200 text-[10px] font-bold cursor-not-allowed outline-none" title="기본 규칙 ID는 변경할 수 없습니다." />
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)]">
                                                 {rule.category === 'MAB' ? <input value={rule.mabSubId || ""} onChange={(e) => updateField('mabSubId', e.target.value)} className="w-full p-1 border rounded text-center bg-white text-blue-600 border-slate-300 font-bold text-[10px]" placeholder="Sub ID" /> : "-"}
@@ -624,12 +618,6 @@ export default function DataEditorPage() {
                                 />
                                 <span className="absolute left-2 top-2 opacity-50 text-gray-400 text-[10px]">🔍</span>
                             </div>
-                            <button 
-                                onClick={() => addRuleRow(currentVersionIndex, 'Runnable')}
-                                className="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-emerald-700 transition-colors whitespace-nowrap"
-                            >
-                                + Runnable 규칙 추가
-                            </button>
                         </div>
                     </h2>
 
@@ -661,7 +649,7 @@ export default function DataEditorPage() {
                                     return (
                                         <tr key={displayedIdx} className="hover:bg-[var(--hover-bg)] transition-colors">
                                             <td className="p-1 border border-[var(--border-color)] font-medium sm:sticky sm:left-0 bg-white sm:z-10">
-                                                <input list="rule-ids" value={rule.id} onChange={(e) => updateField('id', e.target.value)} className="w-full p-1 border rounded text-black bg-white border-slate-300 text-[10px]" placeholder="ID 입력" />
+                                                <input readOnly value={rule.id} className="w-full p-1 border rounded text-slate-600 bg-slate-50 border-slate-200 text-[10px] font-bold cursor-not-allowed outline-none" title="기본 규칙 ID는 변경할 수 없습니다." />
                                             </td>
                                             <td className="p-1 border border-[var(--border-color)]">
                                                 {rule.category === 'MAB' ? <input value={rule.mabSubId || ""} onChange={(e) => updateField('mabSubId', e.target.value)} className="w-full p-1 border rounded text-center bg-white text-emerald-600 border-slate-300 font-bold text-[10px]" placeholder="Sub ID" /> : "-"}
