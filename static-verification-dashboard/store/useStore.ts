@@ -579,6 +579,11 @@ export const useStore = create<AppState>()(
             })
             .join(', ');
 
+        // Dynamic progress calculation to avoid legacy unweighted data
+        const totalDetected = currentData.subsystemsList?.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0) || 0;
+        const totalAnalyzed = currentData.subsystemsList?.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0) || 0;
+        const dynamicProgress = totalDetected > 0 ? Math.round((totalAnalyzed / totalDetected) * 100) + "%" : "0%";
+
         const prompt = `
             다음은 '정적검증 업무 포탈'의 현재 검증 데이터입니다. 
             전문적인 정적검증 엔지니어의 시각에서 전체 진행 상황을 요약하고, 특히 Due Date(검증 종료일)와 현재 진척도를 확인하여 일정 내에 목표 달성(100%)이 가능한지 판단해 주세요.
@@ -591,7 +596,7 @@ export const useStore = create<AppState>()(
             }
             
             - 버전: ${state.versions[state.currentVersionIndex]}
-            - 전체 진척도: ${currentData.dashboardData.overallProgress}
+            - 전체 진척도: ${dynamicProgress}
             - 검증 시작일: ${currentData.dashboardData.startDate || '미입력'}
             - 검증 종료일 (Due Date): ${currentData.dashboardData.endDate || '미입력'}
             - 현재 기준 날짜: ${new Date().toISOString().split('T')[0]}
@@ -638,6 +643,11 @@ export const useStore = create<AppState>()(
         const currentData = state.versionedData[state.currentVersionIndex];
         if (!currentData) return;
 
+        // Dynamic progress calculation
+        const totalDetected = currentData.subsystemsList?.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0) || 0;
+        const totalAnalyzed = currentData.subsystemsList?.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0) || 0;
+        const dynamicProgress = totalDetected > 0 ? Math.round((totalAnalyzed / totalDetected) * 100) + "%" : "0%";
+
         const prompt = `
             다음은 '정적검증 업무 포탈(차량 제어기 SW 검증)'의 현재 프로젝트 데이터입니다.
             현재 선택된 버전(${state.versions[state.currentVersionIndex]})의 데이터를 바탕으로 프로젝트의 '위험 요소(Risks)'를 분석해줘.
@@ -646,7 +656,7 @@ export const useStore = create<AppState>()(
 
             프로젝트 컨텍스트:
             - 버전: ${state.versions[state.currentVersionIndex]}
-            - 전체 진척도: ${currentData.dashboardData.overallProgress}
+            - 전체 진척도: ${dynamicProgress}
             - 검증 종료일 (Due Date): ${currentData.dashboardData.endDate || '미입력'}
             - 예상 상태: ${currentData.dashboardData.expectedSchedule}
             
@@ -735,13 +745,18 @@ export const useStore = create<AppState>()(
         const issue = currentData.issuesList.find(i => i.id === issueId);
         if (!issue || !issue.title) return;
 
+        // Dynamic progress calculation
+        const totalDetected = currentData.subsystemsList?.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0) || 0;
+        const totalAnalyzed = currentData.subsystemsList?.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0) || 0;
+        const dynamicProgress = totalDetected > 0 ? Math.round((totalAnalyzed / totalDetected) * 100) + "%" : "0%";
+
         const prompt = `
             다음은 '정적검증 업무 포탈(차량 제어기 SW 검증)'에서 발생한 구체적인 소프트웨어 검증 이슈입니다.
             현재 프로젝트 상황을 고려하여 이 이슈에 대한 전문적이고 실무적인 해결 방안을 권장해줘.
             
             프로젝트 상황:
             - 진행 버전: ${state.versions[state.currentVersionIndex]}
-            - 전체 진척률: ${currentData.dashboardData.overallProgress}
+            - 전체 진척률: ${dynamicProgress}
             
             이슈 상세 내역:
             - 제목: ${issue.title}
@@ -770,6 +785,11 @@ export const useStore = create<AppState>()(
         const currentData = state.versionedData[state.currentVersionIndex];
         if (!currentData) return;
 
+        // Dynamic progress calculation
+        const totalDetected = currentData.subsystemsList?.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0) || 0;
+        const totalAnalyzed = currentData.subsystemsList?.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0) || 0;
+        const dynamicProgress = totalDetected > 0 ? Math.round((totalAnalyzed / totalDetected) * 100) + "%" : "0%";
+
         const prompt = `
             다음은 '차량 제어기 SW 정적검증' 프로젝트의 데이터입니다.
             현재 버전(${state.versions[state.currentVersionIndex]}) 데이터를 기반으로, 두 종류의 주진 보고서(Markdown 포맷) 초안을 작성해주세요.
@@ -782,7 +802,7 @@ export const useStore = create<AppState>()(
 
             프로젝트 상황:
             - 진행 버전: ${state.versions[state.currentVersionIndex]}
-            - 전체 진척률: ${currentData.dashboardData.overallProgress}
+            - 전체 진척률: ${dynamicProgress}
             - 검증 종료일 (Due Date): ${currentData.dashboardData.endDate || '미입력'}
             - 예상 상태: ${currentData.dashboardData.expectedSchedule}
             - 신규 위배 규칙: ${currentData.dashboardData.newRuleViolationsCount}건

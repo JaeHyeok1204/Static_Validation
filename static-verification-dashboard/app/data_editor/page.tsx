@@ -49,23 +49,20 @@ export default function DataEditorPage() {
 
         // 1. Calculate overall progress and specific component/runnable inspection/analysis counts
         if (subsystemsList && subsystemsList.length > 0) {
-            const validSubsystems = subsystemsList.filter((s: import('../../store/useStore').SubsystemData) => s.progress !== undefined);
-            if (validSubsystems.length > 0) {
-                const totalProgress = validSubsystems.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.progress || 0), 0);
-                newDashboard.overallProgress = Math.round(totalProgress / validSubsystems.length) + "%";
-            } else {
-                newDashboard.overallProgress = "0%";
-            }
+            const compList = subsystemsList.filter((s: import('../../store/useStore').SubsystemData) => s.category === 'Component');
+            const runnList = subsystemsList.filter((s: import('../../store/useStore').SubsystemData) => s.category === 'Runnable');
 
-            const compList = subsystemsList.filter(s => s.category === 'Component');
-            const runnList = subsystemsList.filter(s => s.category === 'Runnable');
+            const compInspection = compList.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.newDetectedViolations || 0), 0);
+            const compAnalysis = compList.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.analyzedViolations || 0), 0);
             
-            const compInspection = compList.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0);
-            const compAnalysis = compList.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0);
-            
-            const runnInspection = runnList.reduce((acc, s) => acc + (s.newDetectedViolations || 0), 0);
-            const runnAnalysis = runnList.reduce((acc, s) => acc + (s.analyzedViolations || 0), 0);
-            
+            const runnInspection = runnList.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.newDetectedViolations || 0), 0);
+            const runnAnalysis = runnList.reduce((acc: number, s: import('../../store/useStore').SubsystemData) => acc + (s.analyzedViolations || 0), 0);
+
+            const totalDetected = compInspection + runnInspection;
+            const totalAnalyzed = compAnalysis + runnAnalysis;
+
+            newDashboard.overallProgress = totalDetected > 0 ? Math.round((totalAnalyzed / totalDetected) * 100) + "%" : "0%";
+
             newDashboard.violationInspectionComponent = compInspection.toString();
             newDashboard.violationAnalysisComponent = compAnalysis.toString();
             newDashboard.violationInspectionRunnable = runnInspection.toString();
